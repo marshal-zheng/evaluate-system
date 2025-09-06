@@ -1,0 +1,51 @@
+// Custom SCSS variables and mixins for the evaluate-system project
+// This file is automatically imported in all Vue components via Vite config
+
+// Primary colors
+$primary-color: #409eff;
+$success-color: #67c23a;
+$warning-color: #e6a23c;
+$danger-color: #f56c6c;
+$info-color: #909399;
+
+// Font sizes
+$font-size-large: 18px;
+$font-size-medium: 16px;
+$font-size-small: 14px;
+$font-size-mini: 12px;
+
+// Spacing
+$spacing-mini: 4px;
+$spacing-small: 8px;
+$spacing-medium: 16px;
+$spacing-large: 24px;
+$spacing-xl: 32px;
+
+// Border radius
+$border-radius-small: 2px;
+$border-radius-medium: 4px;
+$border-radius-large: 6px;
+
+// Box shadows
+$box-shadow-light: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+$box-shadow-base: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.12);
+$box-shadow-dark: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.18);
+
+// Mixins
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin ellipsis {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
