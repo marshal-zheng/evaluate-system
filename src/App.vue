@@ -1,30 +1,82 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
+import { ref } from 'vue'
+import { useMessage } from './composables/useElementPlus.js'
+
+const { showSuccess, showWarning, showError, showInfo } = useMessage()
+
+const handleMessage = (type) => {
+  const messages = {
+    success: () => showSuccess('操作成功！'),
+    warning: () => showWarning('请注意检查数据'),
+    error: () => showError('操作失败，请稍后重试'),
+    info: () => showInfo('这是一条提示信息')
+  }
+  messages[type]()
+}
 </script>
 
 <template>
-  <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
+  <div class="app-container">
+    <div class="app-header">
+      <h1>Element Plus 扩展演示</h1>
+    </div>
   </div>
-  <HelloWorld msg="Vite + Vue" />
 </template>
 
 <style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
+.app-container {
+  min-height: 100vh;
+  background: var(--el-bg-color-page);
+  padding: 20px;
 }
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding: 0 8px;
 }
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
+
+.app-header h1 {
+  margin: 0;
+  color: var(--el-text-color-primary);
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.demo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 20px;
+}
+
+.demo-card {
+  height: fit-content;
+}
+
+.button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.button-group:last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+  .demo-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .app-container {
+    padding: 12px;
+  }
+  
+  .button-group {
+    justify-content: center;
+  }
 }
 </style>
