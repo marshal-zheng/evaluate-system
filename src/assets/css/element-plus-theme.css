@@ -102,29 +102,56 @@
   --el-transition-duration-fast: 0.2s;
 }
 
-/* Dark theme overrides */
-html.dark {
-  --el-bg-color: #141414;
-  --el-bg-color-page: #0a0a0a;
-  --el-bg-color-overlay: #1d1e1f;
-  --el-text-color-primary: #e5eaf3;
-  --el-text-color-regular: #cfd3dc;
-  --el-text-color-secondary: #a3a6ad;
-  --el-text-color-placeholder: #8d9095;
-  --el-text-color-disabled: #6c6e72;
-  --el-border-color: #4c4d4f;
-  --el-border-color-light: #414243;
-  --el-border-color-lighter: #363637;
-  --el-border-color-extra-light: #2b2b2c;
-  --el-border-color-dark: #58585b;
-  --el-border-color-darker: #636466;
-  --el-fill-color: #303133;
-  --el-fill-color-light: #262727;
-  --el-fill-color-lighter: #1d1d1d;
-  --el-fill-color-extra-light: #191919;
-  --el-fill-color-dark: #39393a;
-  --el-fill-color-darker: #424243;
-  --el-fill-color-blank: #141414;
+/* Dark theme overrides - ZXHL Style */
+html.dark,
+:root[data-theme="dark"] {
+  /* Primary theme colors based on ZXHL design */
+  --el-color-primary: #9cfff9;
+  --el-color-primary-light-3: #b3fffc;
+  --el-color-primary-light-5: #ccfffe;
+  --el-color-primary-light-7: #e6ffff;
+  --el-color-primary-light-8: #f0ffff;
+  --el-color-primary-light-9: #f7ffff;
+  --el-color-primary-dark-2: #7dcccc;
+
+  /* Status colors */
+  --el-color-success: #5fbb63;
+  --el-color-warning: #ffab00;
+  --el-color-danger: #f03f3c;
+  --el-color-info: #92a7cd;
+
+  /* Background colors */
+  --el-bg-color: #0c1d30;
+  --el-bg-color-page: #0c1d30;
+  --el-bg-color-overlay: #062846;
+  
+  /* Text colors */
+  --el-text-color-primary: #ffffff;
+  --el-text-color-regular: #9cfff9;
+  --el-text-color-secondary: #9aa8b3;
+  --el-text-color-placeholder: #356a72;
+  --el-text-color-disabled: #5d687a;
+  
+  /* Border colors */
+  --el-border-color: #9cfff9;
+  --el-border-color-light: #29d4b9;
+  --el-border-color-lighter: #356a72;
+  --el-border-color-extra-light: #062846;
+  --el-border-color-dark: #9cfff9;
+  --el-border-color-darker: #29d4b9;
+  
+  /* Fill colors */
+  --el-fill-color: #062846;
+  --el-fill-color-light: #07395f;
+  --el-fill-color-lighter: #094d7b;
+  --el-fill-color-extra-light: #0c2f48;
+  --el-fill-color-dark: #052746;
+  --el-fill-color-darker: #022864;
+  --el-fill-color-blank: #0c1d30;
+  
+  /* Component specific colors */
+  --el-mask-color: rgba(0, 0, 0, 0.8);
+  --el-mask-color-extra-light: rgba(0, 0, 0, 0.3);
 }
 
 /* Custom Element Plus component extensions */

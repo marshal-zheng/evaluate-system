@@ -1,0 +1,303 @@
+/* Dark Blue Theme - Based on Element Plus CSS3 Variables */
+/* 参考深蓝色系主题，使用Element Plus标准变量 */
+
+:root {
+  /* ========== 主色系配置 ========== */
+  /* Primary Colors - 蓝色主题 */
+  --el-color-primary: #1a89c3;
+  --el-color-primary-light-1: #2d95cc;
+  --el-color-primary-light-2: #40a1d5;
+  --el-color-primary-light-3: #53adde;
+  --el-color-primary-light-4: #66b9e7;
+  --el-color-primary-light-5: #79c5f0;
+  --el-color-primary-light-6: #8cd1f9;
+  --el-color-primary-light-7: #9fddff;
+  --el-color-primary-light-8: #b2e9ff;
+  --el-color-primary-light-9: #c5f5ff;
+  --el-color-primary-dark-1: #1678af;
+  --el-color-primary-dark-2: #13679b;
+
+  /* ========== 功能色系 ========== */
+  /* Success Colors */
+  --el-color-success: #5fbb63;
+  --el-color-success-light-3: #7cc880;
+  --el-color-success-light-5: #94d59a;
+  --el-color-success-light-7: #abe2b3;
+  --el-color-success-light-8: #baebc0;
+  --el-color-success-light-9: #c9f4ce;
+  --el-color-success-dark-2: #4c9650;
+
+  /* Warning Colors */
+  --el-color-warning: #ffab00;
+  --el-color-warning-light-3: #ffb82b;
+  --el-color-warning-light-5: #ffc555;
+  --el-color-warning-light-7: #ffd280;
+  --el-color-warning-light-8: #ffdeaa;
+  --el-color-warning-light-9: #ffead5;
+  --el-color-warning-dark-2: #cc8900;
+
+  /* Danger Colors */
+  --el-color-danger: #f03f3c;
+  --el-color-danger-light-3: #f35956;
+  --el-color-danger-light-5: #f67370;
+  --el-color-danger-light-7: #f98d8a;
+  --el-color-danger-light-8: #fba7a4;
+  --el-color-danger-light-9: #fdc1be;
+  --el-color-danger-dark-2: #c03230;
+
+  /* Info Colors */
+  --el-color-info: #92a7cd;
+  --el-color-info-light-3: #a5b5d5;
+  --el-color-info-light-5: #b8c3dd;
+  --el-color-info-light-7: #cbd1e5;
+  --el-color-info-light-8: #dedeed;
+  --el-color-info-light-9: #f1ecf5;
+  --el-color-info-dark-2: #7486a4;
+
+  /* ========== 背景色系 ========== */
+  /* Background Colors - 深蓝色背景 */
+  --el-bg-color: #0c1d30;
+  --el-bg-color-page: #0c1d30;
+  --el-bg-color-overlay: #094d7b;
+  
+  /* Fill Colors */
+  --el-fill-color: #1a2940;
+  --el-fill-color-light: #233550;
+  --el-fill-color-lighter: #2c4160;
+  --el-fill-color-extra-light: #354d70;
+  --el-fill-color-dark: #111f35;
+  --el-fill-color-darker: #08152a;
+  --el-fill-color-blank: transparent;
+
+  /* ========== 文字色系 ========== */
+  /* Text Colors - 适配深色背景 */
+  --el-text-color-primary: #ffffff;
+  --el-text-color-regular: #ffffff;
+  --el-text-color-secondary: #e6e6e6;
+  --el-text-color-placeholder: #cccccc;
+  --el-text-color-disabled: #999999;
+
+  /* ========== 边框色系 ========== */
+  /* Border Colors - 蓝色系边框 */
+  --el-border-color: #3a5a7a;
+  --el-border-color-light: #4a6a8a;
+  --el-border-color-lighter: #5a7a9a;
+  --el-border-color-extra-light: #6a8aaa;
+  --el-border-color-dark: #2a4a6a;
+  --el-border-color-darker: #1a3a5a;
+
+  /* ========== 组件专用色系 ========== */
+  /* Component Colors */
+  --el-color-white: #ffffff;
+  --el-color-black: #000000;
+  --el-color-transparent: transparent;
+
+  /* Box Shadow */
+  --el-box-shadow: 0 2px 12px 0 rgba(26, 137, 195, 0.1);
+  --el-box-shadow-light: 0 2px 8px 0 rgba(26, 137, 195, 0.08);
+  --el-box-shadow-base: 0 2px 12px 0 rgba(26, 137, 195, 0.1);
+  --el-box-shadow-dark: 0 4px 16px 0 rgba(26, 137, 195, 0.15);
+
+  /* ========== 特殊组件样式 ========== */
+  /* Menu */
+  --el-menu-bg-color: #0c1d30;
+  --el-menu-text-color: #ffffff;
+  --el-menu-hover-bg-color: #1a3f5a;
+  --el-menu-item-hover-bg-color: #1a3f5a;
+  --el-menu-active-color: #1a89c3;
+
+  /* Input */
+  --el-input-bg-color: #1a2940;
+  --el-input-border-color: #3a5a7a;
+  --el-input-hover-border-color: #1a89c3;
+  --el-input-focus-border-color: #1a89c3;
+  --el-input-text-color: #ffffff;
+  --el-input-placeholder-color: #cccccc;
+
+  /* Button */
+  --el-button-bg-color: #1a2940;
+  --el-button-border-color: #3a5a7a;
+  --el-button-text-color: #ffffff;
+  --el-button-hover-bg-color: #233550;
+  --el-button-hover-border-color: #1a89c3;
+  --el-button-hover-text-color: #1a89c3;
+
+  /* Table */
+  --el-table-bg-color: #1a2940;
+  --el-table-tr-bg-color: #1a2940;
+  --el-table-header-bg-color: #233550;
+  --el-table-row-hover-bg-color: #2c4160;
+  --el-table-border-color: #3a5a7a;
+  --el-table-text-color: #ffffff;
+
+  /* Card */
+  --el-card-bg-color: #1a2940;
+  --el-card-border-color: #3a5a7a;
+
+  /* Dialog */
+  --el-dialog-bg-color: #1a2940;
+  --el-dialog-border-color: #3a5a7a;
+
+  /* Dropdown */
+  --el-dropdown-bg-color: #1a2940;
+  --el-dropdown-border-color: #3a5a7a;
+  --el-dropdown-menu-item-hover-bg-color: #233550;
+  --el-dropdown-menu-item-hover-color: #1a89c3;
+
+  /* Select */
+  --el-select-input-focus-border-color: #1a89c3;
+
+  /* Pagination */
+  --el-pagination-bg-color: #1a2940;
+  --el-pagination-button-bg-color: #1a2940;
+  --el-pagination-button-border-color: #3a5a7a;
+  --el-pagination-hover-color: #1a89c3;
+
+  /* Tabs */
+  --el-tabs-header-bg-color: #1a2940;
+
+  /* Checkbox & Radio */
+  --el-checkbox-bg-color: #1a2940;
+  --el-checkbox-input-border-color: #3a5a7a;
+  --el-checkbox-checked-bg-color: #1a89c3;
+  --el-checkbox-checked-input-border-color: #1a89c3;
+
+  /* DatePicker */
+  --el-datepicker-bg-color: #1a2940;
+  --el-datepicker-border-color: #3a5a7a;
+  --el-datepicker-header-bg-color: #233550;
+  --el-datepicker-inrange-bg-color: rgba(26, 137, 195, 0.2);
+  --el-datepicker-inrange-hover-bg-color: rgba(26, 137, 195, 0.3);
+
+  /* Message */
+  --el-message-bg-color: #233550;
+  --el-message-border-color: #3a5a7a;
+
+  /* Notification */
+  --el-notification-bg-color: #233550;
+  --el-notification-border-color: #3a5a7a;
+
+  /* Popover */
+  --el-popover-bg-color: #1a2940;
+  --el-popover-border-color: #3a5a7a;
+
+  /* Tooltip */
+  --el-tooltip-bg-color: #0c1d30;
+  --el-tooltip-border-color: #3a5a7a;
+
+  /* Switch */
+  --el-switch-on-color: #1a89c3;
+  --el-switch-off-color: #3a5a7a;
+
+  /* Slider */
+  --el-slider-runway-bg-color: #3a5a7a;
+  --el-slider-main-bg-color: #1a89c3;
+  --el-slider-button-bg-color: #1a89c3;
+
+  /* Progress */
+  --el-progress-bg-color: #3a5a7a;
+
+  /* Loading */
+  --el-loading-spinner-color: #1a89c3;
+  --el-loading-mask-bg-color: rgba(12, 29, 48, 0.8);
+
+  /* Tree */
+  --el-tree-node-hover-bg-color: #233550;
+  --el-tree-text-color: #ffffff;
+
+  /* Transfer */
+  --el-transfer-bg-color: #1a2940;
+  --el-transfer-border-color: #3a5a7a;
+  --el-transfer-panel-header-bg-color: #233550;
+
+  /* Upload */
+  --el-upload-dragger-bg-color: #1a2940;
+  --el-upload-dragger-border-color: #3a5a7a;
+
+  /* Steps */
+  --el-steps-bg-color: transparent;
+  --el-steps-border-color: #3a5a7a;
+  --el-steps-active-color: #1a89c3;
+
+  /* Badge */
+  --el-badge-bg-color: #f03f3c;
+
+  /* Tag */
+  --el-tag-bg-color: #233550;
+  --el-tag-border-color: #3a5a7a;
+  --el-tag-text-color: #ffffff;
+
+  /* Alert */
+  --el-alert-bg-color: #233550;
+  --el-alert-border-color: #3a5a7a;
+
+  /* Empty */
+  --el-empty-fill-color-0: #1a2940;
+  --el-empty-fill-color-1: #233550;
+  --el-empty-fill-color-2: #2c4160;
+  --el-empty-fill-color-3: #354d70;
+  --el-empty-fill-color-4: #3e5980;
+  --el-empty-fill-color-5: #476590;
+  --el-empty-fill-color-6: #5071a0;
+  --el-empty-fill-color-7: #597db0;
+  --el-empty-fill-color-8: #6289c0;
+  --el-empty-fill-color-9: #6b95d0;
+
+  /* Result */
+  --el-result-bg-color: #1a2940;
+
+  /* Skeleton */
+  --el-skeleton-color: #233550;
+  --el-skeleton-to-color: #2c4160;
+
+  /* Backtop */
+  --el-backtop-bg-color: #1a2940;
+  --el-backtop-text-color: #ffffff;
+  --el-backtop-hover-bg-color: #233550;
+
+  /* Page Header */
+  --el-page-header-bg-color: #1a2940;
+  --el-page-header-border-color: #3a5a7a;
+
+  /* Breadcrumb */
+  --el-breadcrumb-font-color: #ffffff;
+  --el-breadcrumb-separator-color: #cccccc;
+
+  /* Avatar */
+  --el-avatar-bg-color: #233550;
+  --el-avatar-text-color: #ffffff;
+}
+
+/* ========== 暗色模式专用样式 ========== */
+/* 确保在暗色模式下正确应用 */
+html.dark,
+[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0c1d30;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #3a5a7a;
+  border-radius: 10px;
+  border: 2px solid #0c1d30;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #4a6a8a;
+}
+
+/* Firefox */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: #3a5a7a #0c1d30;
+}

@@ -1,81 +1,136 @@
 <script setup>
-import { ref } from 'vue'
-import { useMessage } from './composables/useElementPlus.js'
+// App.vue - 应用根组件
+// 布局和路由管理由 Vue Router 处理
+import { onMounted } from 'vue'
 
-const { showSuccess, showWarning, showError, showInfo } = useMessage()
-
-const handleMessage = (type) => {
-  const messages = {
-    success: () => showSuccess('操作成功！'),
-    warning: () => showWarning('请注意检查数据'),
-    error: () => showError('操作失败，请稍后重试'),
-    info: () => showInfo('这是一条提示信息')
-  }
-  messages[type]()
-}
+// 应用深色主题
+onMounted(() => {
+  // 设置深色主题
+  document.documentElement.setAttribute('data-theme', 'dark')
+  document.documentElement.classList.add('dark')
+})
 </script>
 
 <template>
-  <div class="app-container">
-    <div class="app-header">
-      <h1>Element Plus 扩展演示</h1>
-    </div>
+  <div id="app" class="dark-theme">
+    <!-- 路由视图，布局由路由系统管理 -->
+    <router-view />
   </div>
 </template>
 
-<style scoped>
-.app-container {
-  min-height: 100vh;
-  background: var(--el-bg-color-page);
-  padding: 20px;
+<style>
+/* 全局样式重置 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.app-header {
+html, body {
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background-color: #0c1d30;
+  color: #ffffff;
+}
+
+#app {
+  height: 100%;
+  background-color: #0c1d30;
+}
+
+/* ZXHL Dark Theme Global Styles */
+.dark-theme {
+  background-color: #0c1d30;
+  color: #ffffff;
+}
+
+/* 确保所有Element Plus组件使用深色主题 */
+.dark-theme .el-card {
+  background-color: #062846;
+  border-color: #9cfff9;
+}
+
+.dark-theme .el-table {
+  background-color: #062846;
+  color: #ffffff;
+}
+
+.dark-theme .el-table th {
+  background-color: #094d7b;
+  color: #9cfff9;
+}
+
+.dark-theme .el-table td {
+  border-color: #356a72;
+}
+
+.dark-theme .el-input__inner {
+  background-color: #062846;
+  border-color: #9cfff9;
+  color: #ffffff;
+}
+
+.dark-theme .el-button {
+  background-color: #094d7b;
+  border-color: #9cfff9;
+  color: #9cfff9;
+}
+
+.dark-theme .el-button:hover {
+  background-color: #9cfff9;
+  color: #0c1d30;
+}
+
+/* 演示组件样式（如果需要使用） */
+.demo-container {
+  padding: 24px;
+}
+
+.demo-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
-  padding: 0 8px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--el-border-color-light);
 }
 
-.app-header h1 {
+.demo-header h2 {
   margin: 0;
   color: var(--el-text-color-primary);
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 600;
 }
 
-.demo-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: 20px;
-}
-
-.demo-card {
-  height: fit-content;
-}
-
-.button-group {
+.demo-tabs {
   display: flex;
-  flex-wrap: wrap;
   gap: 12px;
-  margin-bottom: 16px;
 }
 
-.button-group:last-child {
-  margin-bottom: 0;
+.demo-tabs .el-button.is-active {
+  background: var(--el-color-primary);
+  border-color: var(--el-color-primary);
+  color: #fff;
 }
 
+.demo-content {
+  min-height: 400px;
+}
+
+/* 响应式设计 */
 @media (max-width: 768px) {
-  .demo-grid {
-    grid-template-columns: 1fr;
+  .demo-container {
+    padding: 16px;
   }
   
-  .app-container {
-    padding: 12px;
+  .demo-header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
   }
   
-  .button-group {
+  .demo-tabs {
+    width: 100%;
     justify-content: center;
   }
 }
