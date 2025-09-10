@@ -134,7 +134,7 @@ html.dark,
   
   /* Border colors */
   --el-border-color: #9cfff9;
-  --el-border-color-light: red;
+  --el-border-color-light: #29d4b9;
   --el-border-color-lighter: #356a72;
   --el-border-color-extra-light: #062846;
   --el-border-color-dark: #9cfff9;
@@ -152,90 +152,21 @@ html.dark,
   /* Component specific colors */
   --el-mask-color: rgba(0, 0, 0, 0.8);
   --el-mask-color-extra-light: rgba(0, 0, 0, 0.3);
-}
 
-/* Custom Element Plus component extensions */
-.el-button--purple {
-  --el-button-text-color: #fff;
-  --el-button-bg-color: var(--el-color-purple);
-  --el-button-border-color: var(--el-color-purple);
-  --el-button-hover-text-color: #fff;
-  --el-button-hover-bg-color: #9254de;
-  --el-button-hover-border-color: #9254de;
-  --el-button-active-text-color: #fff;
-  --el-button-active-bg-color: #531dab;
-  --el-button-active-border-color: #531dab;
-}
 
-.el-button--pink {
-  --el-button-text-color: #fff;
-  --el-button-bg-color: var(--el-color-pink);
-  --el-button-border-color: var(--el-color-pink);
-  --el-button-hover-text-color: #fff;
-  --el-button-hover-bg-color: #f759ab;
-  --el-button-hover-border-color: #f759ab;
-  --el-button-active-text-color: #fff;
-  --el-button-active-bg-color: #c41d7f;
-  --el-button-active-border-color: #c41d7f;
-}
-
-.el-button--orange {
-  --el-button-text-color: #fff;
-  --el-button-bg-color: var(--el-color-orange);
-  --el-button-border-color: var(--el-color-orange);
-  --el-button-hover-text-color: #fff;
-  --el-button-hover-bg-color: #ffa940;
-  --el-button-hover-border-color: #ffa940;
-  --el-button-active-text-color: #fff;
-  --el-button-active-bg-color: #d46b08;
-  --el-button-active-border-color: #d46b08;
-}
-
-/* Custom utility classes */
-.el-card--shadow-always {
-  box-shadow: var(--el-box-shadow-base);
-}
-
-.el-card--shadow-hover:hover {
-  box-shadow: var(--el-box-shadow-light);
-}
-
-.el-card--shadow-never {
-  box-shadow: none;
-}
-
-/* Custom responsive breakpoints */
-@media (max-width: 768px) {
-  .el-form--responsive .el-form-item {
-    display: block;
-  }
+  /* ========== 业务自定义变量区域 ========== */
+  /* Business Custom Variables Area - 专门放置项目业务相关的CSS3变量 */
+  /* 以 --app 开头的业务变量，用于项目特有的样式定制 */
   
-  .el-form--responsive .el-form-item__label {
-    display: block;
-    padding: 0;
-    line-height: 1.5;
-    margin-bottom: 8px;
-  }
-}
+  /* Content Wrapper Background */
+  --app-content-wrapper-bg: #1a2940;
 
-/* Animation enhancements */
-.el-fade-in-linear-enter-active,
-.el-fade-in-linear-leave-active {
-  transition: opacity var(--el-transition-duration) linear;
-}
-
-.el-fade-in-linear-enter-from,
-.el-fade-in-linear-leave-to {
-  opacity: 0;
-}
-
-.el-zoom-in-center-enter-active,
-.el-zoom-in-center-leave-active {
-  transition: all var(--el-transition-duration) cubic-bezier(0.55, 0, 0.1, 1);
-}
-
-.el-zoom-in-center-enter-from,
-.el-zoom-in-center-leave-to {
-  opacity: 0;
-  transform: scaleX(0);
+  /* Card Background Colors */
+  --app-background-color-card-default: #062846;
+  --app-background-color-card-hover: #07395f;
+  --app-background-color-card-active: #094d7b;
+  
+  /* Additional Card Variants */
+  --app-background-color-card-secondary: #0c2f48;
+  --app-background-color-card-tertiary: #052746;
 }

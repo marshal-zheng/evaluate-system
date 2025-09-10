@@ -1,3 +1,8 @@
+---
+trigger: always_on
+alwaysApply: true
+---
+
 # 评估系统项目规则 (Evaluate System Project Rules)
 
 ## 项目概述 (Project Overview)

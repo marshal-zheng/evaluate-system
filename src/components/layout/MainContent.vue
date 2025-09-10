@@ -1,7 +1,7 @@
 <template>
   <div class="main-content" :class="{ 'is-collapsed': collapsed }">
     <!-- 面包屑导航 -->
-    <div class="breadcrumb-container" v-if="showBreadcrumb">
+    <!-- <div class="breadcrumb-container" v-if="showBreadcrumb">
       <el-breadcrumb separator="/">
         <el-breadcrumb-item :to="{ path: '/' }">
           <el-icon><HomeFilled /></el-icon>
@@ -15,7 +15,7 @@
           {{ item.title }}
         </el-breadcrumb-item>
       </el-breadcrumb>
-    </div>
+    </div> -->
 
     <!-- 页面标题区域 -->
     <div class="page-header" v-if="showPageHeader">
@@ -36,17 +36,6 @@
           <!-- 路由视图：显示当前路由对应的页面组件 -->
           <router-view />
         </slot>
-      </div>
-    </div>
-
-    <!-- 页脚信息 -->
-    <div class="content-footer" v-if="showFooter">
-      <div class="footer-content">
-        <span>© 2024 综合效能分析评估工具 v1.0</span>
-        <span class="footer-links">
-          <a href="#" @click.prevent="showHelp">帮助文档</a>
-          <a href="#" @click.prevent="showAbout">关于我们</a>
-        </span>
       </div>
     </div>
   </div>

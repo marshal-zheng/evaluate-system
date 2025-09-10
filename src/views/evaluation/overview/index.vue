@@ -130,6 +130,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
 import {
   DataBoard,
   DataAnalysis,
@@ -142,16 +143,20 @@ import {
   List,
   Tools
 } from '@element-plus/icons-vue'
+import { evaluationApi } from '@/components/ZXHL/api/modules/evaluation/index.js'
 
 const router = useRouter()
 
 // 统计数据
 const stats = ref({
-  totalEvaluations: 1248,
-  completedEvaluations: 1156,
-  activeModels: 24,
-  activeUsers: 156
+  totalEvaluations: 0,
+  completedEvaluations: 0,
+  activeModels: 0,
+  activeUsers: 0
 })
+
+// 加载状态
+const loading = ref(false)
 
 // 功能模块
 const features = ref([
@@ -186,29 +191,52 @@ const features = ref([
 ])
 
 // 最近活动
-const recentActivities = ref([
-  {
-    id: 1,
-    title: '完成综合效能评估',
-    description: '评估任务 #2024001 已完成，评估结果已生成',
-    timestamp: '2024-01-15 14:30',
-    type: 'success'
-  },
-  {
-    id: 2,
-    title: '新增评估模型',
-    description: '创建了新的评估模型 "效能分析模型 v2.0"',
-    timestamp: '2024-01-15 10:15',
-    type: 'primary'
-  },
-  {
-    id: 3,
-    title: '数据导入完成',
-    description: '成功导入 1000 条评估数据',
-    timestamp: '2024-01-14 16:45',
-    type: 'info'
+const recentActivities = ref([])
+
+// 任务管理数据
+const evaluationList = ref([])
+
+// 加载统计数据 - 使用静态数据
+const loadStats = async () => {
+  try {
+    loading.value = true
+    // 使用静态统计数据
+    stats.value = {
+      totalEvaluations: 25,
+      completedEvaluations: 15,
+      activeModels: 3,
+      activeUsers: 7
+    }
+    ElMessage.success('统计数据已更新')
+  } catch (error) {
+    console.error('加载统计数据失败:', error)
+    ElMessage.error('加载统计数据失败')
+  } finally {
+    loading.value = false
   }
-])
+}
+
+// 加载任务管理
+const loadEvaluationList = async () => {
+  try {
+    const response = await evaluationApi.getEvaluationList({ page: 1, size: 5 })
+    if (response.code === 200) {
+      evaluationList.value = response.data.list
+      // 转换为活动数据格式
+      recentActivities.value = response.data.list.slice(0, 3).map(item => ({
+        id: item.id,
+        title: `评估任务: ${item.name}`,
+        description: `状态: ${item.status} | 创建时间: ${item.createTime}`,
+        timestamp: item.createTime,
+        type: item.status === 'completed' ? 'success' : item.status === 'running' ? 'primary' : 'info'
+      }))
+      console.log('Mock任务管理数据:', response.data)
+    }
+  } catch (error) {
+    console.error('加载任务管理失败:', error)
+    ElMessage.error('加载任务管理失败，请检查mock配置')
+  }
+}
 
 // 导航到指定页面
 const navigateTo = (path) => {
@@ -216,9 +244,10 @@ const navigateTo = (path) => {
 }
 
 // 页面初始化
-onMounted(() => {
-  // 这里可以加载实际的统计数据
-  console.log('评估概览页面已加载')
+onMounted(async () => {
+  console.log('评估概览页面已加载，开始测试Mock数据...')
+  await loadStats()
+  await loadEvaluationList()
 })
 </script>
 

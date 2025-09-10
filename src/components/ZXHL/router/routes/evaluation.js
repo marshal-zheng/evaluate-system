@@ -4,7 +4,7 @@ export const evaluationRoutes = [
     path: 'evaluate',
     name: 'EvaluationOverview',
     meta: { 
-      title: '评估管理',
+      title: '评估任务管理',
       icon: 'EditPen'
     },
     redirect: 'list',
@@ -13,7 +13,7 @@ export const evaluationRoutes = [
       path: 'list',
       name: 'EvaluationList',
       meta: { 
-        title: '评估列表',
+        title: '任务管理',
       },
       component: () => import('@/components/ZXHL/pages/evaluation/list.vue')
     }, {

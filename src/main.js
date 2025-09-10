@@ -1,7 +1,7 @@
 import { createApp } from 'vue'
 import './style.css'
 import './assets/css/element-plus-theme.css'
-import './assets/css/dark-blue-theme.css'
+import './components/ZXHL/styles/index.scss'
 import App from './App.vue'
 import router from './router'
 

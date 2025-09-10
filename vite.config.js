@@ -6,6 +6,7 @@ import legacy from '@vitejs/plugin-legacy'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
+import { viteMockServe } from 'vite-plugin-mock'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -26,6 +27,12 @@ export default defineConfig({
     Components({
       resolvers: [ElementPlusResolver()],
       dts: true, // Generate type definitions
+    }),
+    viteMockServe({
+      mockPath: 'mock',
+      localEnabled: true,
+      prodEnabled: false,
+      logger: true
     }),
   ],
   base: './',
@@ -49,21 +56,12 @@ export default defineConfig({
   },
   server: {
     host: '0.0.0.0',
-    proxy: {
-      '/api': {
-        // target: 'http://172.20.10.2:7999',
-        // target: 'http://172.168.21.174:7999',
-        target: 'http://10.7.7.81:7999',
-        rewrite: (path) => path.replace(/^\/api/, '/'),
-      },
-      '/user': {
-        target: 'http://172.168.20.151:8081',
-        rewrite: (path) => path.replace(/^\/api/, '/'),
-      },
-      '/gateway': {
-        target: 'http://172.168.20.151:8081',
-        rewrite: (path) => path.replace(/^\/api/, '/'),
-      }
-    }
+    // 开发环境使用Mock数据，注释掉代理配置
+    // proxy: {
+    //   '/api': {
+    //     target: 'http://10.7.7.81:7999',
+    //     rewrite: (path) => path.replace(/^/api/, '/'),
+    //   }
+    // }
   }
 })

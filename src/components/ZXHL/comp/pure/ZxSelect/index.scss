@@ -1,0 +1,52 @@
+.zx-select {
+  width: 100%;
+  
+  .el-select__wrapper {
+    position: relative;
+  }
+  
+  .zx-select-inner-all {
+    position: absolute;
+    top: 0;
+    display: flex;
+    height: 100%;
+    width: 100%;
+    align-items: center;
+    color: var(--el-text-color-primary);
+    background-color: var(--el-bg-color);
+  }
+  
+  // 全选选项样式
+  .all-select-option {
+    border-bottom: 1px solid var(--el-border-color-light);
+    margin-bottom: 4px;
+    
+    .el-checkbox {
+      width: 100%;
+    }
+  }
+  
+  // 选项内容样式
+  .option-content {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  // 标签样式优化
+  :deep(.el-select__tags) {
+    max-width: calc(100% - 30px);
+  }
+  
+  :deep(.el-tag) {
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  // 高亮搜索关键字样式
+  .highlight-keyword {
+    color: var(--el-color-primary);
+    font-weight: 500;
+  }
+}
