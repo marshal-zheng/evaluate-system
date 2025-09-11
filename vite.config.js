@@ -56,6 +56,7 @@ export default defineConfig({
   },
   server: {
     host: '0.0.0.0',
+    port: 5174,
     // 开发环境使用Mock数据，注释掉代理配置
     // proxy: {
     //   '/api': {
