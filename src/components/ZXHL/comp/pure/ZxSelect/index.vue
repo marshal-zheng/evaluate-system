@@ -86,6 +86,11 @@
 import { computed, ref, watch, onBeforeMount, onMounted, nextTick, watchEffect } from 'vue'
 import './index.scss'
 
+// 组件名称
+defineOptions({
+  name: 'ZxSelect'
+})
+
 // Props 定义
 const props = defineProps({
   // 模式：静态或远程
@@ -147,7 +152,7 @@ const props = defineProps({
   // 数据转换函数
   transform: {
     type: Function,
-    default: (list) => list
+    default: list => list
   },
   // 是否使用对象值
   objectValue: {

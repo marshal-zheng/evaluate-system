@@ -64,26 +64,22 @@
     <!-- 侧边栏底部 -->
     <div class="sidebar-footer">
       <div class="footer-info" v-show="!collapsed">
-        <el-icon><InfoFilled /></el-icon>
+        <ZxIcon icon="InfoFilled" :size="16" />
         <span>系统版本 v1.0</span>
-        <el-button
-          type="text"
-          size="large"
+        <ZxIcon 
+          icon="Fold" 
+          :size="30" 
           class="menu-toggle"
           @click="toggleSidebar"
-        >
-          <el-icon><Fold /></el-icon>
-        </el-button>
+        />
       </div>
       <div class="footer-collapsed" v-show="collapsed">
-        <el-button
-          type="text"
-          size="large"
+        <ZxIcon 
+          icon="Expand" 
+          :size="30" 
           class="menu-toggle"
           @click="toggleSidebar"
-        >
-          <el-icon><Expand /></el-icon>
-        </el-button>
+        />
       </div>
     </div>
   </div>
@@ -93,6 +89,7 @@
 import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import ZxIcon from '../ZXHL/comp/pure/ZxIcon/index.vue'
 import {
   DataBoard,
   DataAnalysis,
@@ -115,10 +112,7 @@ import {
   Tools,
   User,
   UserFilled,
-  Notebook,
-  InfoFilled,
-  Fold,
-  Expand
+  Notebook
 } from '@element-plus/icons-vue'
 
 // Props

@@ -131,7 +131,6 @@ const showAbout = () => {
   flex-direction: column;
   background: #f5f7fa;
   transition: all 0.3s;
-  min-height: 100vh;
 }
 
 .main-content.is-collapsed {
@@ -185,6 +184,7 @@ const showAbout = () => {
 .content-body {
   flex: 1;
   padding: 24px;
+  overflow: auto;
 }
 
 .welcome-content {
@@ -302,6 +302,10 @@ const showAbout = () => {
 .footer-links a:hover {
   color: #409eff;
 }
+
+ .content-body {
+    margin: 20px;
+  }
 
 /* 响应式设计 */
 @media (max-width: 768px) {

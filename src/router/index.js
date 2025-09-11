@@ -11,7 +11,35 @@ const routes = [
   {
     path: '/',
     component: Layout,
-    children: businessRoutes
+    children: [
+      ...businessRoutes,
+      // ZxSearch 组件演示页面
+      {
+        path: '/search-demo',
+        name: 'SearchDemo',
+        component: () => import('@/views/search-demo.vue'),
+        meta: {
+          title: 'ZxSearch 组件演示'
+        }
+      },
+      // ZxIcon 组件演示页面
+      {
+          path: '/icon-demo',
+          name: 'IconDemo',
+          component: () => import('@/views/icon-demo.vue'),
+          meta: {
+            title: 'ZxIcon 组件演示'
+          }
+        },
+        {
+          path: '/pure-components-demo',
+          name: 'PureComponentsDemo',
+          component: () => import('@/views/pure-components-demo.vue'),
+          meta: {
+            title: 'Pure 组件统一注册演示'
+          }
+        }
+    ]
   },
   // 404 页面路由 - 必须放在最后
   {

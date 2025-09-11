@@ -4,10 +4,11 @@ import ZXR from '../../http/index.js'
 // 获取评估任务列表
 export function getEvaluationList(params) {
   // 返回完整的后端响应结构（包含 code/message/data），以兼容现有页面逻辑
+  // 支持 ZxGridList 的 params 格式，HTTP 层会自动处理数据转换
   return ZXR.get(
     {
       url: '/evaluation/list',
-      params,
+      data: params, // 使用 data 而不是 params，让 HTTP 层处理格式转换
     }
   )
 }

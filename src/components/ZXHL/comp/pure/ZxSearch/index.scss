@@ -1,0 +1,122 @@
+// ZxSearch 组件样式
+
+// 变量定义
+$zx-search-prefix: 'zx-search';
+$zx-search-border-radius: 4px;
+$zx-search-gap: 8px;
+
+// 主题变量
+:root {
+  --zx-search-primary-color: #409eff;
+  --zx-search-text-color: #303133;
+  --zx-search-text-color-secondary: #606266;
+  --zx-search-border-color-base: #dcdfe6;
+  --zx-search-background-color: #ffffff;
+  --zx-search-disabled-bg: #f5f7fa;
+  --zx-search-disabled-color: #c0c4cc;
+}
+
+// 暗色主题
+[data-theme="dark"] {
+  --zx-search-text-color: #e4e7ed;
+  --zx-search-text-color-secondary: #c0c4cc;
+  --zx-search-border-color-base: #4c4d4f;
+  --zx-search-background-color: #1d1e1f;
+}
+
+// 组件主体样式
+.#{$zx-search-prefix} {
+  position: relative;
+  width: 100%;
+  
+  &.is-disabled {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+  
+  &__input-wrapper {
+    width: 100%;
+    
+    .el-input {
+      width: 100%;
+      
+      .el-input-group__prepend {
+        background-color: var(--el-fill-color-light);
+        border-color: var(--el-border-color);
+        
+        .el-select {
+          .el-input__wrapper {
+            box-shadow: none;
+            background-color: transparent;
+          }
+        }
+      }
+      
+      .el-input-group__append {
+        padding: 0;
+        
+        .el-button {
+          border: none;
+          border-radius: 0;
+          margin: 0;
+          transition: none !important;
+          transform: none !important;
+          
+          &:hover {
+            transform: none !important;
+          }
+          
+          &:active {
+            transform: none !important;
+          }
+        }
+      }
+    }
+  }
+  
+  &--loading {
+    .#{$zx-search-prefix}__button {
+      pointer-events: none;
+    }
+  }
+  
+
+}
+
+// 垂直布局（当模式切换显示时）
+.#{$zx-search-prefix}:has(.#{$zx-search-prefix}__mode-wrapper) {
+  flex-direction: column;
+  align-items: stretch;
+  
+  .#{$zx-search-prefix}__mode-wrapper {
+    align-self: flex-start;
+  }
+  
+  .#{$zx-search-prefix}__input-wrapper,
+  .#{$zx-search-prefix}__button {
+    align-self: stretch;
+  }
+}
+
+// 水平布局（当模式切换隐藏时）
+.#{$zx-search-prefix}:not(:has(.#{$zx-search-prefix}__mode-wrapper)) {
+  flex-direction: row;
+  align-items: center;
+}
+
+// 响应式设计
+@media (max-width: 768px) {
+  .#{$zx-search-prefix} {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    
+    &__mode-wrapper {
+      align-self: flex-start;
+    }
+    
+    &__button {
+      width: 100%;
+    }
+  }
+}

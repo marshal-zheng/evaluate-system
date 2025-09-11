@@ -27,14 +27,14 @@ onMounted(() => {
 }
 
 html, body {
-  height: 100%;
+  min-height: 100%;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   background-color: #0c1d30;
   color: #ffffff;
 }
 
 #app {
-  height: 100%;
+  min-height: 100vh;
   background-color: #0c1d30;
 }
 

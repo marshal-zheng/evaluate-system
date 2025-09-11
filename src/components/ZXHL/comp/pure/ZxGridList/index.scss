@@ -1,0 +1,172 @@
+.zx-grid-list {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  // 由父容器控制整体高度，避免组件内部再强行设定视口相关 min-height 造成抖动
+  
+  &__toolbar {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+    
+    :deep(.el-form) {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      
+      &.align-left {
+        justify-content: flex-start;
+      }
+      
+      .el-form-item {
+        margin-bottom: 0;
+        
+        &:last-child {
+          margin-right: 0;
+        }
+      }
+    }
+    
+    .master-btns {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+  }
+  
+  &__grid {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0; // 允许flex子项收缩
+    overflow: hidden;
+  }
+  
+  &__table {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    
+    :deep(.el-table) {
+      flex: 1;
+      height: 100%;
+      
+      .el-table__body-wrapper {
+        // 让表格主体区域在容器内自适应，固定分页区域高度时不抖动
+        flex: 1 1 auto;
+        overflow: auto;
+      }
+      
+      .el-table-column--selection {
+        .cell {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0;
+        }
+      }
+    }
+  }
+  
+  &__empty {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    padding: 40px 20px;
+    
+    :deep(.zx-empty) {
+      width: 100%;
+      min-height: auto;
+    }
+  }
+  
+  &__pagination {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  // 通过固定最小高度，始终为分页占位，避免数据多/少导致上下跳动
+  min-height: 56px;
+  padding: 12px 0;
+  margin-top: auto; // 推到底部
+  background: var(--el-bg-color);
+  border-top: 1px solid var(--el-border-color-light);
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+    
+    :deep(.el-pagination) {
+      --el-pagination-font-size: 14px;
+      --el-pagination-bg-color: transparent;
+      
+      .el-select .el-input {
+        width: 84px;
+      }
+      
+      .el-pagination__sizes {
+        margin-right: 16px;
+      }
+      
+      .el-pagination__jump {
+        margin-left: 16px;
+      }
+    }
+  }
+}
+
+// 响应式设计
+@media (max-width: 768px) {
+  .zx-grid-list {
+    &__toolbar {
+      :deep(.el-form) {
+        flex-direction: column;
+        align-items: stretch;
+        
+        .el-form-item {
+          width: 100%;
+        }
+      }
+    }
+    
+    &__pagination {
+      justify-content: flex-end;
+      
+      :deep(.el-pagination) {
+        --el-pagination-font-size: 12px;
+        
+        .el-pagination__sizes,
+        .el-pagination__jump {
+          margin: 0 8px;
+        }
+      }
+    }
+  }
+}
+
+.zx-grid-list__pagination {
+  padding-right: 20px;
+}
+
+// 加载状态样式
+.zx-grid-list__grid[v-loading] {
+  // 保持加载时也有稳定高度，避免骨架/加载层抖动
+  min-height: 200px;
+}
+
+// 暗色主题适配
+@media (prefers-color-scheme: dark) {
+  .zx-grid-list {
+    &__pagination {
+      :deep(.el-pagination) {
+        --el-pagination-bg-color: transparent;
+        --el-pagination-text-color: var(--el-text-color-primary);
+      }
+    }
+  }
+}

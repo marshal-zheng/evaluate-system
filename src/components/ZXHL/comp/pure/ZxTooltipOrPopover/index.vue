@@ -10,66 +10,47 @@
   </component>
 </template>
 
-<script>
-import { computed, defineComponent, ref, useAttrs } from 'vue'
+<script setup>
+import { computed, useAttrs } from 'vue'
 import { ElPopover, ElTooltip } from 'element-plus'
-import { css } from '@emotion/css'
-import { get } from 'lodash'
 
-export default defineComponent({
-  name: 'TooltipOrPopover',
-  props: {
-    title: {
-      type: String,
-    },
-    content: {
-      type: String,
-    },
-    trigger: {
-      type: String,
-      default: 'hover',
-    },
-    placement: {
-      type: String,
-      default: 'top',
-    }
-  },
-  setup(props) {
-    const attrs = useAttrs()
-    /**
-   *  默认props
-   */
-    const defaultProps = {
-      trigger: 'hover',
-      placement: 'top',
-    }
-
-    const titleClass = css`
-      font-size: ${get(props, 'themeVars.fontSizeHeading5', '14')}px;
-      margin-bottom: ${props.content ? '8px' : '0'};
-      min-width: 177px;
-    `
-
-    const contentClass = css`
-      font-size: ${props.themeVars?.fontSize || '14'}px;
-      min-width: 177px;
-      margin-bottom: 0;
-    `
-
-    const isPopover = computed(() => Boolean(props.title))
-    const finalProps = ref({ ...defaultProps, ...attrs, ...props })
-    const Component = computed(() => (isPopover.value ? ElPopover : ElTooltip))
-
-    return {
-      titleClass,
-      contentClass,
-      isPopover,
-      finalProps,
-      Component,
-      title: props.title,
-      content: props.content,
-      attrs,
-    }
-  },
+// 组件名称
+defineOptions({
+  name: 'ZxTooltipOrPopover'
 })
+
+// Props 定义
+const props = defineProps({
+  title: {
+    type: String,
+    default: ''
+  },
+  content: {
+    type: String,
+    default: ''
+  },
+  trigger: {
+    type: String,
+    default: 'hover'
+  },
+  placement: {
+    type: String,
+    default: 'top'
+  }
+})
+
+const attrs = useAttrs()
+
+// 计算属性
+const isPopover = computed(() => Boolean(props.title))
+const Component = computed(() => (isPopover.value ? ElPopover : ElTooltip))
+
+// 合并最终的 props
+const finalProps = computed(() => ({
+  trigger: props.trigger,
+  placement: props.placement,
+  content: props.content,
+  title: props.title,
+  ...attrs
+}))
 </script>

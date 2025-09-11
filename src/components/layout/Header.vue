@@ -94,8 +94,8 @@ const handleUserCommand = (command) => {
   justify-content: space-between;
   height: 60px;
   padding: 0 20px;
-  background: #2d2d2d;
-  border-bottom: 1px solid #404040;
+  background: var(--app-layout-header-bg);
+  border-bottom: 1px solid var(--app-layout-header-border-bottom);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   position: relative;
   z-index: 1000;

@@ -1,4 +1,105 @@
 .content-wrapper {
   background-color: var(--app-content-wrapper-bg);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.content-body {
+  background-color: var(--app-content-body-bg);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0; // 允许flex子项收缩
+  overflow: hidden;
+  
+  // 为gridlist提供固定高度容器支持
+  .zx-grid-list {
+  height: 100%;
+  // 让父容器决定高度，不再强制视口相关 min-height，避免分页上跳
+  }
+  
+  // 确保页面内容能够正确填充
+  > * {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+
+/* 企业级表格视觉规范（全局） */
+.el-table {
+  /* 全局字号略大一档，增强可读性 */
+  font-size: 14px;
+
+  .el-table__header-wrapper th,
+  .el-table__header th {
+    /* 表头高度：更高更稳重 */
+    height: 56px;
+    padding: 0 16px; /* 左右留白 */
+    background-color: var(--el-table-header-bg-color, var(--app-background-color-card-hover));
+    color: var(--el-table-header-text-color, var(--el-text-color-primary));
+    font-weight: 600;
+    border-bottom: 1px solid var(--el-table-border-color, #356a72);
+    /* 表头文字稍微紧凑，避免撑高 */
+    line-height: 56px;
+  }
+
+  .el-table__body tr {
+    height: 48px; /* 行高：遵循通用企业规范 */
+  }
+
+  .el-table__body td {
+    padding: 10px 16px; /* 实际可视行高≈48px */
+    background-color: var(--el-table-tr-bg-color, var(--app-background-color-card-default));
+    border-bottom: 1px solid var(--el-table-border-color, rgba(255,255,255,0.06));
+  }
+
+  .el-table__body tr:hover > td {
+    background-color: var(--el-table-row-hover-bg-color, var(--app-background-color-card-secondary));
+  }
+
+  .el-table__body tr.current-row > td {
+    background-color: var(--el-table-current-row-bg-color, rgba(156, 255, 249, 0.08));
+  }
+
+  /* 紧凑型表格（小尺寸）兼容：保持层次，但收窄高度 */
+  &.el-table--small {
+    .el-table__header th {
+      height: 48px;
+      line-height: 48px;
+      padding: 0 12px;
+    }
+    .el-table__body tr { height: 40px; }
+    .el-table__body td { padding: 8px 12px; }
+  }
+}
+
+/* 分页与表格底部对齐的间距优化 */
+.el-pagination {
+  padding: 12px 0;
+}
+
+
+/* 操作列稳定布局 */
+.el-table .op-col__header {
+  text-align: right;
+}
+.el-table .op-col .cell {
+  padding-right: 16px; /* 与表头左右留白一致 */
+}
+.el-table .op-col__wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px; /* 按钮间距统一 */
+  width: 100%;
+  white-space: nowrap; /* 禁止换行，防止“乱” */
+}
+
+/* 防止行高被内容撑破：按钮使用 link 样式已降低内边距 */
+.el-table .op-col .el-button--small {
+  padding: 0 4px;
 }
 

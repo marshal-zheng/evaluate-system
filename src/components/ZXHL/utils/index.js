@@ -4,15 +4,17 @@
  * @param {number} depth - 当前深度
  * @returns {number} 最大深度
  */
-export function calculateMaxDepth(arr, depth = 0) {
+export function calculateMaxDepth(arr, depth = 1) {
   if (!arr || arr.length === 0) {
     return depth;
   }
 
   let maxDepth = depth;
-  Object.values(arr).forEach((item) => {
-    const childDepth = calculateMaxDepth(item.children, depth + 1);
-    maxDepth = Math.max(maxDepth, childDepth);
+  arr.forEach((item) => {
+    if (item.children && item.children.length > 0) {
+      const childDepth = calculateMaxDepth(item.children, depth + 1);
+      maxDepth = Math.max(maxDepth, childDepth);
+    }
   });
 
   return maxDepth;
