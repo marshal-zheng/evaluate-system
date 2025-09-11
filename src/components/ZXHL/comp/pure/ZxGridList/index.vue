@@ -66,7 +66,7 @@
           :current-page="currentPage"
           :small="small"
           :background="paginationBackground"
-          :disabled="!hasPagination || !hasData"
+          :disabled="!hasPagination"
           @size-change="handleSizeChange"
           @current-change="handlePageChange"
         />
