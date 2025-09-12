@@ -1,0 +1,20 @@
+:root {
+  --zx-form-create-basic-bg: #fff;
+  --zx-form-create-basic-padding: 16px;
+  --zx-form-create-basic-gap: 12px;
+}
+
+.zx-form-create-basic {
+  background: var(--zx-form-create-basic-bg);
+  padding: var(--zx-form-create-basic-padding);
+
+  &__form {
+    .zx-form-create-basic__item {
+      margin-bottom: var(--zx-form-create-basic-gap);
+
+      :deep(.el-form-item__content) {
+        width: 100%;
+      }
+    }
+  }
+}

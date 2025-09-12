@@ -22,6 +22,7 @@
     "echarts": "^5.4.2",
     "el-table-infinite-scroll": "^1.0.1",
     "element-plus": "^2.3.8",
+    "gridstack": "^12.3.3",
     "js-base64": "^3.7.8",
     "lodash-es": "^4.17.21",
     "pinia": "^2.1.4",
@@ -32,6 +33,7 @@
     "uuid": "^9.0.0",
     "vue": "^3.3.4",
     "vue-draggable-plus": "^0.6.0",
+    "vue-echarts": "^7.0.3",
     "vue-router": "^4.2.4"
   },
   "devDependencies": {

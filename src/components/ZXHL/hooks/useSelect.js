@@ -1,5 +1,5 @@
 import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
-import { calculateMaxDepth } from '../utils'
+import { calculateMaxDepth } from '../utils/index.js'
 
 /**
  * 计算 Select 组件的单行展示的最大标签数量

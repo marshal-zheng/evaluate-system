@@ -1,6 +1,14 @@
 import PureRouterView from '@/components/ZXHL/comp/pure/ZxPureRouterView/index.vue'
 
 export const componentRoutes = [
+   {
+    path: 'gridLayout',
+    name: 'gridLayout',
+    meta: { 
+      title: '报表布局'
+    },
+    component: () => import('@/components/ZXHL/pages/dashboard/index.vue')
+  },
   {
     path: 'components',
     name: 'ComponentsDemo',
@@ -187,6 +195,14 @@ export const componentRoutes = [
           title: 'ZxDetailCard 详情卡片组件'
         },
         component: () => import('@/components/ZXHL/comp/pure/ZxDetailCard/example.vue')
+      },
+      {
+        path: 'zx-chart',
+        name: 'ZxChartDemo',
+        meta: { 
+          title: 'ZxChart 图表组件'
+        },
+        component: () => import('@/components/ZXHL/comp/pure/ZxChart/example.vue')
       }
     ]
   }

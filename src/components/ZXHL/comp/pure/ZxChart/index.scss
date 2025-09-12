@@ -1,0 +1,150 @@
+:root {
+  // ZxChart 组件 CSS 变量
+  --zx-chart-background-color: #ffffff;
+  --zx-chart-border-color: #e4e7ed;
+  --zx-chart-border-radius: 4px;
+  --zx-chart-border-width: 1px;
+  --zx-chart-padding: 16px;
+  --zx-chart-margin: 0;
+  --zx-chart-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+  --zx-chart-min-height: 200px;
+  --zx-chart-min-width: 200px;
+  
+  // 加载状态
+  --zx-chart-loading-color: #409eff;
+  --zx-chart-loading-background: rgba(255, 255, 255, 0.9);
+  
+  // 暗色主题变量
+  --zx-chart-dark-background-color: #1d1e1f;
+  --zx-chart-dark-border-color: #4c4d4f;
+  --zx-chart-dark-loading-background: rgba(29, 30, 31, 0.9);
+}
+
+.zx-chart {
+  position: relative;
+  background-color: var(--zx-chart-background-color);
+  border: var(--zx-chart-border-width) solid var(--zx-chart-border-color);
+  border-radius: var(--zx-chart-border-radius);
+  padding: var(--zx-chart-padding);
+  margin: var(--zx-chart-margin);
+  box-shadow: var(--zx-chart-box-shadow);
+  min-height: var(--zx-chart-min-height);
+  min-width: var(--zx-chart-min-width);
+  overflow: hidden;
+  
+  // 确保图表容器占满父容器
+  .echarts {
+    width: 100% !important;
+    height: 100% !important;
+  }
+  
+  // 加载状态样式
+  &.zx-chart-loading {
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--zx-chart-loading-background);
+      z-index: 1000;
+    }
+    
+    &::after {
+      content: '加载中...';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: var(--zx-chart-loading-color);
+      font-size: 14px;
+      z-index: 1001;
+    }
+  }
+  
+  // 无边框样式
+  &.zx-chart-borderless {
+    border: none;
+    box-shadow: none;
+  }
+  
+  // 无内边距样式
+  &.zx-chart-no-padding {
+    padding: 0;
+  }
+  
+  // 圆角样式变体
+  &.zx-chart-rounded {
+    border-radius: 8px;
+  }
+  
+  &.zx-chart-rounded-lg {
+    border-radius: 12px;
+  }
+  
+  // 阴影样式变体
+  &.zx-chart-shadow-sm {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  }
+  
+  &.zx-chart-shadow-lg {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+  
+  // 响应式设计
+  @media (max-width: 768px) {
+    padding: 12px;
+    min-height: 150px;
+    
+    .echarts {
+      font-size: 12px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    padding: 8px;
+    min-height: 120px;
+    
+    .echarts {
+      font-size: 10px;
+    }
+  }
+}
+
+// 暗色主题支持
+.dark .zx-chart,
+[data-theme='dark'] .zx-chart {
+  background-color: var(--zx-chart-dark-background-color);
+  border-color: var(--zx-chart-dark-border-color);
+  
+  &.zx-chart-loading {
+    &::before {
+      background-color: var(--zx-chart-dark-loading-background);
+    }
+  }
+}
+
+// 图表工具提示样式增强
+:deep(.echarts-tooltip) {
+  border-radius: var(--zx-chart-border-radius);
+  box-shadow: var(--zx-chart-box-shadow);
+}
+
+// 图表图例样式增强
+:deep(.echarts-legend) {
+  .echarts-legend-item {
+    margin-right: 16px;
+    
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+}
+
+// 数据缩放组件样式
+:deep(.echarts-datazoom) {
+  .echarts-datazoom-handle {
+    border-radius: 2px;
+  }
+}
