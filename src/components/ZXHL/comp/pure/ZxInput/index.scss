@@ -1,0 +1,224 @@
+:root {
+  // ZxInput 组件 CSS 变量定义
+  --zx-input-border-color: var(--el-border-color);
+  --zx-input-border-color-hover: var(--el-border-color-hover);
+  --zx-input-border-color-focus: var(--el-color-primary);
+  --zx-input-border-radius: var(--el-border-radius-base);
+  --zx-input-background-color: var(--el-fill-color-blank);
+  --zx-input-background-color-disabled: var(--el-disabled-bg-color);
+  --zx-input-text-color: var(--el-text-color-regular);
+  --zx-input-text-color-disabled: var(--el-disabled-text-color);
+  --zx-input-text-color-placeholder: var(--el-text-color-placeholder);
+  --zx-input-font-size: var(--el-font-size-base);
+  --zx-input-font-size-large: var(--el-font-size-large);
+  --zx-input-font-size-small: var(--el-font-size-small);
+  --zx-input-height: var(--el-component-size);
+  --zx-input-height-large: var(--el-component-size-large);
+  --zx-input-height-small: var(--el-component-size-small);
+  --zx-input-padding-horizontal: 12px;
+  --zx-input-padding-vertical: 8px;
+  --zx-input-box-shadow-focus: 0 0 0 2px var(--el-color-primary-light-8);
+  --zx-input-transition: all 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+}
+
+.zx-input {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  font-size: var(--zx-input-font-size);
+  line-height: 1.5;
+
+  // 基础样式增强
+  .el-input {
+    transition: var(--zx-input-transition);
+
+    .el-input__wrapper {
+      border-color: var(--zx-input-border-color);
+      background-color: var(--zx-input-background-color);
+      transition: var(--zx-input-transition);
+
+      &:hover {
+        border-color: var(--zx-input-border-color-hover);
+      }
+
+      &.is-focus {
+        border-color: var(--zx-input-border-color-focus);
+        box-shadow: var(--zx-input-box-shadow-focus);
+      }
+    }
+
+    .el-input__inner {
+      color: var(--zx-input-text-color);
+      font-size: var(--zx-input-font-size);
+      transition: var(--zx-input-transition);
+
+      &::placeholder {
+        color: var(--zx-input-text-color-placeholder);
+      }
+    }
+
+    &.is-disabled {
+      .el-input__wrapper {
+        background-color: var(--zx-input-background-color-disabled);
+        border-color: var(--el-disabled-border-color);
+        cursor: not-allowed;
+      }
+
+      .el-input__inner {
+        color: var(--zx-input-text-color-disabled);
+        cursor: not-allowed;
+      }
+    }
+  }
+
+  // 数字输入框样式
+  .el-input-number {
+    width: fit-content;
+    transition: var(--zx-input-transition);
+
+    .el-input__wrapper {
+      border-color: var(--zx-input-border-color);
+      background-color: var(--zx-input-background-color);
+      transition: var(--zx-input-transition);
+
+      &:hover {
+        border-color: var(--zx-input-border-color-hover);
+      }
+
+      &.is-focus {
+        border-color: var(--zx-input-border-color-focus);
+        box-shadow: var(--zx-input-box-shadow-focus);
+      }
+    }
+
+    .el-input__inner {
+      color: var(--zx-input-text-color);
+      font-size: var(--zx-input-font-size);
+      transition: var(--zx-input-transition);
+
+      &::placeholder {
+        color: var(--zx-input-text-color-placeholder);
+      }
+    }
+
+    &.is-disabled {
+      .el-input__wrapper {
+        background-color: var(--zx-input-background-color-disabled);
+        border-color: var(--el-disabled-border-color);
+        cursor: not-allowed;
+      }
+
+      .el-input__inner {
+        color: var(--zx-input-text-color-disabled);
+        cursor: not-allowed;
+      }
+    }
+  }
+
+  // 尺寸变体
+  &.zx-input--large {
+    font-size: var(--zx-input-font-size-large);
+
+    .el-input .el-input__inner,
+    .el-input-number .el-input__inner {
+      font-size: var(--zx-input-font-size-large);
+    }
+  }
+
+  &.zx-input--small {
+    font-size: var(--zx-input-font-size-small);
+
+    .el-input .el-input__inner,
+    .el-input-number .el-input__inner {
+      font-size: var(--zx-input-font-size-small);
+    }
+  }
+
+  // 类型变体
+  &.zx-input--textarea {
+    .el-textarea {
+      .el-textarea__inner {
+        color: var(--zx-input-text-color);
+        font-size: var(--zx-input-font-size);
+        border-color: var(--zx-input-border-color);
+        background-color: var(--zx-input-background-color);
+        transition: var(--zx-input-transition);
+
+        &::placeholder {
+          color: var(--zx-input-text-color-placeholder);
+        }
+
+        &:hover {
+          border-color: var(--zx-input-border-color-hover);
+        }
+
+        &:focus {
+          border-color: var(--zx-input-border-color-focus);
+          box-shadow: var(--zx-input-box-shadow-focus);
+        }
+      }
+
+      &.is-disabled {
+        .el-textarea__inner {
+          background-color: var(--zx-input-background-color-disabled);
+          border-color: var(--el-disabled-border-color);
+          color: var(--zx-input-text-color-disabled);
+          cursor: not-allowed;
+        }
+      }
+    }
+  }
+
+  &.zx-input--number {
+    width: fit-content;
+  }
+
+  // 状态变体
+  &.zx-input--disabled {
+    cursor: not-allowed;
+  }
+
+  &.zx-input--readonly {
+    .el-input .el-input__inner,
+    .el-input-number .el-input__inner,
+    .el-textarea .el-textarea__inner {
+      cursor: default;
+    }
+  }
+
+  // 组件内部样式
+  .zx-input__component {
+    width: 100%;
+
+    &.zx-input__component--number {
+      width: fit-content;
+    }
+  }
+
+  // 响应式设计
+  @media (max-width: 768px) {
+    &.zx-input--number {
+      width: 100%;
+
+      .el-input-number {
+        width: 100%;
+      }
+    }
+  }
+
+  // 暗色主题适配
+  @media (prefers-color-scheme: dark) {
+    --zx-input-background-color: var(--el-bg-color);
+    --zx-input-border-color: var(--el-border-color-darker);
+    --zx-input-text-color: var(--el-text-color-primary);
+  }
+}
+
+// 工具提示增强
+.el-tooltip__popper {
+  &.zx-input-tooltip {
+    max-width: 300px;
+    word-wrap: break-word;
+    word-break: break-all;
+  }
+}

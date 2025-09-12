@@ -126,6 +126,7 @@ const showAbout = () => {
 
 <style scoped>
 .main-content {
+  overflow-y: scroll;
   flex: 1;
   display: flex;
   flex-direction: column;

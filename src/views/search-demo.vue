@@ -1,75 +1,156 @@
 <template>
-  <div class="search-demo-page">
-    <div class="demo-container">
-      <h1>ZxSearch 表格筛选组件演示</h1>
-      
-      <!-- 表格数据筛选 -->
-      <!-- <div class="demo-section">
-        <h2>表格数据筛选</h2>
-        <div class="search-container">
-           <ZxSearch
-             v-model="searchValue"
-             placeholder="请输入搜索内容筛选表格数据"
-             @search="handleSearch"
-             @clear="handleClear"
-           />
-         </div>
-        
-        <div class="table-container">
-          <el-table :data="filteredTableData" style="width: 100%" border>
-            <el-table-column prop="id" label="ID" width="80" />
-            <el-table-column prop="name" label="应用名" width="150" />
-            <el-table-column prop="type" label="类型" width="120" />
-            <el-table-column prop="status" label="状态" width="100">
-              <template #default="scope">
-                <el-tag :type="scope.row.status === '运行中' ? 'success' : 'info'">
-                  {{ scope.row.status }}
-                </el-tag>
-              </template>
-            </el-table-column>
-            <el-table-column prop="description" label="描述" />
-            <el-table-column prop="createTime" label="创建时间" width="180" />
-          </el-table>
-        </div>
-        
+  <div class="search-demo">
+    <div class="demo-header">
+      <h1>ZxSearch 搜索组件演示</h1>
+      <p>基于 Element Plus 的搜索组件，支持多种搜索模式和配置</p>
+    </div>
+
+    <!-- 基础用法 -->
+    <div class="demo-section">
+      <h2>基础用法</h2>
+      <div class="demo-content">
+        <ZxSearch
+          v-model="basicSearchValue"
+          placeholder="请输入搜索内容"
+          @search="handleBasicSearch"
+        />
+        <p class="demo-description">基础的搜索组件，支持输入和搜索功能</p>
         <div class="result-display">
-           <p><strong>搜索值:</strong> {{ searchValue }}</p>
-           <p><strong>搜索模式:</strong> 模糊搜索（默认）</p>
-           <p><strong>筛选结果:</strong> 共 {{ filteredTableData.length }} 条数据</p>
-         </div>
-      </div> -->
+          <p><strong>搜索结果:</strong> {{ basicSearchResult }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 不同搜索模式 -->
+    <div class="demo-section">
+      <h2>不同搜索模式</h2>
       
-      <!-- 不同搜索模式演示 -->
-      <div class="demo-section">
-        <h2>不同搜索模式演示</h2>
-        
-        <div class="config-demo">
-          <h3>点击图标搜索模式（默认）</h3>
+      <div class="mode-demo">
+        <h3>点击搜索模式（默认）</h3>
+        <ZxSearch
+          v-model="clickSearchValue"
+          search-mode="click"
+          placeholder="输入内容后点击搜索图标"
+          @search="handleClickSearch"
+        />
+        <p class="mode-description">需要点击搜索图标才会触发搜索事件</p>
+      </div>
+      
+      <div class="mode-demo">
+        <h3>输入搜索模式</h3>
+        <ZxSearch
+          v-model="inputSearchValue"
+          search-mode="input"
+          placeholder="直接输入即可搜索（防抖300ms）"
+          @search="handleInputSearch"
+        />
+        <p class="mode-description">输入内容后自动触发搜索（防抖300ms），无需点击搜索按钮</p>
+      </div>
+      
+      <div class="result-display">
+        <h3>搜索结果展示</h3>
+        <p><strong>点击模式搜索值:</strong> {{ clickSearchResult }}</p>
+        <p><strong>输入模式搜索值:</strong> {{ inputSearchResult }}</p>
+      </div>
+    </div>
+
+    <!-- 自定义配置 -->
+    <div class="demo-section">
+      <h2>自定义配置</h2>
+      
+      <div class="config-demo">
+        <h3>自定义防抖延迟</h3>
+        <ZxSearch
+          v-model="debounceSearchValue"
+          search-mode="input"
+          :debounce="800"
+          placeholder="自定义防抖延迟800ms"
+          @search="handleDebounceSearch"
+        />
+        <p class="mode-description">可以自定义防抖延迟时间，适应不同的使用场景</p>
+      </div>
+      
+      <div class="config-demo">
+        <h3>禁用状态</h3>
+        <ZxSearch
+          v-model="disabledSearchValue"
+          disabled
+          placeholder="禁用状态的搜索框"
+        />
+        <p class="mode-description">支持禁用状态，适用于权限控制等场景</p>
+      </div>
+      
+      <div class="config-demo">
+        <h3>自定义尺寸</h3>
+        <div class="size-demo">
           <ZxSearch
-            v-model="searchValue2"
-            search-mode="click"
-            placeholder="输入内容后点击搜索图标"
-            @search="handleSearch2"
+            v-model="largeSearchValue"
+            size="large"
+            placeholder="大尺寸搜索框"
+            @search="handleSizeSearch"
           />
-          <p class="mode-description">需要点击搜索图标才会触发搜索事件</p>
-        </div>
-        
-        <div class="config-demo">
-          <h3>直接输入检索模式</h3>
           <ZxSearch
-             v-model="searchValue3"
-             search-mode="input"
-             placeholder="直接输入即可搜索（防抖300ms）"
-            @search="handleSearch3"
+            v-model="defaultSearchValue"
+            size="default"
+            placeholder="默认尺寸搜索框"
+            @search="handleSizeSearch"
           />
-          <p class="mode-description">输入内容后自动触发搜索（防抖300ms），无需点击搜索按钮</p>
+          <ZxSearch
+            v-model="smallSearchValue"
+            size="small"
+            placeholder="小尺寸搜索框"
+            @search="handleSizeSearch"
+          />
+        </div>
+        <p class="mode-description">支持大、中、小三种尺寸</p>
+      </div>
+    </div>
+
+    <!-- 实际应用场景 -->
+    <div class="demo-section">
+      <h2>实际应用场景</h2>
+      
+      <div class="application-demo">
+        <h3>表格数据筛选</h3>
+        <div class="table-search">
+          <ZxSearch
+            v-model="tableSearchValue"
+            search-mode="input"
+            placeholder="搜索用户姓名、邮箱或角色"
+            @search="handleTableSearch"
+          />
         </div>
         
-        <div class="result-display">
-          <h3>搜索结果展示</h3>
-          <p><strong>点击模式搜索值:</strong> {{ searchValue2 }}</p>
-          <p><strong>输入模式搜索值:</strong> {{ searchValue3 }}</p>
-        </div>
+        <el-table :data="filteredTableData" style="width: 100%; margin-top: 15px;">
+          <el-table-column prop="id" label="ID" width="80" />
+          <el-table-column prop="name" label="姓名" />
+          <el-table-column prop="email" label="邮箱" />
+          <el-table-column prop="role" label="角色" />
+        </el-table>
+        
+        <p class="mode-description">实时搜索表格数据，支持多字段模糊匹配</p>
+      </div>
+    </div>
+
+    <!-- API 文档 -->
+    <div class="demo-section">
+      <h2>API 文档</h2>
+      
+      <div class="api-table">
+        <h3>Props</h3>
+        <el-table :data="propsData" style="width: 100%;">
+          <el-table-column prop="prop" label="属性" width="150" />
+          <el-table-column prop="type" label="类型" width="120" />
+          <el-table-column prop="default" label="默认值" width="120" />
+          <el-table-column prop="description" label="说明" />
+        </el-table>
+        
+        <h3 style="margin-top: 30px;">Events</h3>
+        <el-table :data="eventsData" style="width: 100%;">
+          <el-table-column prop="event" label="事件名" width="150" />
+          <el-table-column prop="params" label="参数" width="200" />
+          <el-table-column prop="description" label="说明" />
+        </el-table>
       </div>
     </div>
   </div>
@@ -77,159 +158,209 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import ZxSearch from '@/components/ZXHL/comp/pure/ZxSearch/index.vue'
 
-// 搜索相关数据
-const searchValue = ref('')
-const searchValue2 = ref('')
-const searchValue3 = ref('')
+// 基础搜索
+const basicSearchValue = ref('')
+const basicSearchResult = ref('')
 
-// 表格数据
+// 不同模式搜索
+const clickSearchValue = ref('')
+const inputSearchValue = ref('')
+const clickSearchResult = ref('')
+const inputSearchResult = ref('')
+
+// 自定义配置
+const debounceSearchValue = ref('')
+const disabledSearchValue = ref('')
+const largeSearchValue = ref('')
+const defaultSearchValue = ref('')
+const smallSearchValue = ref('')
+
+// 表格搜索
+const tableSearchValue = ref('')
 const tableData = ref([
-  { id: 1, name: '用户管理系统', type: 'Web应用', status: '运行中', description: '企业用户权限管理平台', createTime: '2024-01-15 10:30:00' },
-  { id: 2, name: '数据分析平台', type: 'Web应用', status: '停止', description: '业务数据统计分析工具', createTime: '2024-01-20 14:20:00' },
-  { id: 3, name: '移动端APP', type: '移动应用', status: '运行中', description: '客户服务移动应用', createTime: '2024-02-01 09:15:00' },
-  { id: 4, name: 'API网关', type: '微服务', status: '运行中', description: '统一API接口管理', createTime: '2024-02-10 16:45:00' },
-  { id: 5, name: '消息推送服务', type: '微服务', status: '运行中', description: '实时消息推送系统', createTime: '2024-02-15 11:30:00' },
-  { id: 6, name: '文件存储服务', type: '微服务', status: '停止', description: '分布式文件存储', createTime: '2024-02-20 13:20:00' },
-  { id: 7, name: '监控告警系统', type: 'Web应用', status: '运行中', description: '系统性能监控和告警', createTime: '2024-03-01 08:00:00' },
-  { id: 8, name: '日志分析工具', type: 'Web应用', status: '运行中', description: '系统日志收集分析', createTime: '2024-03-05 15:10:00' }
+  { id: 1, name: '张三', email: 'zhangsan@example.com', role: '管理员' },
+  { id: 2, name: '李四', email: 'lisi@example.com', role: '用户' },
+  { id: 3, name: '王五', email: 'wangwu@example.com', role: '编辑' },
+  { id: 4, name: '赵六', email: 'zhaoliu@example.com', role: '用户' },
+  { id: 5, name: '钱七', email: 'qianqi@example.com', role: '管理员' },
+  { id: 6, name: '孙八', email: 'sunba@example.com', role: '用户' }
 ])
 
-// 筛选后的表格数据
+// API 文档数据
+const propsData = ref([
+  { prop: 'modelValue', type: 'String', default: "''", description: '绑定值' },
+  { prop: 'placeholder', type: 'String', default: "'请输入搜索内容'", description: '输入框占位文本' },
+  { prop: 'searchMode', type: 'String', default: "'click'", description: '搜索模式：click | input' },
+  { prop: 'debounce', type: 'Number', default: '300', description: '防抖延迟时间（ms）' },
+  { prop: 'disabled', type: 'Boolean', default: 'false', description: '是否禁用' },
+  { prop: 'size', type: 'String', default: "'default'", description: '尺寸：large | default | small' },
+  { prop: 'clearable', type: 'Boolean', default: 'true', description: '是否可清空' }
+])
+
+const eventsData = ref([
+  { event: 'search', params: '(value: string)', description: '搜索事件，返回搜索值' },
+  { event: 'clear', params: '()', description: '清空事件' },
+  { event: 'focus', params: '(event: Event)', description: '输入框获得焦点事件' },
+  { event: 'blur', params: '(event: Event)', description: '输入框失去焦点事件' }
+])
+
+// 计算属性
 const filteredTableData = computed(() => {
-  if (!searchValue.value.trim()) {
+  if (!tableSearchValue.value) {
     return tableData.value
   }
   
-  const keyword = searchValue.value.toLowerCase()
-  return tableData.value.filter(item => {
-    return item.name.toLowerCase().includes(keyword) ||
-           item.type.toLowerCase().includes(keyword) ||
-           item.status.toLowerCase().includes(keyword) ||
-           item.description.toLowerCase().includes(keyword)
-  })
+  const keyword = tableSearchValue.value.toLowerCase()
+  return tableData.value.filter(item => 
+    item.name.toLowerCase().includes(keyword) ||
+    item.email.toLowerCase().includes(keyword) ||
+    item.role.toLowerCase().includes(keyword)
+  )
 })
 
 // 事件处理函数
-const handleSearch = (searchData) => {
-  console.log('搜索事件:', searchData)
-  // 这里可以添加额外的搜索逻辑，比如发送API请求
+const handleBasicSearch = (value) => {
+  basicSearchResult.value = value
+  console.log('基础搜索:', value)
 }
 
-const handleClear = () => {
-  console.log('清空搜索')
-  // 清空时的额外处理逻辑
+const handleClickSearch = (value) => {
+  clickSearchResult.value = value
+  console.log('点击搜索:', value)
 }
 
-const handleSearch2 = (searchData) => {
-  console.log('简洁模式搜索:', searchData)
+const handleInputSearch = (value) => {
+  inputSearchResult.value = value
+  console.log('输入搜索:', value)
 }
 
-const handleSearch3 = (searchData) => {
-  console.log('实时搜索:', searchData)
+const handleDebounceSearch = (value) => {
+  console.log('防抖搜索:', value)
+}
+
+const handleSizeSearch = (value) => {
+  console.log('尺寸搜索:', value)
+}
+
+const handleTableSearch = (value) => {
+  console.log('表格搜索:', value)
+  // filteredTableData 会自动更新
 }
 </script>
 
 <style scoped>
-.search-demo-page {
+.search-demo {
   padding: 20px;
-  background-color: var(--el-bg-color-page);
-  min-height: 100vh;
-}
-
-.demo-container {
-  max-width: 800px;
+  max-width: 1200px;
   margin: 0 auto;
-  background: var(--el-bg-color);
-  padding: 30px;
-  border-radius: 8px;
-  box-shadow: var(--el-box-shadow-light);
 }
 
-h1 {
+.demo-header {
   text-align: center;
-  color: var(--el-text-color-primary);
-  margin-bottom: 30px;
-  font-size: 28px;
-  font-weight: 600;
+  margin-bottom: 40px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #ebeef5;
 }
 
-h2 {
-  color: var(--el-text-color-regular);
-  margin-bottom: 15px;
-  font-size: 18px;
-  font-weight: 500;
-  border-bottom: 2px solid var(--el-color-primary-light-8);
-  padding-bottom: 8px;
+.demo-header h1 {
+  color: #303133;
+  margin-bottom: 10px;
+}
+
+.demo-header p {
+  color: #606266;
+  font-size: 14px;
 }
 
 .demo-section {
   margin-bottom: 40px;
   padding: 20px;
-  border: 1px solid var(--el-border-color-lighter);
-  border-radius: 6px;
-  background: var(--el-fill-color-extra-light);
+  border: 1px solid #ebeef5;
+  border-radius: 8px;
+  background: #fff;
 }
 
-.result {
-  margin-top: 10px;
-  padding: 8px 12px;
-  background: var(--el-color-info-light-9);
-  border-left: 3px solid var(--el-color-info);
-  border-radius: 4px;
-  font-size: 14px;
-  color: var(--el-text-color-regular);
+.demo-section h2 {
+  color: #303133;
+  margin-bottom: 20px;
+  font-size: 18px;
+  border-bottom: 2px solid #409eff;
+  padding-bottom: 8px;
 }
 
-.user-results {
-  margin-top: 15px;
-  max-height: 200px;
-  overflow-y: auto;
+.demo-section h3 {
+  color: #606266;
+  margin-bottom: 15px;
+  font-size: 16px;
 }
 
-.user-item {
-  padding: 8px 12px;
-  margin-bottom: 5px;
-  background: var(--el-color-success-light-9);
-  border-radius: 4px;
-  font-size: 14px;
-  color: var(--el-text-color-regular);
+.demo-content {
+  margin-top: 20px;
 }
 
-/* 搜索模式描述样式 */
+.demo-description,
 .mode-description {
-  margin-top: 8px;
-  padding: 8px 12px;
-  background: var(--el-color-info-light-9);
-  border-left: 3px solid var(--el-color-info);
-  border-radius: 4px;
+  margin-top: 10px;
+  color: #909399;
   font-size: 13px;
-  color: var(--el-text-color-secondary);
-  line-height: 1.4;
+  font-style: italic;
 }
 
-/* 自定义搜索样式 */
-:deep(.custom-search) {
-  .search-input {
-    border: 2px solid var(--el-color-success);
-  }
-  
-  .search-button {
-    background: linear-gradient(45deg, var(--el-color-success), var(--el-color-success-light-3));
-    border: none;
-    font-weight: 600;
-  }
+.mode-demo,
+.config-demo {
+  margin-bottom: 25px;
+  padding: 15px;
+  background: #fafafa;
+  border-radius: 4px;
 }
 
+.result-display {
+  margin-top: 20px;
+  padding: 15px;
+  background: #f5f7fa;
+  border-radius: 4px;
+  border-left: 4px solid #409eff;
+}
+
+.result-display p {
+  margin: 5px 0;
+  color: #606266;
+  font-size: 14px;
+}
+
+.size-demo {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.table-search {
+  margin-bottom: 15px;
+}
+
+.application-demo {
+  padding: 20px;
+  background: #fafafa;
+  border-radius: 4px;
+}
+
+.api-table {
+  margin-top: 20px;
+}
+
+/* 响应式设计 */
 @media (max-width: 768px) {
-  .demo-container {
-    padding: 20px;
-    margin: 10px;
+  .search-demo {
+    padding: 10px;
   }
   
   .demo-section {
     padding: 15px;
+  }
+  
+  .size-demo {
+    gap: 10px;
   }
 }
 </style>

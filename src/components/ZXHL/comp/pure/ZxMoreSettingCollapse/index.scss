@@ -1,0 +1,124 @@
+:root {
+  // ZxMoreSettingCollapse 组件 CSS 变量
+  --zx-more-setting-collapse-bg-color: #ffffff;
+  --zx-more-setting-collapse-border-color: #e4e7ed;
+  --zx-more-setting-collapse-border-radius: 4px;
+  --zx-more-setting-collapse-padding: 16px;
+  --zx-more-setting-collapse-margin-top: 24px;
+  
+  // 触发器样式变量
+  --zx-more-setting-collapse-trigger-color: var(--el-color-primary);
+  --zx-more-setting-collapse-trigger-hover-color: var(--el-color-primary-light-3);
+  --zx-more-setting-collapse-trigger-font-size: 14px;
+  --zx-more-setting-collapse-trigger-font-weight: 400;
+  
+  // 图标样式变量
+  --zx-more-setting-collapse-icon-size: 14px;
+  --zx-more-setting-collapse-icon-margin-left: 4px;
+  --zx-more-setting-collapse-icon-color: var(--el-color-primary);
+  
+  // 内容区域变量
+  --zx-more-setting-collapse-content-padding: 16px 0;
+  --zx-more-setting-collapse-content-bg: transparent;
+}
+
+.zx-more-setting-collapse {
+  background-color: var(--zx-more-setting-collapse-bg-color);
+  border-radius: var(--zx-more-setting-collapse-border-radius);
+  
+  // 重置 Element Plus 默认样式
+  :deep(.el-collapse) {
+    border: none;
+    
+    .el-collapse-item {
+      border-bottom: none;
+      
+      .el-collapse-item__header {
+        background-color: transparent;
+        border-bottom: none;
+        padding: 0;
+        height: auto;
+        line-height: 1;
+        
+        .el-collapse-item__arrow {
+          display: none; // 隐藏默认箭头
+        }
+      }
+      
+      .el-collapse-item__wrap {
+        border-bottom: none;
+        
+        .el-collapse-item__content {
+          padding: 0;
+        }
+      }
+    }
+  }
+  
+  &__trigger {
+    color: var(--zx-more-setting-collapse-trigger-color) !important;
+    font-size: var(--zx-more-setting-collapse-trigger-font-size);
+    font-weight: var(--zx-more-setting-collapse-trigger-font-weight);
+    padding: 8px 12px; // 移除 !important 以支持动态 padding
+    border: 1px solid var(--zx-more-setting-collapse-border-color) !important;
+    background: var(--zx-more-setting-collapse-bg-color) !important;
+    border-radius: var(--zx-more-setting-collapse-border-radius);
+    height: auto !important;
+    display: inline-flex;
+    align-items: center;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      color: var(--zx-more-setting-collapse-trigger-hover-color) !important;
+      background: var(--el-color-primary-light-9) !important;
+      border-color: var(--el-color-primary-light-5) !important;
+    }
+    
+    &:focus {
+      color: var(--zx-more-setting-collapse-trigger-color) !important;
+      background: var(--zx-more-setting-collapse-bg-color) !important;
+      border-color: var(--zx-more-setting-collapse-border-color) !important;
+      box-shadow: none !important;
+      outline: none !important;
+    }
+  }
+  
+  &__icon {
+    font-size: var(--zx-more-setting-collapse-icon-size);
+    margin-left: var(--zx-more-setting-collapse-icon-margin-left);
+    color: var(--zx-more-setting-collapse-icon-color);
+    transition: transform 0.3s ease;
+  }
+  
+  &__content {
+    padding: var(--zx-more-setting-collapse-content-padding); // 默认 padding，可被内联样式覆盖
+    background-color: var(--zx-more-setting-collapse-content-bg);
+    margin-top: var(--zx-more-setting-collapse-margin-top);
+    border: 1px solid var(--zx-more-setting-collapse-border-color);
+    border-radius: var(--zx-more-setting-collapse-border-radius);
+    background-color: var(--el-bg-color-page);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+}
+
+// 暗色主题适配
+.dark {
+  :root {
+    --zx-more-setting-collapse-bg-color: #1d1e1f;
+    --zx-more-setting-collapse-border-color: #414243;
+  }
+}
+
+// 响应式设计
+@media (max-width: 768px) {
+  .zx-more-setting-collapse {
+    &__trigger {
+      font-size: 13px;
+    }
+    
+    &__content {
+      margin-top: 16px;
+      padding: 12px 0;
+    }
+  }
+}

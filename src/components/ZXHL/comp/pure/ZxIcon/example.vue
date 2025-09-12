@@ -1,89 +1,80 @@
 <template>
   <div class="zx-icon-example">
-    <h2>ZxIcon 组件示例</h2>
-    
-    <div class="example-section">
+    <div class="example-header">
+      <h2>ZxIcon 图标组件演示</h2>
+      <p>基于 Element Plus Icons 和 iconfont 的图标组件</p>
+    </div>
+
+    <div class="demo-section">
       <h3>基础用法</h3>
       <div class="icon-row">
-        <ZxIcon icon="icon-home" :size="20" />
-        <ZxIcon icon="icon-user" :size="24" color="#409eff" />
-        <ZxIcon icon="icon-setting" :size="18" color="#67c23a" />
+        <ZxIcon icon="Search" :size="20" />
+        <ZxIcon icon="Edit" :size="24" color="#409EFF" />
+        <ZxIcon icon="Delete" :size="28" color="#F56C6C" />
+        <ZxIcon icon="Plus" :size="32" color="#67C23A" />
       </div>
     </div>
-    
-    <div class="example-section">
+
+    <div class="demo-section">
       <h3>不同尺寸</h3>
       <div class="icon-row">
-        <ZxIcon icon="icon-star" :size="12" />
-        <ZxIcon icon="icon-star" :size="16" />
-        <ZxIcon icon="icon-star" :size="20" />
-        <ZxIcon icon="icon-star" :size="24" />
-        <ZxIcon icon="icon-star" :size="32" />
+        <ZxIcon icon="Star" :size="16" />
+        <ZxIcon icon="Star" :size="20" />
+        <ZxIcon icon="Star" :size="24" />
+        <ZxIcon icon="Star" :size="32" />
+        <ZxIcon icon="Star" :size="40" />
       </div>
     </div>
-    
-    <div class="example-section">
+
+    <div class="demo-section">
       <h3>悬停效果</h3>
       <div class="icon-row">
-        <ZxIcon 
-          icon="icon-heart" 
-          :size="24" 
-          color="#909399" 
-          hover-color="#f56c6c" 
-        />
-        <ZxIcon 
-          icon="icon-like" 
-          :size="24" 
-          color="#909399" 
-          hover-color="#409eff" 
-        />
-        <ZxIcon 
-          icon="icon-thumb" 
-          :size="24" 
-          color="#909399" 
-          hover-color="#67c23a" 
-        />
+        <ZxIcon icon="Star" :size="32" color="#909399" hover-color="#F56C6C" />
+        <ZxIcon icon="StarFilled" :size="32" color="#909399" hover-color="#E6A23C" />
+        <ZxIcon icon="Like" :size="32" color="#909399" hover-color="#409EFF" />
       </div>
     </div>
-    
-    <div class="example-section">
-      <h3>本地 SVG 图标</h3>
-      <div class="icon-row">
-        <ZxIcon icon="svg-icon:user" :size="24" />
-        <ZxIcon icon="svg-icon:home" :size="24" color="#409eff" />
-        <ZxIcon icon="svg-icon:setting" :size="24" color="#67c23a" />
-      </div>
-      <p class="note">注意：本地 SVG 需要配置 svg-sprite</p>
-    </div>
-    
-    <div class="example-section">
-      <h3>自定义类名</h3>
-      <div class="icon-row">
-        <ZxIcon 
-          icon="icon-custom" 
-          :size="24" 
-          class-name="custom-icon-1" 
-        />
-        <ZxIcon 
-          icon="icon-custom" 
-          :size="24" 
-          class-name="custom-icon-2" 
-        />
+
+    <div class="demo-section">
+      <h3>Element Plus 常用图标</h3>
+      <div class="icon-grid">
+        <div class="icon-item" v-for="iconName in commonIcons" :key="iconName">
+          <ZxIcon :icon="iconName" :size="24" />
+          <span>{{ iconName }}</span>
+        </div>
       </div>
     </div>
-    
-    <div class="example-section">
-      <h3>动态图标</h3>
-      <div class="icon-row">
-        <ZxIcon 
-          :icon="currentIcon" 
-          :size="iconSize" 
-          :color="iconColor"
-        />
-        <div class="controls">
-          <button @click="changeIcon">切换图标</button>
-          <button @click="changeSize">切换大小</button>
-          <button @click="changeColor">切换颜色</button>
+
+    <div class="demo-section">
+      <h3>iconfont 图标演示</h3>
+      <p style="color: #666; margin-bottom: 20px;">使用 type="iconfont" 来显示 iconfont 图标</p>
+      
+      <div class="demo-section">
+        <h4>基础用法</h4>
+        <div class="icon-row">
+          <ZxIcon type="iconfont" icon="icon_environment" :size="20" />
+          <ZxIcon type="iconfont" icon="icon_task_center" :size="24" color="#409EFF" />
+          <ZxIcon type="iconfont" icon="icon_file_ms" :size="28" color="#F56C6C" />
+          <ZxIcon type="iconfont" icon="icon_download" :size="32" color="#67C23A" />
+        </div>
+      </div>
+      
+      <div class="demo-section">
+        <h4>悬停效果</h4>
+        <div class="icon-row">
+          <ZxIcon type="iconfont" icon="icon_environment" :size="32" color="#909399" hover-color="#F56C6C" />
+          <ZxIcon type="iconfont" icon="icon_task_center" :size="32" color="#909399" hover-color="#E6A23C" />
+          <ZxIcon type="iconfont" icon="icon_download" :size="32" color="#909399" hover-color="#409EFF" />
+        </div>
+      </div>
+      
+      <div class="demo-section">
+        <h4>常用 iconfont 图标</h4>
+        <div class="icon-grid">
+          <div class="icon-item" v-for="iconName in iconfontIcons" :key="iconName">
+            <ZxIcon type="iconfont" :icon="iconName" :size="24" />
+            <span>{{ iconName }}</span>
+          </div>
         </div>
       </div>
     </div>
@@ -91,38 +82,34 @@
 </template>
 
 <script>
-import ZxIcon from './index.js'
-
 export default {
-  name: 'ZxIconExample',
-  components: {
-    ZxIcon
-  },
+  name: 'IconDemo',
   data() {
     return {
-      currentIcon: 'icon-home',
-      iconSize: 24,
-      iconColor: '#409eff',
-      icons: ['icon-home', 'icon-user', 'icon-setting', 'icon-star'],
-      sizes: [16, 20, 24, 32],
-      colors: ['#409eff', '#67c23a', '#e6a23c', '#f56c6c']
-    }
-  },
-  methods: {
-    changeIcon() {
-      const currentIndex = this.icons.indexOf(this.currentIcon)
-      const nextIndex = (currentIndex + 1) % this.icons.length
-      this.currentIcon = this.icons[nextIndex]
-    },
-    changeSize() {
-      const currentIndex = this.sizes.indexOf(this.iconSize)
-      const nextIndex = (currentIndex + 1) % this.sizes.length
-      this.iconSize = this.sizes[nextIndex]
-    },
-    changeColor() {
-      const currentIndex = this.colors.indexOf(this.iconColor)
-      const nextIndex = (currentIndex + 1) % this.colors.length
-      this.iconColor = this.colors[nextIndex]
+      // Element Plus 常用图标
+      commonIcons: [
+        'Search', 'Edit', 'Delete', 'Plus', 'Minus', 'Star', 'StarFilled',
+        'Like', 'Share', 'Download', 'Upload', 'Setting', 'User', 'Home',
+        'Document', 'Folder', 'FolderOpened', 'Picture', 'VideoCamera',
+        'Headset', 'Phone', 'Message', 'ChatDotRound', 'Bell', 'Warning',
+        'InfoFilled', 'SuccessFilled', 'CircleClose', 'Check', 'Close',
+        'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Refresh',
+        'More', 'MoreFilled', 'Grid', 'Menu', 'List'
+      ],
+      // iconfont 常用图标
+      iconfontIcons: [
+        'icon_environment', 'icon_task_center', 'icon_file_ms', 'icon_download',
+        'icon_upload', 'icon_setting', 'icon_user', 'icon_home', 'icon_search',
+        'icon_edit', 'icon_delete', 'icon_add', 'icon_minus', 'icon_star',
+        'icon_like', 'icon_share', 'icon_folder', 'icon_document', 'icon_picture',
+        'icon_video', 'icon_music', 'icon_phone', 'icon_message', 'icon_bell',
+        'icon_warning', 'icon_info', 'icon_success', 'icon_error', 'icon_close',
+        'icon_check', 'icon_arrow_left', 'icon_arrow_right', 'icon_arrow_up',
+        'icon_arrow_down', 'icon_refresh', 'icon_more', 'icon_grid', 'icon_menu',
+        'icon_list', 'icon_calendar', 'icon_clock', 'icon_location', 'icon_lock',
+        'icon_unlock', 'icon_eye', 'icon_eye_close', 'icon_copy', 'icon_cut',
+        'icon_paste', 'icon_save', 'icon_print', 'icon_export', 'icon_import'
+      ]
     }
   }
 }
@@ -131,26 +118,53 @@ export default {
 <style lang="scss" scoped>
 .zx-icon-example {
   padding: 20px;
-  max-width: 800px;
+  max-width: 1200px;
   margin: 0 auto;
+
+  .icon-item {
+    background-color: red;
+  }
   
-  h2 {
-    color: #303133;
-    margin-bottom: 20px;
+  .example-header {
+    text-align: center;
+    margin-bottom: 40px;
+    
+    h2 {
+      color: #303133;
+      margin-bottom: 10px;
+      font-size: 28px;
+    }
+    
+    p {
+      color: #606266;
+      font-size: 16px;
+    }
   }
   
   h3 {
     color: #606266;
-    margin: 20px 0 10px;
-    font-size: 16px;
+    margin: 20px 0 15px;
+    font-size: 18px;
+    font-weight: 600;
   }
   
-  .example-section {
+  h4 {
+    color: #606266;
+    margin: 15px 0 10px;
+    font-size: 16px;
+    font-weight: 500;
+  }
+  
+  .demo-section {
     margin-bottom: 30px;
-    padding: 20px;
-    border: 1px solid #ebeef5;
-    border-radius: 4px;
-    background-color: #fafafa;
+    padding: 25px;
+    border: 1px solid #EBEEF5;
+    border-radius: 8px;
+    background-color: #FAFAFA;
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
   }
   
   .icon-row {
@@ -158,50 +172,45 @@ export default {
     align-items: center;
     gap: 20px;
     flex-wrap: wrap;
-  }
-  
-  .controls {
-    display: flex;
-    gap: 10px;
-    margin-left: 20px;
+    margin-bottom: 15px;
     
-    button {
-      padding: 5px 10px;
-      border: 1px solid #dcdfe6;
-      border-radius: 4px;
-      background-color: #fff;
-      cursor: pointer;
-      font-size: 12px;
-      
-      &:hover {
-        border-color: #409eff;
-        color: #409eff;
-      }
+    &:last-child {
+      margin-bottom: 0;
     }
   }
   
-  .note {
-    margin-top: 10px;
-    font-size: 12px;
-    color: #909399;
+  .icon-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
   }
-}
-
-// 自定义图标样式示例
-.custom-icon-1 {
-  background: linear-gradient(45deg, #409eff, #67c23a);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.custom-icon-2 {
-  color: #f56c6c;
-  text-shadow: 2px 2px 4px rgba(245, 108, 108, 0.3);
   
-  &:hover {
-    transform: rotate(360deg);
-    transition: transform 0.5s ease;
+  .icon-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 15px 10px;
+    border: 1px solid #E4E7ED;
+    border-radius: 6px;
+    background-color: red;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    
+    &:hover {
+      border-color: #409EFF;
+      box-shadow: 0 2px 8px rgba(64, 158, 255, 0.2);
+      transform: translateY(-2px);
+    }
+    
+    span {
+      margin-top: 8px;
+      font-size: 12px;
+      color: #606266;
+      text-align: center;
+      word-break: break-all;
+      line-height: 1.2;
+    }
   }
 }
 </style>

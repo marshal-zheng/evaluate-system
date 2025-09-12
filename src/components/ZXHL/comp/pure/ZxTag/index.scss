@@ -1,0 +1,145 @@
+.zx-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  text-align: center;
+  box-sizing: border-box;
+  outline: none;
+  transition: all 0.3s;
+  user-select: none;
+  
+  &.zx-tag-no-margin {
+    margin-right: 0 !important;
+  }
+
+  .zx-tag-content {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--zx-tag-icon-gap);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+  }
+
+  .zx-tag-icon {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    font-size: var(--zx-tag-icon-size);
+  }
+
+  .zx-tag-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  // 主题样式
+  &.zx-tag-dark {
+    .el-tag {
+      color: var(--el-color-white);
+      background-color: var(--el-tag-bg-color);
+      border-color: var(--el-tag-border-color);
+    }
+  }
+
+  &.zx-tag-light {
+    .el-tag {
+      color: var(--el-tag-text-color);
+      background-color: var(--el-color-primary-light-9);
+      border-color: var(--el-color-primary-light-8);
+    }
+  }
+
+  &.zx-tag-plain {
+    .el-tag {
+      color: var(--el-tag-text-color);
+      background-color: transparent;
+      border-color: var(--el-border-color-light);
+    }
+  }
+
+  // 尺寸样式
+  &.el-tag--large {
+    height: 32px;
+    line-height: 30px;
+    font-size: 14px;
+    padding: 0 12px;
+  }
+
+  &.el-tag--default {
+    height: 24px;
+    line-height: 22px;
+    font-size: 12px;
+    padding: 0 8px;
+  }
+
+  &.el-tag--small {
+    height: 20px;
+    line-height: 18px;
+    font-size: 12px;
+    padding: 0 6px;
+  }
+
+  // 关闭按钮样式
+  .el-tag__close {
+    color: var(--el-text-color-regular);
+    transition: color 0.3s;
+    
+    &:hover {
+      color: var(--el-text-color-primary);
+    }
+  }
+
+  // 响应式设计
+  @media (max-width: 768px) {
+    max-width: 120px;
+    
+    .zx-tag-content {
+      max-width: 100px;
+    }
+  }
+}
+
+// CSS 变量定义
+:root {
+  // 间距变量
+  --zx-tag-margin-small: 2px;
+  --zx-tag-margin-default: 3px;
+  --zx-tag-margin-large: 4px;
+  --zx-tag-icon-gap: 4px;
+  
+  // 尺寸变量
+  --zx-tag-max-width: 144px;
+  --zx-tag-mobile-max-width: 120px;
+  --zx-tag-icon-size: 14px;
+  
+  // 高度变量
+  --zx-tag-height-large: 32px;
+  --zx-tag-height-default: 24px;
+  --zx-tag-height-small: 20px;
+  
+  // 内边距变量
+  --zx-tag-padding-large: 0 12px;
+  --zx-tag-padding-default: 0 8px;
+  --zx-tag-padding-small: 0 6px;
+  
+  // 字体大小变量
+  --zx-tag-font-size-large: 14px;
+  --zx-tag-font-size-default: 12px;
+  --zx-tag-font-size-small: 12px;
+  
+  // 行高变量
+  --zx-tag-line-height-large: 30px;
+  --zx-tag-line-height-default: 22px;
+  --zx-tag-line-height-small: 18px;
+  
+  // 过渡动画变量
+  --zx-tag-transition: all 0.3s;
+  
+  // 边框圆角变量
+  --zx-tag-border-radius: var(--el-border-radius-base);
+  --zx-tag-border-radius-round: var(--el-border-radius-round);
+}

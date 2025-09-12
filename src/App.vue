@@ -27,14 +27,14 @@ onMounted(() => {
 }
 
 html, body {
-  min-height: 100%;
+  height: 100%;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   background-color: #0c1d30;
   color: #ffffff;
 }
 
 #app {
-  min-height: 100vh;
+  height: 100%;
   background-color: #0c1d30;
 }
 
@@ -49,15 +49,10 @@ html, body {
   background-color: #062846;
   border-color: #9cfff9;
 }
-
+/* 
 .dark-theme .el-table {
   background-color: #062846;
   color: #ffffff;
-}
-
-.dark-theme .el-table th {
-  background-color: #094d7b;
-  color: #9cfff9;
 }
 
 .dark-theme .el-table td {
@@ -79,7 +74,7 @@ html, body {
 .dark-theme .el-button:hover {
   background-color: #9cfff9;
   color: #0c1d30;
-}
+} */
 
 /* 演示组件样式（如果需要使用） */
 .demo-container {

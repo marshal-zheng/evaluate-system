@@ -124,6 +124,25 @@
         </el-card>
       </el-col>
     </el-row>
+
+    <!-- 测试长内容区域 -->
+    <div class="test-long-content" style="margin-top: 20px;">
+      <h2 style="color: var(--el-text-color-primary); margin-bottom: 20px;">测试滚动区域 (长内容)</h2>
+      <div class="long-content-container">
+        <div v-for="i in 50" :key="i" style="margin-bottom: 15px;">
+          <el-card class="test-card">
+            <h3>测试项目 #{{ i }}</h3>
+            <p>这是第 {{ i }} 个测试项目的内容。这里有很多文字内容用来测试页面的滚动功能是否正常工作。</p>
+            <p>当页面内容很长时，应该只有主内容区域可以滚动，而顶部导航栏和左侧边栏应该保持固定不动。</p>
+            <p>这符合标准的中后台管理系统的布局模式，提供更好的用户体验。</p>
+            <div style="margin-top: 10px;">
+              <el-tag type="primary">项目 {{ i }}</el-tag>
+              <el-tag type="success" style="margin-left: 10px;">正常</el-tag>
+            </div>
+          </el-card>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 

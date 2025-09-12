@@ -1,0 +1,338 @@
+// ZxSplitBox 分割面板组件样式
+// 基于 Element Plus 的分割面板组件样式定义
+
+// CSS 变量定义
+:root {
+  // 容器相关
+  --zx-split-box-bg: #ffffff;
+  --zx-split-box-border: #e4e7ed;
+  --zx-split-box-radius: 4px;
+  
+  // 分割线相关
+  --zx-split-box-divider-bg: #f5f7fa;
+  --zx-split-box-divider-hover-bg: #409eff;
+  --zx-split-box-divider-active-bg: #337ecc;
+  --zx-split-box-divider-width: 6px;
+  --zx-split-box-divider-line-color: #e4e7ed;
+  
+  // 展开按钮相关
+  --zx-split-box-expand-bg: #f5f7fa;
+  --zx-split-box-expand-hover-bg: #e4e7ed;
+  --zx-split-box-expand-active-bg: #d3d4d6;
+  --zx-split-box-expand-icon-color: #409eff;
+  --zx-split-box-expand-icon-hover-color: #66b1ff;
+  
+  // 动画相关
+  --zx-split-box-transition: all 0.3s ease;
+  --zx-split-box-resize-transition: none;
+  
+  // 阴影相关
+  --zx-split-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --zx-split-box-divider-shadow: 0 0 4px rgba(64, 158, 255, 0.3);
+}
+
+// 主容器样式
+.zx-split-box {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: var(--zx-split-box-bg);
+  border-radius: var(--zx-split-box-radius);
+  overflow: hidden;
+  
+  // 水平布局
+  &--horizontal {
+    display: flex;
+    flex-direction: row;
+  }
+  
+  // 垂直布局
+  &--vertical {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  // 展开状态
+  &--expanded {
+    .zx-split-box__first {
+      transition: var(--zx-split-box-transition);
+    }
+  }
+  
+  // 动画状态
+  &--animating {
+    .zx-split-box__first {
+      transition: var(--zx-split-box-transition);
+    }
+    
+    .zx-split-box__second {
+      transition: var(--zx-split-box-transition);
+    }
+  }
+  
+  // 禁用状态
+  &--disabled {
+    .zx-split-box__divider {
+      cursor: not-allowed;
+      
+      &:hover {
+        background-color: var(--zx-split-box-divider-bg);
+      }
+    }
+    
+    .zx-split-box__expand-trigger {
+      display: none;
+    }
+  }
+}
+
+// 第一个面板
+.zx-split-box__first {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--zx-split-box-bg);
+  
+  &.zx-split-box__left {
+    border-right: 1px solid var(--zx-split-box-border);
+  }
+  
+  &.zx-split-box__top {
+    border-bottom: 1px solid var(--zx-split-box-border);
+  }
+}
+
+// 第二个面板
+.zx-split-box__second {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  background-color: var(--zx-split-box-bg);
+  
+  &.zx-split-box__right {
+    // 右侧面板样式
+  }
+  
+  &.zx-split-box__bottom {
+    // 底部面板样式
+  }
+}
+
+// 分割线
+.zx-split-box__divider {
+  position: relative;
+  background-color: var(--zx-split-box-divider-bg);
+  transition: var(--zx-split-box-transition);
+  z-index: 10;
+  
+  // 水平分割线
+  &--horizontal {
+    width: var(--zx-split-box-divider-width);
+    cursor: col-resize;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    &:hover {
+      background-color: var(--zx-split-box-divider-hover-bg);
+      box-shadow: var(--zx-split-box-divider-shadow);
+      
+      .zx-split-box__divider-line {
+        background-color: rgba(255, 255, 255, 0.8);
+      }
+    }
+    
+    &:active {
+      background-color: var(--zx-split-box-divider-active-bg);
+    }
+  }
+  
+  // 垂直分割线
+  &--vertical {
+    height: var(--zx-split-box-divider-width);
+    cursor: row-resize;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    &:hover {
+      background-color: var(--zx-split-box-divider-hover-bg);
+      box-shadow: var(--zx-split-box-divider-shadow);
+      
+      .zx-split-box__divider-line {
+        background-color: rgba(255, 255, 255, 0.8);
+      }
+    }
+    
+    &:active {
+      background-color: var(--zx-split-box-divider-active-bg);
+    }
+  }
+}
+
+// 分割线内部线条
+.zx-split-box__divider-line {
+  background-color: var(--zx-split-box-divider-line-color);
+  transition: var(--zx-split-box-transition);
+  
+  .zx-split-box__divider--horizontal & {
+    width: 1px;
+    height: 20px;
+  }
+  
+  .zx-split-box__divider--vertical & {
+    width: 20px;
+    height: 1px;
+  }
+}
+
+// 展开/收起按钮
+.zx-split-box__expand-trigger {
+  position: absolute;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--zx-split-box-expand-bg);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: var(--zx-split-box-transition);
+  opacity: 0;
+  
+  &:hover {
+    opacity: 1;
+    background-color: var(--zx-split-box-expand-hover-bg);
+    
+    .zx-split-box__expand-icon {
+      color: var(--zx-split-box-expand-icon-hover-color);
+    }
+  }
+  
+  &:active {
+    background-color: var(--zx-split-box-expand-active-bg);
+  }
+  
+  // 左侧展开按钮
+  &--left {
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 48px;
+    border-radius: 0 4px 4px 0;
+  }
+  
+  // 右侧展开按钮
+  &--right {
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 48px;
+    border-radius: 4px 0 0 4px;
+  }
+  
+  // 顶部展开按钮
+  &--top {
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 48px;
+    height: 24px;
+    border-radius: 0 0 4px 4px;
+  }
+}
+
+// 展开按钮图标
+.zx-split-box__expand-icon {
+  color: var(--zx-split-box-expand-icon-color);
+  font-size: 14px;
+  transition: var(--zx-split-box-transition);
+}
+
+// 悬停时显示展开按钮
+.zx-split-box__first:hover,
+.zx-split-box__second:hover {
+  .zx-split-box__expand-trigger {
+    opacity: 1;
+  }
+}
+
+// 拖拽时的样式
+.zx-split-box--resizing {
+  user-select: none;
+  
+  .zx-split-box__first,
+  .zx-split-box__second {
+    pointer-events: none;
+  }
+  
+  .zx-split-box__divider {
+    background-color: var(--zx-split-box-divider-active-bg);
+  }
+}
+
+// 响应式设计
+@media (max-width: 768px) {
+  .zx-split-box {
+    // 移动端强制垂直布局
+    &--horizontal {
+      flex-direction: column;
+    }
+    
+    .zx-split-box__divider--horizontal {
+      width: 100%;
+      height: var(--zx-split-box-divider-width);
+      cursor: row-resize;
+    }
+    
+    .zx-split-box__expand-trigger {
+      // 移动端增大触摸区域
+      &--left,
+      &--right {
+        width: 32px;
+        height: 56px;
+      }
+      
+      &--top {
+        width: 56px;
+        height: 32px;
+      }
+    }
+  }
+}
+
+// 暗色主题支持
+@media (prefers-color-scheme: dark) {
+  :root {
+    --zx-split-box-bg: #1d1e1f;
+    --zx-split-box-border: #414243;
+    --zx-split-box-divider-bg: #2d2e2f;
+    --zx-split-box-divider-line-color: #414243;
+    --zx-split-box-expand-bg: #2d2e2f;
+    --zx-split-box-expand-hover-bg: #3d3e3f;
+    --zx-split-box-expand-active-bg: #4d4e4f;
+  }
+}
+
+// 滚动条样式
+.zx-split-box__first,
+.zx-split-box__second {
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: var(--zx-split-box-bg);
+    border-radius: 3px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: var(--zx-split-box-border);
+    border-radius: 3px;
+    
+    &:hover {
+      background: var(--zx-split-box-divider-hover-bg);
+    }
+  }
+}

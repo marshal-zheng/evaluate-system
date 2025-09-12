@@ -1,0 +1,214 @@
+// ZxDialog 对话框组件样式
+// 纯净组件样式，不包含主题配置
+
+:root {
+  --zx-dialog-border-radius: 8px;
+  --zx-dialog-box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  --zx-dialog-header-bg: #ffffff;
+  --zx-dialog-body-bg: #ffffff;
+  --zx-dialog-footer-bg: #ffffff;
+  --zx-dialog-border-color: #e4e7ed;
+}
+
+// 对话框容器样式
+.zx-dialog {
+  // Element Plus 对话框基础样式覆盖
+  :deep(.el-dialog) {
+    border-radius: var(--zx-dialog-border-radius);
+    box-shadow: var(--zx-dialog-box-shadow);
+    
+    // 确保对话框不会超出视窗
+    max-width: calc(100vw - 40px);
+    max-height: calc(100vh - 40px);
+  }
+  
+  // 头部样式
+  :deep(.el-dialog__header) {
+    background-color: var(--zx-dialog-header-bg);
+    border-bottom: 1px solid var(--zx-dialog-border-color);
+    padding: 16px 20px;
+    margin: 0;
+    border-radius: var(--zx-dialog-border-radius) var(--zx-dialog-border-radius) 0 0;
+    
+    // 头部标题样式
+    .el-dialog__title {
+      font-size: 16px;
+      font-weight: 500;
+      color: #303133;
+    }
+  }
+  
+  // 内容区域样式
+  :deep(.el-dialog__body) {
+    background-color: var(--zx-dialog-body-bg);
+    padding: 0;
+    overflow: hidden;
+  }
+  
+  // 底部操作栏样式
+  :deep(.el-dialog__footer) {
+    background-color: var(--zx-dialog-footer-bg);
+    border-top: 1px solid var(--zx-dialog-border-color);
+    padding: 16px 20px;
+    margin: 0;
+    border-radius: 0 0 var(--zx-dialog-border-radius) var(--zx-dialog-border-radius);
+    
+    // 按钮组样式
+    .el-button + .el-button {
+      margin-left: 12px;
+    }
+  }
+
+  // 关闭按钮样式
+  :deep(.el-dialog__close) {
+    color: #909399;
+    font-size: 16px;
+    
+    &:hover {
+      color: #409eff;
+    }
+  }
+}
+
+// 对话框主体内容样式
+.zx-dialog-body {
+  width: 100%;
+  overflow: auto;
+  padding: 20px;
+  
+  // 滚动条样式
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #f5f7fa;
+    border-radius: 3px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #c0c4cc;
+    border-radius: 3px;
+    
+    &:hover {
+      background: #a8abb2;
+    }
+  }
+}
+
+// 无标题样式
+.zx-dialog-no-title {
+  :deep(.el-dialog__header) {
+    display: none;
+  }
+}
+
+// 无内容边距样式
+.zx-dialog-no-content-padding {
+  .zx-dialog-body {
+    padding: 0;
+  }
+}
+
+// 无遮罩样式
+.zx-dialog-no-mask {
+  :deep(.el-overlay) {
+    background-color: transparent;
+  }
+}
+
+// 不同尺寸的对话框样式
+.zx-dialog-small {
+  :deep(.el-dialog) {
+    width: 400px;
+    min-width: 400px;
+  }
+}
+
+.zx-dialog-medium {
+  :deep(.el-dialog) {
+    width: 600px;
+    min-width: 600px;
+  }
+}
+
+.zx-dialog-large {
+  :deep(.el-dialog) {
+    width: 800px;
+    min-width: 800px;
+  }
+}
+
+// 响应式设计
+@media (max-width: 768px) {
+  .zx-dialog {
+    :deep(.el-dialog) {
+      width: calc(100vw - 20px) !important;
+      min-width: auto !important;
+      margin: 10px;
+    }
+  }
+  
+  .zx-dialog-body {
+    padding: 16px;
+  }
+  
+  .zx-dialog :deep(.el-dialog__header),
+  .zx-dialog :deep(.el-dialog__footer) {
+    padding: 12px 16px;
+  }
+}
+
+// 描述列表样式优化
+.zx-dialog-body {
+  :deep(.el-descriptions) {
+    .el-descriptions__header {
+      margin-bottom: 16px;
+    }
+    
+    .el-descriptions__body {
+      .el-descriptions__table {
+        border-collapse: collapse;
+        
+        .el-descriptions__cell {
+          border: 1px solid var(--zx-dialog-border-color);
+          padding: 12px 16px;
+          
+          &.is-bordered-label {
+            background-color: #fafafa;
+            font-weight: 500;
+          }
+        }
+      }
+    }
+  }
+}
+
+// 开关组件样式
+.zx-dialog :deep(.el-dialog__footer) {
+  .el-switch {
+    margin-right: 8px;
+  }
+  
+  .el-tooltip__trigger {
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+// 加载状态样式
+.zx-dialog-body {
+  :deep(.el-loading-mask) {
+    border-radius: 4px;
+  }
+}
+
+// 标签样式
+.zx-dialog :deep(.el-dialog__header) {
+  .el-tag {
+    font-size: 12px;
+    height: 20px;
+    line-height: 18px;
+  }
+}

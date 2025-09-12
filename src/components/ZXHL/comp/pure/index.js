@@ -5,6 +5,10 @@ import ZxTooltipOrPopover from './ZxTooltipOrPopover'
 import ZxSearch from './ZxSearch'
 import ZxIcon from './ZxIcon'
 import ZxEmpty from './ZxEmpty'
+import ZxGridList from './ZxGridList'
+import ZxList from './ZxList'
+import ZXExportDrawer from './ZxExportDrawer'
+import ZxSplitBox from './ZxSplitBox'
 
 // 所有组件列表
 const components = [
@@ -13,7 +17,11 @@ const components = [
   ZxTooltipOrPopover,
   ZxSearch,
   ZxIcon,
-  ZxEmpty
+  ZxEmpty,
+  ZxGridList,
+  ZxList,
+  ZXExportDrawer,
+  ZxSplitBox
 ]
 
 // 统一的全局注册方法
@@ -35,6 +43,10 @@ export {
   ZxSearch,
   ZxIcon,
   ZxEmpty,
+  ZxGridList,
+  ZxList,
+  ZXExportDrawer,
+  ZxSplitBox,
   install
 }
 
@@ -46,5 +58,9 @@ export default {
   ZxSearch,
   ZxIcon,
   ZxEmpty,
+  ZxGridList,
+  ZxList,
+  ZXExportDrawer,
+  ZxSplitBox,
   install
 }

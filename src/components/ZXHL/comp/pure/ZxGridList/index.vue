@@ -97,6 +97,11 @@ import { Base64 } from 'js-base64'
 import ZxEmpty from '../ZxEmpty'
 import './index.scss'
 
+// 定义组件选项
+defineOptions({
+  name: 'ZxGridList'
+})
+
 // 手动实现 useDebounceFn 和 useIntervalFn（避免依赖 @vueuse/core）
 const useDebounceFn = (fn, delay) => {
   let timeoutId

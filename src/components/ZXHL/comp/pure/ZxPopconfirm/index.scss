@@ -1,0 +1,129 @@
+:root {
+  // ZxPopconfirm 组件 CSS 变量
+  --zx-popconfirm-bg-color: #ffffff;
+  --zx-popconfirm-border-color: #e4e7ed;
+  --zx-popconfirm-border-radius: 4px;
+  --zx-popconfirm-padding: 16px;
+  --zx-popconfirm-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  
+  // 标题样式变量
+  --zx-popconfirm-title-color: var(--el-text-color-primary);
+  --zx-popconfirm-title-font-size: 14px;
+  --zx-popconfirm-title-font-weight: 500;
+  --zx-popconfirm-title-line-height: 22px;
+  
+  // 图标样式变量
+  --zx-popconfirm-icon-size: 18px;
+  --zx-popconfirm-icon-color: var(--el-color-warning);
+  --zx-popconfirm-icon-margin-right: 8px;
+  
+  // 副标题样式变量
+  --zx-popconfirm-subtitle-color: var(--el-text-color-regular);
+  --zx-popconfirm-subtitle-font-size: 12px;
+  --zx-popconfirm-subtitle-margin-top: 8px;
+  --zx-popconfirm-subtitle-margin-left: 26px;
+  
+  // 表单样式变量
+  --zx-popconfirm-form-margin-top: 12px;
+  --zx-popconfirm-input-width: 245px;
+}
+
+.zx-popconfirm {
+  &__content {
+    padding: var(--zx-popconfirm-padding);
+    background-color: var(--zx-popconfirm-bg-color);
+    border-radius: var(--zx-popconfirm-border-radius);
+    box-shadow: var(--zx-popconfirm-shadow);
+  }
+  
+  &__header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  
+  &__icon {
+    font-size: var(--zx-popconfirm-icon-size);
+    color: var(--zx-popconfirm-icon-color);
+    margin-right: var(--zx-popconfirm-icon-margin-right);
+    flex-shrink: 0;
+  }
+  
+  &__title {
+    color: var(--zx-popconfirm-title-color);
+    font-size: var(--zx-popconfirm-title-font-size);
+    font-weight: var(--zx-popconfirm-title-font-weight);
+    line-height: var(--zx-popconfirm-title-line-height);
+    flex: 1;
+  }
+  
+  &__subtitle {
+    color: var(--zx-popconfirm-subtitle-color);
+    font-size: var(--zx-popconfirm-subtitle-font-size);
+    margin-top: var(--zx-popconfirm-subtitle-margin-top);
+    margin-left: var(--zx-popconfirm-subtitle-margin-left);
+    line-height: 1.4;
+  }
+  
+  &__form {
+    margin-top: var(--zx-popconfirm-form-margin-top);
+    
+    .el-form-item {
+      margin-bottom: 0;
+    }
+  }
+  
+  &__input,
+  &__textarea {
+    width: var(--zx-popconfirm-input-width);
+  }
+}
+
+// Element Plus Popconfirm 样式覆盖
+:deep(.el-popconfirm__main) {
+  padding: 0;
+  
+  .el-popconfirm__icon {
+    display: none; // 隐藏默认图标，使用自定义图标
+  }
+  
+  .el-popconfirm__title {
+    display: none; // 隐藏默认标题，使用自定义标题
+  }
+}
+
+:deep(.el-popconfirm__action) {
+  margin-top: 16px;
+  text-align: right;
+  
+  .el-button {
+    margin-left: 8px;
+    
+    &:first-child {
+      margin-left: 0;
+    }
+  }
+}
+
+// 暗色主题适配
+.dark {
+  :root {
+    --zx-popconfirm-bg-color: #1d1e1f;
+    --zx-popconfirm-border-color: #414243;
+    --zx-popconfirm-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.3);
+  }
+}
+
+// 响应式设计
+@media (max-width: 768px) {
+  .zx-popconfirm {
+    &__input,
+    &__textarea {
+      width: 200px;
+    }
+    
+    &__content {
+      padding: 12px;
+    }
+  }
+}

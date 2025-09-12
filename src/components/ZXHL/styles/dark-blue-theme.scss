@@ -1,4 +1,4 @@
-Element Plus Custom Theme Variables
+/* Element Plus Custom Theme Variables */
 :root {
   /* Primary Colors */
   --el-color-primary: #409eff;
@@ -100,11 +100,16 @@ Element Plus Custom Theme Variables
   /* Animation */
   --el-transition-duration: 0.3s;
   --el-transition-duration-fast: 0.2s;
+
+  /* ZxDrawer Component Variables (Light Theme) */
+  /* 拖拽手柄在浅色主题下的默认颜色 */
 }
 
 /* Dark theme overrides - ZXHL Style */
 html.dark,
-:root[data-theme="dark"] {
+html.dark-blue,
+:root[data-theme="dark"],
+:root[data-theme="dark-blue"] {
   /* Primary theme colors based on ZXHL design */
   --el-color-primary: #9cfff9;
   --el-color-primary-light-3: #b3fffc;
@@ -175,10 +180,75 @@ html.dark,
 
   /* Element Plus Table Variables (Dark Theme) */
   /* 让表头更深、更有层次，行悬停/选中更易读 */
-  --el-table-header-bg-color: var(--app-background-color-card-hover);
+  --el-table-header-bg-color: #ff4d4f; /* red for verification */
   --el-table-header-text-color: var(--el-text-color-primary);
   --el-table-tr-bg-color: var(--app-background-color-card-default);
   --el-table-row-hover-bg-color: var(--app-background-color-card-secondary);
   --el-table-current-row-bg-color: rgba(156, 255, 249, 0.08);
   --el-table-border-color: #356a72;
+
+  /* ZxDrawer Component Variables (Dark Theme) */
+  /* 拖拽手柄在深色主题下的颜色适配 */
+  --zx-drawer-handle-bg: #07395f;
+  --zx-drawer-handle-hover-bg: #094d7b;
+  --zx-drawer-handle-active-bg: #0c2f48;
+  --zx-drawer-dots-color: #9aa8b3;
+  --zx-drawer-dots-hover-color: #9cfff9;
+  --zx-drawer-dots-active-color: #ffffff;
+}
+
+/* Element Plus Table 具体样式应用 (Dark Theme) */
+html.dark,
+html.dark-blue,
+:root[data-theme="dark"],
+:root[data-theme="dark-blue"] {
+  
+  /* 使用更高优先级的选择器 */
+  .el-table {
+    /* 表格头部样式 */
+    .el-table__header-wrapper {
+      background-color: var(--el-table-header-bg-color) !important;
+    }
+    
+    .el-table__header th,
+    .el-table__header .el-table__cell {
+      background-color: var(--el-table-header-bg-color) !important;
+      color: var(--el-table-header-text-color) !important;
+      border-bottom: 1px solid var(--el-table-border-color) !important;
+    }
+    
+    /* 表格行样式 */
+    .el-table__body tr {
+      background-color: var(--el-table-tr-bg-color) !important;
+    }
+    
+    .el-table__body tr:hover > td {
+      background-color: var(--el-table-row-hover-bg-color) !important;
+    }
+    
+    .el-table__body tr.current-row > td {
+      background-color: var(--el-table-current-row-bg-color) !important;
+    }
+    
+    /* 表格边框 */
+    .el-table__border,
+    .el-table td,
+    .el-table th {
+      border-color: var(--el-table-border-color) !important;
+    }
+  }
+}
+
+/* 全局表格样式覆盖 - 最高优先级 */
+.el-table .el-table__header-wrapper .el-table__header th {
+  background-color: var(--el-table-header-bg-color, #f5f7fa) !important;
+}
+
+/* 深色主题下的强制样式 */
+html.dark .el-table .el-table__header-wrapper .el-table__header th,
+html.dark-blue .el-table .el-table__header-wrapper .el-table__header th,
+[data-theme="dark"] .el-table .el-table__header-wrapper .el-table__header th,
+[data-theme="dark-blue"] .el-table .el-table__header-wrapper .el-table__header th {
+  background-color: var(--el-table-header-bg-color, #052746) !important;
+  color: var(--el-table-header-text-color, #ffffff) !important;
 }

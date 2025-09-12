@@ -136,7 +136,7 @@ defineExpose({
   display: flex;
   height: 100vh;
   /* 根容器不滚动，避免头部和侧边栏跟随滚动 */
-  overflow: hidden;
+  /* overflow: hidden; */
   background: #1a1a1a;
 }
 
@@ -147,10 +147,8 @@ defineExpose({
   margin-left: 0;
   transition: margin-left 0.3s;
   min-width: 0;
-  min-height: 0; /* 关键：允许子元素在纵向收缩以出现滚动 */
-  /* 占满视口高度，内部自行控制滚动 */
-  height: 100vh;
-  overflow: hidden;
+  min-height: 0; /* 关键：允许flex子元素收缩 */
+  /* 移除固定高度和overflow限制，让flex自然布局 */
 }
 
 .layout-main.is-collapsed {

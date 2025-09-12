@@ -25,7 +25,7 @@
 import { defineComponent, ref, watch, onUnmounted, toRefs } from 'vue'
 import { ElButton } from 'element-plus'
 import { debounce, throttle, omit, isEmpty } from 'lodash-es'
-import TooltipOrPopover from '../TooltipOrPopover/index.vue'
+import TooltipOrPopover from '../ZxTooltipOrPopover/index.vue'
 
 export default defineComponent({
   name: 'TooltipButton',
