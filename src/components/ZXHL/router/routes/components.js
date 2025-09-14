@@ -1,14 +1,6 @@
 import PureRouterView from '@/components/ZXHL/comp/pure/ZxPureRouterView/index.vue'
 
 export const componentRoutes = [
-   {
-    path: 'gridLayout',
-    name: 'gridLayout',
-    meta: { 
-      title: '报表布局'
-    },
-    component: () => import('@/components/ZXHL/pages/dashboard/index.vue')
-  },
   {
     path: 'components',
     name: 'ComponentsDemo',
@@ -19,6 +11,14 @@ export const componentRoutes = [
     redirect: 'pure-components',
     component: PureRouterView,
     children: [
+      {
+        path: 'dashboard',
+        name: 'dashboard',
+        meta: { 
+          title: '报表布局'
+        },
+        component: () => import('@/components/ZXHL/pages/dashboard/index.vue')
+      },
       {
         path: 'pure-components',
         name: 'PureComponentsDemo',
