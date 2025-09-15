@@ -103,6 +103,35 @@
 
   /* ZxDrawer Component Variables (Light Theme) */
   /* 拖拽手柄在浅色主题下的默认颜色 */
+
+  /* ========== 业务自定义变量：浅色主题 ========== */
+  --app-content-wrapper-bg: var(--el-bg-color-page, #f2f3f5);
+  --app-content-body-bg: var(--el-bg-color, #ffffff);
+  --app-layout-header-bg: #ffffff;
+  --app-layout-header-border-bottom: var(--el-border-color);
+
+  /* 卡片与容器 */
+  --app-background-color-card-default: var(--el-fill-color-blank, #ffffff);
+  --app-background-color-card-hover: var(--el-fill-color, #f0f2f5);
+  --app-background-color-card-active: var(--el-fill-color-dark, #ebedf0);
+  --app-background-color-card-secondary: var(--el-fill-color-light, #f5f7fa);
+  --app-background-color-card-tertiary: var(--el-fill-color-lighter, #fafafa);
+
+  /* 组件内文本/阴影 */
+  --app-on-color-text: #ffffff;
+  --app-text-shadow-on-color: 0 1px 2px rgba(0, 0, 0, 0.3);
+
+  /* DashboardGrid 相关变量 */
+  --app-grid-placeholder-bg: var(--el-color-primary);
+  --app-grid-placeholder-opacity: 0.2;
+  --app-grid-placeholder-shadow-color: var(--el-color-primary);
+  --app-grid-placeholder-bg-translucent: rgba(31, 96, 196, 0.2);
+
+  /* Resize 句柄颜色 */
+  --app-resize-handle-color: #acb6bf;
+  --app-panel-header-hover-bg: var(--el-fill-color-light, #f1f5f9);
+  --app-panel-header-border-color: transparent;
+  --app-panel-content-padding: 10px;
 }
 
 /* Dark theme overrides - ZXHL Style */
@@ -195,15 +224,23 @@ html.dark-blue,
   --zx-drawer-dots-color: #9aa8b3;
   --zx-drawer-dots-hover-color: #9cfff9;
   --zx-drawer-dots-active-color: #ffffff;
-}
 
-/* Element Plus Table 具体样式应用 (Dark Theme) */
-html.dark,
-html.dark-blue,
-:root[data-theme="dark"],
-:root[data-theme="dark-blue"] {
+  /* ========== 业务自定义变量：深色主题覆盖 ========== */
+  --app-on-color-text: #ffffff;
+  --app-text-shadow-on-color: 0 1px 2px rgba(0, 0, 0, 0.3);
   
-  /* 使用更高优先级的选择器 */
+  /* DashboardGrid 相关变量 */
+  --app-panel-container-border-color: transparent;
+  --app-grid-placeholder-bg: blue;
+  --app-grid-placeholder-opacity: 0.2;
+  --app-grid-placeholder-shadow-color: var(--el-color-primary);
+  --app-grid-placeholder-bg-translucent: rgba(156, 255, 249, 0.2);
+  --app-resize-handle-color: #9aa8b3;
+  --app-panel-header-hover-bg: var(--app-background-color-card-hover);
+  --app-panel-header-border-color: transparent;
+  --app-panel-content-padding: 0;
+
+  /* Element Plus Table 具体样式应用 (Dark Theme) */
   .el-table {
     /* 表格头部样式 */
     .el-table__header-wrapper {

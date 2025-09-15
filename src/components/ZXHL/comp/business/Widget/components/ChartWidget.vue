@@ -11,7 +11,7 @@
 
 <script setup>
 import { reactive } from 'vue'
-import ZxChart from '../../../comp/pure/ZxChart/index.vue'
+import ZxChart from '@/components/ZXHL/comp/pure/ZxChart/index.vue'
 
 // 示例图表配置
 const chartOptions = reactive({

@@ -203,6 +203,30 @@ export const componentRoutes = [
           title: 'ZxChart 图表组件'
         },
         component: () => import('@/components/ZXHL/comp/pure/ZxChart/example.vue')
+      },
+      {
+        path: 'widget',
+        name: 'WidgetDemo',
+        meta: { 
+          title: 'Widget 异步加载组件'
+        },
+        component: () => import('@/components/ZXHL/comp/business/Widget/example.vue')
+      },
+      {
+        path: 'dashboard-grid-vue3',
+        name: 'DashboardGridDemo',
+        meta: { 
+          title: 'DashboardGrid 网格布局组件'
+        },
+        component: () => import('@/components/ZXHL/comp/business/DashboardGrid/example/index.vue')
+      },
+      {
+        path: 'panel-header',
+        name: 'PanelHeaderDemo',
+        meta: { 
+          title: 'PanelHeader 面板头部组件'
+        },
+        component: () => import('@/components/ZXHL/comp/business/DashboardGrid/PanelComponent/PanelHeader/example.vue')
       }
     ]
   }

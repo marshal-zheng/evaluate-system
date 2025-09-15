@@ -67,6 +67,7 @@ import { defineComponent, reactive, onMounted } from 'vue';
 import DraggableHello from './DraggableHello.vue'
 import ChartWidget from './widgets/ChartWidget.vue'
 import defaultLayout from './layout.json'
+import { getDragPayload } from '../../comp/business/DashboardGrid/dragPayloadStore'
 
 // Component registry for persistence
 const widgetRegistry = {
@@ -185,6 +186,9 @@ export default defineComponent({
       } catch (e) {
         payload = null;
       }
+      if (!payload) {
+        payload = getDragPayload();
+      }
       if (payload?.type && widgetRegistry[payload.type]) {
         state.widgetsById[id] = widgetRegistry[payload.type];
         state.widgetTypes[id] = payload.type;
@@ -192,7 +196,20 @@ export default defineComponent({
     };
   
     const onDropDragOver  = (e) => {
-      return { w: 2, h: 2 };
+      let payload;
+      try {
+        const text = e?.dataTransfer?.getData('text/plain');
+        payload = text ? JSON.parse(text) : null;
+      } catch (err) {
+        payload = null;
+      }
+      if (!payload) {
+        payload = getDragPayload();
+      }
+      if (payload && typeof payload.w === 'number' && typeof payload.h === 'number') {
+        return { w: payload.w, h: payload.h };
+      }
+      return { w: 6, h: 5 };
     };
     const onDragStop  = (layout, oldLay, newLay) => {
       // sync after drag stop too, to be safe

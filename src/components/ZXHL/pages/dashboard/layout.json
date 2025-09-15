@@ -17,7 +17,11 @@
       "i": "6",
       "moved": false,
       "static": false,
-      "isDraggable": true
+      "isDraggable": true,
+      "metadata": {
+        "id": "",
+        "type": ""
+      }
     },
     {
       "w": 4,

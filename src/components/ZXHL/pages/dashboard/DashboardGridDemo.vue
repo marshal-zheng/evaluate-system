@@ -35,7 +35,7 @@ const createSamplePanels = () => {
       type: 'chart',
       path: 'ChartWidget',
       gridPos: { x: 0, y: 0, w: 6, h: 4 },
-      params: { chartType: 'line' },
+      params: { type: 'line' },
       props: {},
       contentNoPadding: false
     },

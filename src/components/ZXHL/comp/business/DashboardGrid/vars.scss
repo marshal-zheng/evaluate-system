@@ -1,0 +1,27 @@
+.zx-dashboard-grid {
+  /* Base surfaces */
+  --dg-panel-bg: var(--app-background-color-card-default, var(--el-fill-color-blank, #ffffff));
+
+  /* Borders */
+  --dg-panel-container-border-color: var(--app-panel-container-border-color, var(--el-color-primary, #409eff));
+
+  /* Grid placeholders and elevation */
+  --dg-grid-placeholder-bg: var(--app-grid-placeholder-bg, var(--el-color-primary, #409eff));
+  --dg-grid-placeholder-opacity: var(--app-grid-placeholder-opacity, 0.2);
+  --dg-grid-placeholder-shadow-color: var(--app-grid-placeholder-shadow-color, var(--el-color-primary, #409eff));
+  --dg-grid-placeholder-bg-translucent: var(--app-grid-placeholder-bg-translucent, rgba(31, 96, 196, 0.2));
+
+  /* Handles */
+  --dg-resize-handle-color: var(--app-resize-handle-color, #acb6bf);
+  --dg-panel-header-hover-bg: var(--app-panel-header-hover-bg, var(--el-fill-color-light, #f1f5f9));
+  --dg-panel-header-border-color: var(--app-panel-header-border-color, var(--el-border-color-light, #e4e7ed));
+  --dg-panel-content-padding: var(--app-panel-content-padding, 10px);
+}
+
+.zx-dashboard-grid__panel-header-menu {
+  --panel-header-menu-icon-color: var(--app-panel-header-menu-icon-color, var(--el-text-color-secondary));
+  --panel-header-menu-icon-hover-color: var(--app-panel-header-menu-icon-hover-color, var(--el-text-color-primary));
+  --panel-header-menu-icon-size: var(--app-panel-header-menu-icon-size, 16px);
+}
+
+
