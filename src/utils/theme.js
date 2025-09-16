@@ -10,8 +10,8 @@ export const THEME_TYPES = {
   DARK_BLUE: 'dark-blue'
 }
 
-// 当前主题状态
-let currentTheme = THEME_TYPES.DARK_BLUE
+// 当前主题
+let currentTheme = THEME_TYPES.LIGHT
 
 /**
  * 获取当前主题
@@ -62,9 +62,15 @@ export function setTheme(theme) {
  * 初始化主题
  */
 export function initTheme() {
-  // 从localStorage获取保存的主题，默认为深蓝色主题
-  const savedTheme = localStorage.getItem('theme') || THEME_TYPES.DARK_BLUE
-  setTheme(savedTheme)
+  try {
+    const saved = localStorage.getItem('theme')
+    const fallback = THEME_TYPES.LIGHT
+    const theme = [THEME_TYPES.LIGHT, THEME_TYPES.DARK, THEME_TYPES.DARK_BLUE].includes(saved) ? saved : fallback
+    setTheme(theme)
+  } catch (e) {
+    // localStorage 不可用时，退回到浅色
+    setTheme(THEME_TYPES.LIGHT)
+  }
 }
 
 /**

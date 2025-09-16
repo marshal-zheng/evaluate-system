@@ -9,6 +9,10 @@ import ZxGridList from './ZxGridList'
 import ZxList from './ZxList'
 import ZXExportDrawer from './ZxExportDrawer'
 import ZxSplitBox from './ZxSplitBox'
+import ZxButton from './ZxButton'
+import ZxDialog from './ZxDialog'
+import ZxConfirmInput from './ZxConfirmInput'
+import ZxCollapsibleContainer from './ZxCollapsibleContainer'
 
 // 所有组件列表
 const components = [
@@ -21,7 +25,11 @@ const components = [
   ZxGridList,
   ZxList,
   ZXExportDrawer,
-  ZxSplitBox
+  ZxSplitBox,
+  ZxButton,
+  ZxDialog,
+  ZxConfirmInput,
+  ZxCollapsibleContainer
 ]
 
 // 统一的全局注册方法
@@ -47,6 +55,10 @@ export {
   ZxList,
   ZXExportDrawer,
   ZxSplitBox,
+  ZxButton,
+  ZxDialog,
+  ZxConfirmInput,
+  ZxCollapsibleContainer,
   install
 }
 
@@ -62,5 +74,9 @@ export default {
   ZxList,
   ZXExportDrawer,
   ZxSplitBox,
+  ZxButton,
+  ZxDialog,
+  ZxConfirmInput,
+  ZxCollapsibleContainer,
   install
 }

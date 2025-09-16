@@ -1,29 +1,72 @@
 <template>
-  <!-- Element Plus 图标 -->
-  <el-icon 
-    v-if="type === 'element'"
-    :class="iconClasses" 
-    :size="size" 
-    :color="currentColor"
-    @mouseenter="handleMouseEnter"
-    @mouseleave="handleMouseLeave"
+  <ZxTooltipOrPopover
+    v-if="tooltip || popoverTitle"
+    :content="tooltip"
+    :title="popoverTitle"
+    :trigger="tooltipTrigger"
+    :placement="tooltipPlacement"
+    :disabled="disabled || (!tooltip && !popoverTitle)"
   >
-    <component :is="iconComponent" />
-  </el-icon>
+    <!-- Element Plus 图标 -->
+    <el-icon 
+      v-if="type === 'element'"
+      :class="iconClasses" 
+      :size="size" 
+      :color="currentColor"
+      @mouseenter="handleMouseEnter"
+      @mouseleave="handleMouseLeave"
+      @click="handleClick"
+    >
+      <component :is="iconComponent" />
+    </el-icon>
+    
+    <!-- iconfont 图标 -->
+    <i 
+      v-else-if="type === 'iconfont'"
+      :class="iconfontClasses"
+      :style="iconfontStyles"
+      @mouseenter="handleMouseEnter"
+      @mouseleave="handleMouseLeave"
+      @click="handleClick"
+    ></i>
+    
+    <!-- Popover 内容插槽 -->
+    <template v-if="popoverTitle && $slots.popoverContent" #content>
+      <slot name="popoverContent"></slot>
+    </template>
+  </ZxTooltipOrPopover>
   
-  <!-- iconfont 图标 -->
-  <i 
-    v-else-if="type === 'iconfont'"
-    :class="iconfontClasses"
-    :style="iconfontStyles"
-    @mouseenter="handleMouseEnter"
-    @mouseleave="handleMouseLeave"
-  ></i>
+  <!-- 无 tooltip/popover 时的普通图标 -->
+  <template v-else>
+    <!-- Element Plus 图标 -->
+    <el-icon 
+      v-if="type === 'element'"
+      :class="iconClasses" 
+      :size="size" 
+      :color="currentColor"
+      @mouseenter="handleMouseEnter"
+      @mouseleave="handleMouseLeave"
+      @click="handleClick"
+    >
+      <component :is="iconComponent" />
+    </el-icon>
+    
+    <!-- iconfont 图标 -->
+    <i 
+      v-else-if="type === 'iconfont'"
+      :class="iconfontClasses"
+      :style="iconfontStyles"
+      @mouseenter="handleMouseEnter"
+      @mouseleave="handleMouseLeave"
+      @click="handleClick"
+    ></i>
+  </template>
 </template>
 
 <script setup>
 import { computed, ref } from 'vue'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
+import ZxTooltipOrPopover from '../ZxTooltipOrPopover/index.vue'
 import './index.scss'
 
 // 组件名称
@@ -44,7 +87,7 @@ const props = defineProps({
     type: String,
     required: true
   },
-  // 图标颜色
+  // 图标颜色 (不设置默认值，跟随系统主题)
   color: {
     type: String,
     default: ''
@@ -63,8 +106,37 @@ const props = defineProps({
   className: {
     type: String,
     default: ''
+  },
+  // Tooltip 文本
+  tooltip: {
+    type: String,
+    default: ''
+  },
+  // Popover 标题 (有标题时显示为 popover，否则为 tooltip)
+  popoverTitle: {
+    type: String,
+    default: ''
+  },
+  // Tooltip/Popover 触发方式
+  tooltipTrigger: {
+    type: String,
+    default: 'hover',
+    validator: (value) => ['hover', 'click', 'focus', 'manual'].includes(value)
+  },
+  // Tooltip/Popover 位置
+  tooltipPlacement: {
+    type: String,
+    default: 'top'
+  },
+  // 是否禁用
+  disabled: {
+    type: Boolean,
+    default: false
   }
 })
+
+// 事件定义
+const emit = defineEmits(['click'])
 
 const isHover = ref(false)
 
@@ -75,6 +147,10 @@ const iconComponent = computed(() => {
 
 const iconClasses = computed(() => {
   const classes = ['zx-icon']
+  
+  if (props.disabled) {
+    classes.push('is-disabled')
+  }
   
   if (props.className) {
     classes.push(props.className)
@@ -91,6 +167,10 @@ const iconfontClasses = computed(() => {
     // 如果图标名称不以 icon- 开头，则添加前缀
     const iconClass = props.icon.startsWith('icon-') ? props.icon : `icon-${props.icon}`
     classes.push(iconClass)
+  }
+  
+  if (props.disabled) {
+    classes.push('is-disabled')
   }
   
   if (props.className) {
@@ -123,12 +203,20 @@ const currentColor = computed(() => {
 
 // 事件处理
 const handleMouseEnter = () => {
-  if (props.hoverColor) {
+  if (props.hoverColor && !props.disabled) {
     isHover.value = true
   }
 }
 
 const handleMouseLeave = () => {
-  isHover.value = false
+  if (!props.disabled) {
+    isHover.value = false
+  }
+}
+
+const handleClick = (event) => {
+  if (!props.disabled) {
+    emit('click', event)
+  }
 }
 </script>

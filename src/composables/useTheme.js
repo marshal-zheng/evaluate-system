@@ -101,7 +101,7 @@ export function useTheme() {
   
   return {
     // 状态
-    currentTheme: currentTheme.value,
+    currentTheme,
     isDark,
     isDarkBlue,
     isLight,

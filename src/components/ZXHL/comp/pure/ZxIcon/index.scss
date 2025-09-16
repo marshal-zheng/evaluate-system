@@ -1,13 +1,29 @@
+// 导入 CSS 变量定义
+@import './var.scss';
+
 .zx-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   
+  // 基础样式
+  color: var(--cmp-icon-color);
+  padding: var(--cmp-icon-padding);
+  box-shadow: var(--cmp-icon-shadow);
+  
+  // 过渡动画
+  transition: 
+    color var(--cmp-icon-transition-duration) var(--cmp-icon-transition-timing),
+    background-color var(--cmp-icon-transition-duration) var(--cmp-icon-transition-timing),
+    border-color var(--cmp-icon-transition-duration) var(--cmp-icon-transition-timing),
+    box-shadow var(--cmp-icon-transition-duration) var(--cmp-icon-transition-timing);
+  
   svg {
     width: 1em;
     height: 1em;
     fill: currentColor;
+    transition: fill var(--cmp-icon-transition-duration) var(--cmp-icon-transition-timing);
   }
   
   .iconify {
@@ -16,12 +32,19 @@
   
   // 悬停效果
   &:hover {
-    .iconify {
-      transition: color 0.3s ease;
-    }
+    color: var(--cmp-icon-hover-color);
+  }
+  
+  // 禁用状态
+  &.is-disabled {
+    color: var(--cmp-icon-disabled-color);
+    cursor: not-allowed;
     
-    svg {
-      transition: fill 0.3s ease;
+    &:hover {
+      color: var(--cmp-icon-disabled-color);
+      background-color: var(--cmp-icon-bg);
+      border-color: var(--cmp-icon-border-color);
+      box-shadow: var(--cmp-icon-shadow);
     }
   }
 }

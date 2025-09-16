@@ -7,6 +7,31 @@
 
     <!-- 右侧：用户信息 -->
     <div class="header-right">
+      <!-- 主题切换 -->
+      <div class="theme-switcher">
+        <el-dropdown @command="handleThemeCommand" trigger="click">
+          <el-button text>
+            <el-icon><Sunny v-if="currentTheme === 'light'" /><Moon v-else-if="currentTheme === 'dark'" /><Monitor v-else /></el-icon>
+          </el-button>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item command="light">
+                <el-icon><Sunny /></el-icon>
+                浅色主题
+              </el-dropdown-item>
+              <el-dropdown-item command="dark">
+                <el-icon><Moon /></el-icon>
+                深色主题
+              </el-dropdown-item>
+              <el-dropdown-item command="dark-blue">
+                <el-icon><Monitor /></el-icon>
+                深蓝主题
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+      </div>
+      
       <!-- 用户信息 -->
       <div class="user-info">
         <el-dropdown @command="handleUserCommand">
@@ -45,8 +70,12 @@ import {
   User,
   ArrowDown,
   SwitchButton,
-  Setting
+  Setting,
+  Sunny,
+  Moon,
+  Monitor
 } from '@element-plus/icons-vue'
+import { useTheme } from '@/composables/useTheme.js'
 
 // Props
 const props = defineProps({
@@ -56,11 +85,24 @@ const props = defineProps({
   }
 })
 
+// 主题管理
+const { currentTheme, switchTheme, applyDarkBlue } = useTheme()
+
 // 用户信息
 const userInfo = reactive({
   name: '管理员',
   avatar: ''
 })
+
+// 主题切换处理
+const handleThemeCommand = (theme) => {
+  if (theme === 'dark-blue') {
+    applyDarkBlue()
+  } else {
+    switchTheme(theme)
+  }
+  ElMessage.success(`已切换到${theme === 'light' ? '浅色' : theme === 'dark' ? '深色' : '深蓝'}主题`)
+}
 
 // 用户下拉菜单操作
 const handleUserCommand = (command) => {
@@ -120,6 +162,23 @@ const handleUserCommand = (command) => {
   display: flex;
   align-items: center;
   gap: 20px;
+}
+
+.theme-switcher {
+  display: flex;
+  align-items: center;
+}
+
+.theme-switcher .el-button {
+  color: #ffffff;
+  font-size: 18px;
+  padding: 8px;
+  transition: all 0.3s;
+}
+
+.theme-switcher .el-button:hover {
+  color: #409eff;
+  background-color: rgba(64, 158, 255, 0.1);
 }
 
 .toolbar {

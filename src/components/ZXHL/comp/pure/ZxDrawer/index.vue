@@ -1,7 +1,7 @@
 <template>
   <el-drawer
     v-model="visible"
-    :size="fullScreen?.isFullScreen ? '100%' : drawerWidth"
+    :size="computedDrawerSize"
     :direction="direction"
     :show-close="closable"
     :modal="mask"
@@ -21,15 +21,15 @@
   >
     <!-- 自定义标题栏 -->
     <template #header="{ close, titleId, titleClass }">
-      <div class="flex items-center justify-between w-full">
+      <div class="zx-drawer-header-container">
         <slot name="title">
-          <div class="flex flex-1 items-center justify-between overflow-hidden">
-            <div class="flex flex-1 items-center overflow-hidden">
-              <span :id="titleId" :class="titleClass" class="truncate max-w-[300px]">
+          <div class="zx-drawer-title-container">
+            <div class="zx-drawer-title-content">
+              <span :id="titleId" :class="titleClass" class="zx-drawer-title-text">
                 {{ title }}
               </span>
               <slot name="headerLeft"></slot>
-              <el-tag v-if="titleTag" :color="titleTagColor" class="ml-2 mr-auto">
+              <el-tag v-if="titleTag" :color="titleTagColor" class="zx-drawer-title-tag">
                 {{ titleTag }}
               </el-tag>
             </div>
@@ -37,28 +37,30 @@
           </div>
         </slot>
         <div class="zx-drawer-right-operation">
-          <el-button
+          <slot name="headerRight"></slot>
+          <ZxButton
             v-if="showFullScreen"
-            type="default"
+            type="text"
+            size="small"
             class="zx-drawer-fullscreen-btn"
-            @click="fullScreen?.toggleFullScreen"
+            @click="handleFullScreenToggle"
           >
-            <ZxIcon :name="fullScreen?.isFullScreen ? 'fullscreen-exit' : 'fullscreen'" />
-            {{ fullScreen?.isFullScreen ? '退出全屏' : '全屏' }}
-          </el-button>
+            <ZxIcon :icon="fullScreenAPI.isFullScreen ? 'ScaleToOriginal' : 'FullScreen'" />
+            {{ fullScreenAPI.isFullScreen ? '退出全屏' : '全屏' }}
+          </ZxButton>
         </div>
       </div>
     </template>
 
     <!-- 拖拽手柄 -->
     <div
-      v-if="!disabledWidthDrag && typeof drawerWidth === 'number' && !fullScreen?.isFullScreen"
-      class="zx-drawer-handle"
+      v-if="!disabledWidthDrag && typeof drawerWidth === 'number' && !fullScreenAPI.isFullScreen"
+      :class="['zx-drawer-handle', { 'zx-drawer-handle-with-border': showHandleBorder }]"
       @mousedown="startResize"
     >
       <div class="zx-drawer-handle-dots">
-        <div class="dot" v-for="i in 10" :key="i"></div>
-      </div>
+          <div class="zx-dot" v-for="i in 10" :key="i"></div>
+        </div>
     </div>
 
     <!-- 抽屉内容 -->
@@ -97,13 +99,13 @@
     <!-- 底部操作栏 -->
     <template v-if="footer" #footer>
       <slot name="footer">
-        <div class="flex items-center justify-between">
+        <div class="zx-drawer-footer-container">
           <slot name="footerLeft"></slot>
-          <div class="ml-auto flex gap-3">
-            <el-button :disabled="okLoading" @click="handleCancel">
+          <div class="zx-drawer-footer-actions">
+            <ZxButton :disabled="okLoading" @click="handleCancel">
               {{ cancelText || '取消' }}
-            </el-button>
-            <el-button
+            </ZxButton>
+            <ZxButton
               v-if="showContinue"
               type="default"
               :loading="okLoading"
@@ -111,15 +113,15 @@
               @click="handleContinue"
             >
               {{ saveContinueText || '保存并继续' }}
-            </el-button>
-            <el-button
+            </ZxButton>
+            <ZxButton
               type="primary"
               :disabled="okDisabled"
               :loading="okLoading"
               @click="handleOk"
             >
               {{ okText || '确定' }}
-            </el-button>
+            </ZxButton>
           </div>
         </div>
       </slot>
@@ -128,28 +130,28 @@
 </template>
 
 <script setup>
-import { ref, watch, nextTick } from 'vue'
+import { ref, watch, nextTick, computed } from 'vue'
 import ZxIcon from '@/components/ZXHL/comp/pure/ZxIcon'
+import ZxButton from '@/components/ZXHL/comp/pure/ZxButton'
 
-// 全屏功能 Hook
-function useFullScreen(element) {
-  const isFullScreen = ref(false)
+// 全屏功能状态管理
+const isFullScreen = ref(false)
 
-  const toggleFullScreen = () => {
-    isFullScreen.value = !isFullScreen.value
-  }
+const toggleFullScreen = () => {
+  isFullScreen.value = !isFullScreen.value
+}
 
-  const exitFullscreen = () => {
-    isFullScreen.value = false
-  }
+const exitFullscreen = () => {
+  isFullScreen.value = false
+}
 
-  return {
-    get isFullScreen() {
-      return isFullScreen.value
-    },
-    toggleFullScreen,
-    exitFullscreen
-  }
+// 全屏功能对象
+const fullScreenAPI = {
+  get isFullScreen() {
+    return isFullScreen.value
+  },
+  toggleFullScreen,
+  exitFullscreen
 }
 
 // 定义属性
@@ -227,6 +229,10 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  showHandleBorder: {
+    type: Boolean,
+    default: false
+  },
   closable: {
     type: Boolean,
     default: true
@@ -241,7 +247,7 @@ const props = defineProps({
   },
   showFullScreen: {
     type: Boolean,
-    default: false
+    default: true
   },
   maskClosable: {
     type: Boolean,
@@ -270,9 +276,18 @@ const emit = defineEmits([
 
 // 响应式数据
 const visible = ref(props.modelValue)
-const fullScreen = ref()
 const resizing = ref(false)
 const drawerWidth = ref(props.width)
+const isToggling = ref(false) // 防止快速切换时的状态混乱
+
+// 计算抽屉尺寸，确保稳定性
+const computedDrawerSize = computed(() => {
+  if (isToggling.value) {
+    // 切换过程中保持当前状态
+    return fullScreenAPI.isFullScreen ? '100%' : drawerWidth.value
+  }
+  return fullScreenAPI.isFullScreen ? '100%' : drawerWidth.value
+})
 
 // 监听 modelValue 变化
 watch(
@@ -287,12 +302,6 @@ watch(
   () => visible.value,
   (val) => {
     emit('update:modelValue', val)
-    if (val) {
-      nextTick(() => {
-      const drawerElement = document.querySelector('.zx-drawer .el-drawer')
-      fullScreen.value = useFullScreen(drawerElement)
-    })
-    }
   }
 )
 
@@ -306,19 +315,49 @@ const handleOk = () => {
 }
 
 const handleCancel = () => {
-  fullScreen.value?.exitFullscreen()
+  fullScreenAPI.exitFullscreen()
   visible.value = false
   emit('cancel')
 }
 
 const handleClose = () => {
-  fullScreen.value?.exitFullscreen()
+  // 退出全屏模式并关闭抽屉
+  fullScreenAPI.exitFullscreen()
   visible.value = false
   emit('close')
 }
 
 const handleOpen = () => {
   emit('open')
+}
+
+const handleFullScreenToggle = async (event) => {
+  // 阻止事件冒泡，防止触发其他点击事件
+  event.preventDefault()
+  event.stopPropagation()
+  
+  // 防止快速连续点击
+  if (isToggling.value) {
+    return
+  }
+  
+  isToggling.value = true
+  
+  try {
+    // 切换全屏状态
+    fullScreenAPI.toggleFullScreen()
+    
+    // 使用 nextTick 确保DOM更新完成
+    await nextTick()
+    
+    // 添加小延迟确保Element Plus内部状态稳定
+    setTimeout(() => {
+      isToggling.value = false
+    }, 100)
+  } catch (error) {
+    console.error('全屏切换出错:', error)
+    isToggling.value = false
+  }
 }
 
 const handleBeforeClose = (done) => {

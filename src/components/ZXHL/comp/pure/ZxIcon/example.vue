@@ -36,6 +36,105 @@
     </div>
 
     <div class="demo-section">
+      <h3>Tooltip 功能</h3>
+      <div class="icon-row">
+        <ZxIcon icon="Edit" :size="24" tooltip="编辑" />
+        <ZxIcon icon="Delete" :size="24" tooltip="删除" color="#F56C6C" />
+        <ZxIcon icon="Download" :size="24" tooltip="下载文件" tooltip-placement="bottom" />
+        <ZxIcon icon="Share" :size="24" tooltip="分享" tooltip-trigger="click" />
+      </div>
+    </div>
+
+    <div class="demo-section">
+      <h3>Popover 功能</h3>
+      <div class="icon-row">
+        <ZxIcon 
+          icon="QuestionFilled" 
+          :size="24" 
+          popover-title="帮助信息"
+          tooltip="这是一个帮助按钮"
+        />
+        <ZxIcon 
+          icon="Setting" 
+          :size="24" 
+          popover-title="设置选项"
+          tooltip-trigger="click"
+        >
+          <template #popoverContent>
+            <div style="padding: 10px;">
+              <p>这里是详细的设置说明</p>
+              <el-button size="small" type="primary">确认</el-button>
+            </div>
+          </template>
+        </ZxIcon>
+        <ZxIcon 
+          icon="InfoFilled" 
+          :size="24" 
+          popover-title="详细信息"
+          tooltip="点击查看详情"
+          tooltip-trigger="click"
+          tooltip-placement="left"
+        >
+          <template #popoverContent>
+            <div>
+              <p><strong>版本:</strong> 1.0.0</p>
+              <p><strong>作者:</strong> ZX Team</p>
+              <p><strong>更新时间:</strong> 2024-01-01</p>
+            </div>
+          </template>
+        </ZxIcon>
+      </div>
+    </div>
+
+    <div class="demo-section">
+      <h3>禁用状态</h3>
+      <div class="icon-row">
+        <ZxIcon icon="Edit" :size="24" disabled tooltip="当前不可编辑" />
+        <ZxIcon icon="Delete" :size="24" disabled color="#F56C6C" />
+        <ZxIcon icon="Plus" :size="24" disabled hover-color="#67C23A" />
+      </div>
+    </div>
+
+    <div class="demo-section">
+      <h3>跟随系统主题</h3>
+      <p style="color: #666; margin-bottom: 20px;">不设置 color 属性时，图标会自动跟随 Element Plus 主题色</p>
+      <div class="icon-row">
+        <ZxIcon icon="User" :size="24" />
+        <ZxIcon icon="Home" :size="24" />
+        <ZxIcon icon="Document" :size="24" />
+        <ZxIcon icon="Setting" :size="24" hover-color="var(--el-color-primary)" />
+      </div>
+    </div>
+
+    <div class="demo-section">
+      <h3>事件处理</h3>
+      <div class="icon-row">
+        <ZxIcon 
+          icon="Plus" 
+          :size="24" 
+          tooltip="点击添加"
+          @click="handleAdd"
+          style="cursor: pointer;"
+        />
+        <ZxIcon 
+          icon="Refresh" 
+          :size="24" 
+          tooltip="点击刷新"
+          @click="handleRefresh"
+          style="cursor: pointer;"
+        />
+        <ZxIcon 
+          icon="Bell" 
+          :size="24" 
+          tooltip="通知"
+          @click="handleNotification"
+          style="cursor: pointer;"
+        />
+      </div>
+      <p style="color: #666; margin-top: 10px;">点击图标查看控制台输出</p>
+    </div>
+
+    <div class="demo-section">
       <h3>Element Plus 常用图标</h3>
       <div class="icon-grid">
         <div class="icon-item" v-for="iconName in commonIcons" :key="iconName">
@@ -110,6 +209,20 @@ export default {
         'icon_unlock', 'icon_eye', 'icon_eye_close', 'icon_copy', 'icon_cut',
         'icon_paste', 'icon_save', 'icon_print', 'icon_export', 'icon_import'
       ]
+    }
+  },
+  methods: {
+    handleAdd() {
+      console.log('添加操作被触发')
+      this.$message?.success('添加操作')
+    },
+    handleRefresh() {
+      console.log('刷新操作被触发')
+      this.$message?.info('刷新操作')
+    },
+    handleNotification() {
+      console.log('通知操作被触发')
+      this.$message?.warning('新通知')
     }
   }
 }

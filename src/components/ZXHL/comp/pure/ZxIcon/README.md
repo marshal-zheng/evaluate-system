@@ -13,6 +13,10 @@ ZxIcon 是基于原 Icon 组件优化而来的 Vue3 + JavaScript 图标组件，
 - ✅ 支持悬停效果
 - ✅ 集成 Element Plus ElIcon 组件
 - ✅ 扁平化文件结构（无 src 文件夹）
+- ✅ 跟随系统主题（基于 Element Plus CSS 变量）
+- ✅ 支持 Tooltip 和 Popover 功能
+- ✅ 支持禁用状态
+- ✅ CSS3 变量系统（参照 ZxDrawer 规范）
 - ❌ 移除了在线图标库支持
 - ❌ 移除了 TypeScript 类型定义
 
@@ -304,16 +308,111 @@ export default {
 
 | 参数 | 说明 | 类型 | 默认值 | 必填 |
 |------|------|------|--------|------|
+| type | 图标类型：element \| iconfont | String | element | 否 |
 | icon | 图标名称 | String | - | 是 |
 | size | 图标大小 | Number/String | 16 | 否 |
-| color | 图标颜色 | String | - | 否 |
+| color | 图标颜色（不设置时跟随系统主题） | String | - | 否 |
 | hoverColor | 悬停时的颜色 | String | - | 否 |
 | className | 自定义类名 | String | - | 否 |
+| tooltip | Tooltip 文本内容 | String | - | 否 |
+| popoverTitle | Popover 标题（有标题时显示为 popover） | String | - | 否 |
+| tooltipTrigger | Tooltip/Popover 触发方式 | String | hover | 否 |
+| tooltipPlacement | Tooltip/Popover 位置 | String | top | 否 |
+| disabled | 是否禁用 | Boolean | false | 否 |
 
 ### 图标类型说明
 
-1. **图标字体**：直接使用类名，如 `icon-home`、`el-icon-edit` 等
-2. **本地 SVG**：使用 `svg-icon:` 前缀，如 `svg-icon:user`
+1. **Element Plus 图标**：使用 Element Plus 内置图标，如 `Edit`、`Delete` 等
+2. **图标字体**：使用 iconfont 等字体图标，如 `icon-home`、`icon-user` 等
+
+### 新功能使用示例
+
+#### 1. Tooltip 功能
+```vue
+<template>
+  <!-- 基础 Tooltip -->
+  <ZxIcon icon="Edit" tooltip="编辑" />
+  
+  <!-- 自定义触发方式和位置 -->
+  <ZxIcon 
+    icon="Delete" 
+    tooltip="删除操作" 
+    tooltip-trigger="click"
+    tooltip-placement="bottom"
+  />
+</template>
+```
+
+#### 2. Popover 功能
+```vue
+<template>
+  <!-- 基础 Popover -->
+  <ZxIcon 
+    icon="QuestionFilled" 
+    popover-title="帮助信息"
+    tooltip="点击查看详细信息"
+  />
+  
+  <!-- 带自定义内容的 Popover -->
+  <ZxIcon 
+    icon="Setting" 
+    popover-title="设置选项"
+    tooltip-trigger="click"
+  >
+    <template #popoverContent>
+      <div>
+        <p>这里是详细的设置说明</p>
+        <el-button size="small">确认</el-button>
+      </div>
+    </template>
+  </ZxIcon>
+</template>
+```
+
+#### 3. 禁用状态
+```vue
+<template>
+  <!-- 禁用的图标 -->
+  <ZxIcon icon="Edit" disabled tooltip="当前不可编辑" />
+  
+  <!-- 禁用状态下不显示 tooltip -->
+  <ZxIcon icon="Delete" disabled />
+</template>
+```
+
+#### 4. 跟随系统主题
+```vue
+<template>
+  <!-- 不设置 color 时自动跟随系统主题 -->
+  <ZxIcon icon="User" />
+  
+  <!-- 设置自定义颜色 -->
+  <ZxIcon icon="User" color="var(--el-color-primary)" />
+  
+  <!-- 悬停效果 -->
+  <ZxIcon 
+    icon="Heart" 
+    hover-color="var(--el-color-danger)"
+  />
+</template>
+```
+
+#### 5. 事件处理
+```vue
+<template>
+  <ZxIcon 
+    icon="Plus" 
+    tooltip="添加项目"
+    @click="handleAdd"
+  />
+</template>
+
+<script setup>
+const handleAdd = () => {
+  console.log('添加操作')
+}
+</script>
+```
 
 ## 样式定制
 

@@ -8,29 +8,31 @@
     :close-on-click-modal="maskClosable"
     :close-on-press-escape="true"
     :destroy-on-close="unmountOnClose"
+    :modal-class="modalClass"
     :class="[
       'zx-dialog',
       !mask ? 'zx-dialog-no-mask' : '',
       noContentPadding ? 'zx-dialog-no-content-padding' : '',
       noTitle ? 'zx-dialog-no-title' : '',
-      `zx-dialog-${dialogSize}`
+      `zx-dialog-${dialogSize}`,
+      customClass
     ]"
-    :style="dialogStyle"
+    :style="dynamicStyle"
     :before-close="handleBeforeClose"
     @open="handleOpen"
     @close="handleClose"
   >
     <!-- 自定义标题栏 -->
     <template #header="{ close, titleId, titleClass }">
-      <div class="flex items-center justify-between w-full">
+      <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
         <slot name="title">
-          <div class="flex flex-1 items-center justify-between overflow-hidden">
-            <div class="flex flex-1 items-center overflow-hidden">
-              <span :id="titleId" :class="titleClass" class="truncate max-w-[300px]">
+          <div style="display: flex; flex: 1 1 0%; align-items: center; justify-content: space-between; overflow: hidden;">
+            <div style="display: flex; flex: 1 1 0%; align-items: center; overflow: hidden;">
+              <span :id="titleId" :class="titleClass" class="truncate" style="max-width: 300px;">
                 {{ title }}
               </span>
               <slot name="headerLeft"></slot>
-              <el-tag v-if="titleTag" :color="titleTagColor" class="ml-2 mr-auto">
+              <el-tag v-if="titleTag" :color="titleTagColor" style="margin-left: 0.5rem; margin-right: auto;">
                 {{ titleTag }}
               </el-tag>
             </div>
@@ -76,23 +78,23 @@
     <!-- 底部操作栏 -->
     <template v-if="footer" #footer>
       <slot name="footer">
-        <div class="flex" :class="[switchProps?.showSwitch ? 'justify-between' : 'justify-end']">
+        <div style="display: flex;" :style="{ 'justify-content': switchProps?.showSwitch ? 'space-between' : 'flex-end' }">
           <!-- 开关区域 -->
-          <div v-if="switchProps?.showSwitch" class="flex flex-row items-center justify-center">
-            <el-switch v-model="switchEnable" class="mr-1" size="small" />
+          <div v-if="switchProps?.showSwitch" style="display: flex; flex-direction: row; align-items: center; justify-content: center;">
+            <el-switch v-model="switchEnable" style="margin-right: 0.25rem;" size="small" />
             <el-tooltip v-if="switchProps?.switchTooltip" :content="switchProps?.switchTooltip">
-              <span class="flex items-center">
-                <span class="mr-1">{{ switchProps?.switchName }}</span>
-                <span class="mt-[2px]">
-                  <ZxIcon name="question-circle" class="h-[16px] w-[16px] text-[rgb(var(--el-color-primary))]" />
+              <span style="display: flex; align-items: center;">
+                <span style="margin-right: 0.25rem;">{{ switchProps?.switchName }}</span>
+                <span style="margin-top: 2px;">
+                  <ZxIcon name="question-circle" style="height: 16px; width: 16px;" class="text-\[rgb\(var\(--el-color-primary\)\)\]" />
                 </span>
               </span>
             </el-tooltip>
-            <span v-else class="mr-1">{{ switchProps?.switchName }}</span>
+            <span v-else style="margin-right: 0.25rem;">{{ switchProps?.switchName }}</span>
           </div>
           
           <!-- 按钮区域 -->
-          <div class="flex justify-end">
+          <div style="display: flex; justify-content: flex-end;">
             <slot name="footerLeft"></slot>
             <el-button v-if="showCancel" :disabled="okLoading" @click="handleCancel">
               {{ cancelText || '取消' }}
@@ -195,8 +197,8 @@ const props = defineProps({
   },
   dialogSize: {
     type: String,
-    default: 'medium',
-    validator: (value) => ['small', 'medium', 'large'].includes(value)
+    default: 'small',
+    validator: (value) => ['small', 'large'].includes(value)
   },
   noContentPadding: {
     type: Boolean,
@@ -233,6 +235,28 @@ const props = defineProps({
   confirm: {
     type: Function,
     default: null
+  },
+  modalClass: {
+    type: String,
+    default: 'zx-dialog-modal'
+  },
+  // 自定义 class 支持
+  customClass: {
+    type: [String, Array, Object],
+    default: ''
+  },
+  // Padding 配置 props
+  headerPadding: {
+    type: String,
+    default: ''
+  },
+  bodyPadding: {
+    type: String,
+    default: ''
+  },
+  footerPadding: {
+    type: String,
+    default: ''
   }
 })
 
@@ -253,6 +277,25 @@ const confirmLoading = ref(false)
 
 // 计算对话框宽度
 const dialogWidth = ref(props.width)
+
+// 计算动态样式，支持 props 覆盖 CSS 变量
+const dynamicStyle = computed(() => {
+  const style = { ...props.dialogStyle }
+  
+  if (props.headerPadding) {
+    style['--zx-dialog-header-padding'] = props.headerPadding
+  }
+  
+  if (props.bodyPadding) {
+    style['--zx-dialog-body-padding'] = props.bodyPadding
+  }
+  
+  if (props.footerPadding) {
+    style['--zx-dialog-footer-padding'] = props.footerPadding
+  }
+  
+  return style
+})
 
 // 监听 modelValue 变化
 watch(

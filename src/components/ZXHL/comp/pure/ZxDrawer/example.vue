@@ -22,6 +22,9 @@
         <el-button type="danger" @click="openNoMaskDrawer">
           无遮罩抽屉
         </el-button>
+        <el-button type="primary" plain @click="openHeaderRightDrawer">
+          自定义头部操作
+        </el-button>
       </el-space>
     </div>
 
@@ -50,7 +53,6 @@
       v-if="currentDrawer"
       v-model="drawerVisible"
       :title="currentDrawer.title"
-      :show-full-screen="currentDrawer.showFullScreen"
       :width="currentDrawer.width"
       :disabled-width-drag="currentDrawer.disabledWidthDrag"
       :descriptions="currentDrawer.descriptions"
@@ -69,6 +71,24 @@
         </span>
         <span v-else>{{ item.value }}</span>
       </template>
+      
+      <template v-if="currentDrawer.showHeaderRight" #headerRight>
+        <ZxIcon 
+          icon="Refresh" 
+          tooltip="刷新数据" 
+          @click="handleRefresh"
+        />
+        <ZxIcon 
+          icon="Download" 
+          tooltip="下载数据" 
+          @click="handleDownload"
+        />
+        <ZxIcon 
+          icon="Setting" 
+          tooltip="设置" 
+          @click="handleSettings"
+        />
+      </template>
     </ZxDrawer>
   </div>
 </template>
@@ -77,6 +97,7 @@
 import { ref, reactive, defineComponent, h } from 'vue'
 import { ElMessage, ElForm, ElFormItem, ElInput, ElAlert, ElTable, ElTableColumn, ElCard, ElTag } from 'element-plus'
 import ZxDrawer from './index.vue'
+import ZxIcon from '@/components/ZXHL/comp/pure/ZxIcon'
 import { useTheme } from '@/composables/useTheme.js'
 
 // 主题管理
@@ -226,6 +247,36 @@ const createNoMaskContent = () => {
   })
 }
 
+const createHeaderRightContent = () => {
+  return defineComponent({
+    setup() {
+      return () => h('div', { class: 'test-content' }, [
+        h('h3', '自定义头部操作'),
+        h('p', '这个抽屉展示了如何使用 headerRight 插槽添加自定义操作按钮。'),
+        h(ElAlert, {
+          title: '功能说明',
+          type: 'info',
+          description: '头部右侧提供了刷新、下载、设置等操作按钮，同时支持全屏切换和拖拽调整宽度。',
+          showIcon: true,
+          closable: false
+        }),
+        h('div', { style: 'margin-top: 20px;' }, [
+          h(ElCard, {}, {
+            header: () => h('span', '操作演示'),
+            default: () => [
+              h('p', '• 点击头部的刷新按钮可以刷新数据'),
+              h('p', '• 点击下载按钮可以下载数据'),
+              h('p', '• 点击设置按钮可以打开设置'),
+              h('p', '• 点击全屏按钮可以切换全屏模式'),
+              h('p', '• 拖拽左边缘可以调整抽屉宽度')
+            ]
+          })
+        ])
+      ])
+    }
+  })
+}
+
 // Drawer配置工厂函数
 const createDrawerConfig = (type) => {
   const configs = {
@@ -289,6 +340,19 @@ const createDrawerConfig = (type) => {
         ElMessage.success('确认操作成功！')
         handleDrawerCancel()
       }
+    },
+    headerRight: {
+      title: '自定义头部操作',
+      width: 600,
+      showFullScreen: true,
+      disabledWidthDrag: false,
+      mask: true,
+      showHeaderRight: true,
+      component: createHeaderRightContent(),
+      onConfirm: () => {
+        ElMessage.success('确认操作成功！')
+        handleDrawerCancel()
+      }
     }
   }
   return configs[type]
@@ -319,6 +383,23 @@ const openDescriptionDrawer = () => {
 
 const openNoMaskDrawer = () => {
   showDrawer('noMask')
+}
+
+const openHeaderRightDrawer = () => {
+  showDrawer('headerRight')
+}
+
+// 头部操作按钮事件处理
+const handleRefresh = () => {
+  ElMessage.success('数据已刷新')
+}
+
+const handleDownload = () => {
+  ElMessage.success('开始下载数据')
+}
+
+const handleSettings = () => {
+  ElMessage.info('打开设置面板')
 }
 
 // 处理drawer取消/关闭

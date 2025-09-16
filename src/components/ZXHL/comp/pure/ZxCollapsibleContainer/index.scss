@@ -1,0 +1,152 @@
+// ZxCollapsibleContainer 可折叠容器组件样式
+// 支持展开收起的侧边容器组件，具有状态指示和平滑动画效果
+
+.zx-collapsible-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  transition: width 0.3s ease;
+  overflow: hidden;
+  z-index: 100;
+
+  &.collapsed {
+    width: 60px !important;
+  }
+
+  .container-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid #ebeef5;
+    background: #f8f9fa;
+    min-height: 60px;
+
+    .header-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #303133;
+      margin: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+
+      .toggle-btn {
+        padding: 4px;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+        color: #606266;
+
+        &:hover {
+          background: #e6f7ff;
+          color: #409eff;
+        }
+
+        .el-icon {
+          font-size: 16px;
+        }
+      }
+    }
+  }
+
+  .container-content {
+    padding: 20px;
+    height: calc(100% - 60px);
+    overflow-y: auto;
+
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 3px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 3px;
+
+      &:hover {
+        background: #a8a8a8;
+      }
+    }
+  }
+
+  // 折叠状态下的样式
+  &.collapsed {
+    .container-header {
+      padding: 16px 8px;
+      justify-content: center;
+
+      .header-title {
+        display: none;
+      }
+
+      .header-actions {
+        .toggle-btn {
+          padding: 8px;
+        }
+      }
+    }
+
+    .container-content {
+      display: none;
+    }
+  }
+
+  // 加载状态
+  &.loading {
+    .container-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #909399;
+    }
+  }
+
+  // 响应式设计
+  @media (max-width: 768px) {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100% !important;
+    height: 100%;
+    z-index: 1000;
+    border-radius: 0;
+
+    &.collapsed {
+      width: 60px !important;
+    }
+  }
+}
+
+// 动画效果
+.zx-collapsible-container-enter-active,
+.zx-collapsible-container-leave-active {
+  transition: all 0.3s ease;
+}
+
+.zx-collapsible-container-enter-from {
+  transform: translateX(-100%);
+  opacity: 0;
+}
+
+.zx-collapsible-container-leave-to {
+  transform: translateX(-100%);
+  opacity: 0;
+}

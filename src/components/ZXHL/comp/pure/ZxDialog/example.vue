@@ -138,6 +138,39 @@
     </div>
 
     <div class="example-section">
+      <h3>Padding 配置</h3>
+      <el-button @click="paddingDialog = true">自定义 Padding</el-button>
+      <el-button @click="cssVariableDialog = true">CSS 变量 Padding</el-button>
+      
+      <!-- 通过 props 配置 padding -->
+      <ZxDialog
+        v-model="paddingDialog"
+        title="自定义 Padding 对话框"
+        header-padding="30px 40px"
+        body-padding="40px"
+        footer-padding="20px 40px"
+        width="600px"
+      >
+        <p>这是一个通过 props 配置 padding 的对话框示例。</p>
+        <p>Header padding: 30px 40px</p>
+        <p>Body padding: 40px</p>
+        <p>Footer padding: 20px 40px</p>
+      </ZxDialog>
+      
+      <!-- 通过 CSS 变量配置 padding -->
+      <ZxDialog
+        v-model="cssVariableDialog"
+        title="CSS 变量 Padding 对话框"
+        :dialog-style="customPaddingStyle"
+        width="600px"
+      >
+        <p>这是一个通过 CSS 变量配置 padding 的对话框示例。</p>
+        <p>使用了自定义的 CSS 变量来控制各部分的 padding。</p>
+        <p>Header: 10px, Body: 60px, Footer: 25px 30px</p>
+      </ZxDialog>
+    </div>
+
+    <div class="example-section">
       <h3>特殊配置</h3>
       <el-button @click="noMaskDialog = true">无遮罩</el-button>
       <el-button @click="noPaddingDialog = true">无内边距</el-button>
@@ -219,6 +252,15 @@ const form = reactive({
 // 尺寸对话框
 const sizeDialog = ref(false)
 const currentSize = ref('medium')
+
+// Padding 配置对话框
+const paddingDialog = ref(false)
+const cssVariableDialog = ref(false)
+const customPaddingStyle = {
+  '--zx-dialog-header-padding': '10px',
+  '--zx-dialog-body-padding': '60px',
+  '--zx-dialog-footer-padding': '25px 30px'
+}
 
 // 特殊配置对话框
 const noMaskDialog = ref(false)

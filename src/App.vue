@@ -1,18 +1,10 @@
 <script setup>
 // App.vue - 应用根组件
 // 布局和路由管理由 Vue Router 处理
-import { onMounted } from 'vue'
-
-// 应用深色主题
-onMounted(() => {
-  // 设置深色主题
-  document.documentElement.setAttribute('data-theme', 'dark')
-  document.documentElement.classList.add('dark')
-})
 </script>
 
 <template>
-  <div id="app" class="dark-theme">
+  <div id="app">
     <!-- 路由视图，布局由路由系统管理 -->
     <router-view />
   </div>
@@ -29,23 +21,28 @@ onMounted(() => {
 html, body {
   height: 100%;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  background-color: #0c1d30;
-  color: #ffffff;
 }
 
 #app {
   height: 100%;
-  background-color: #0c1d30;
 }
 
 /* ZXHL Dark Theme Global Styles */
-.dark-theme {
+/* 深色主题下的基础背景与文字色，仅在暗色系时生效 */
+html[data-theme="dark"],
+html[data-theme="dark-blue"] {
   background-color: #0c1d30;
   color: #ffffff;
 }
 
+html[data-theme="dark"] #app,
+html[data-theme="dark-blue"] #app {
+  background-color: #0c1d30;
+}
+
 /* 确保所有Element Plus组件使用深色主题 */
-.dark-theme .el-card {
+[data-theme="dark"] .el-card,
+[data-theme="dark-blue"] .el-card {
   background-color: #062846;
   border-color: #9cfff9;
 }

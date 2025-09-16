@@ -227,6 +227,30 @@ export const componentRoutes = [
           title: 'PanelHeader 面板头部组件'
         },
         component: () => import('@/components/ZXHL/comp/business/DashboardGrid/PanelComponent/PanelHeader/example.vue')
+      },
+      {
+        path: 'zx-confirm-input',
+        name: 'ZxConfirmInputDemo',
+        meta: { 
+          title: 'ZxConfirmInput 输入确认对话框'
+        },
+        component: () => import('@/components/ZXHL/comp/pure/ZxConfirmInput/example.vue')
+      },
+      {
+        path: 'zx-confirm-input-theme-test',
+        name: 'ZxConfirmInputThemeTest',
+        meta: { 
+          title: 'ZxConfirmInput 主题测试'
+        },
+        component: () => import('@/views/zx-confirm-input-theme-test.vue')
+      },
+      {
+        path: 'zx-collapsible-container',
+        name: 'ZxCollapsibleContainerDemo',
+        meta: { 
+          title: 'ZxCollapsibleContainer 可折叠容器组件'
+        },
+        component: () => import('@/components/ZXHL/comp/pure/ZxCollapsibleContainer/example.vue')
       }
     ]
   }
