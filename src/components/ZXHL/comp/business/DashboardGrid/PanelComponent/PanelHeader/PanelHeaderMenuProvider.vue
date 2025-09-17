@@ -41,7 +41,7 @@ const props = withDefaults(defineProps<Props>(), {
   autoLoadDefault: true,
   menuConfig: () => ({
     showEdit: true,
-    showDuplicate: true,
+    showDuplicate: false,
     showDelete: true,
     showExport: true,
     showFullscreen: true,

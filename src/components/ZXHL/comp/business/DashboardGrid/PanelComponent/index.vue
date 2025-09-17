@@ -103,15 +103,15 @@ const duplicatePanel = () => {
     id: newId,
     type: src.type,
     title: src.title || '未命名面板',
-    chartType: src.chartType,
+    color: src.color || '#409EFF',
     path: src.path,
     params: src.params || {},
-    contentNoPadding: !!src.contentNoPadding,
+    contentNoPadding: !!src.contentNoPadding || src.widget === 'echarts',
     gridPos: {
-      x: gridPos.x ?? src.x ?? 0,
-      y: (gridPos.y ?? src.y ?? 0) + 1, // 下移一格，避免完全重叠
-      w: gridPos.w ?? src.w ?? 6,
-      h: gridPos.h ?? src.h ?? 3
+      x: gridPos.x ?? 0,
+      y: (gridPos.y ?? 0) + 1, // 下移一格，避免完全重叠
+      w: gridPos.w ?? 6,
+      h: gridPos.h ?? 3
     }
   }
 

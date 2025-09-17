@@ -4,7 +4,8 @@
       <template #default>
         <component
           :is="dynamicComponent"
-          v-bind="{ ...componentProps, data }"
+          v-bind="componentProps"
+          v-if="dynamicComponent"
         />
       </template>
       <template #fallback>
@@ -46,7 +47,8 @@ const props = defineProps({
   data: {
     type: Object,
     default: () => ({})
-  }
+  },
+
 })
 
 // 重命名 props 避免与组件 props 冲突

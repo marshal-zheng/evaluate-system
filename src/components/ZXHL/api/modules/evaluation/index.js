@@ -95,6 +95,22 @@ export function getEvaluationStatistics(params) {
   })
 }
 
+// 获取评估结果数据（基础接口）
+export function getEvaluationResultData(params) {
+  return ZXR.get({
+    url: '/evaluation/result',
+    params
+  })
+}
+
+// 获取动态评估结果数据（支持不同场景）
+export function getDynamicEvaluationResult(params) {
+  return ZXR.get({
+    url: '/evaluation/result/dynamic',
+    params
+  })
+}
+
 // 默认导出所有API
 export const evaluationApi = {
   getEvaluationList,
@@ -108,7 +124,9 @@ export const evaluationApi = {
   getEvaluationStatus,
   getEvaluationResult,
   exportEvaluationResult,
-  getEvaluationStatistics
+  getEvaluationStatistics,
+  getEvaluationResultData,
+  getDynamicEvaluationResult
 }
 
 export default evaluationApi

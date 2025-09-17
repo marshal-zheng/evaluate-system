@@ -19,16 +19,6 @@ const routes = [
         ...route,
         path: `/demo/${route.path}`
       })),
-      // 测试页面路由
-      {
-        path: '/test/panel-header-menu',
-        name: 'PanelHeaderMenuTest',
-        meta: { 
-          title: 'PanelHeaderMenu 测试',
-          showInMenu: false
-        },
-        component: () => import('@/views/panel-header-menu-test.vue')
-      },
       {
         path: '/test/edit-pane',
         name: 'EditPaneTest',
@@ -37,7 +27,16 @@ const routes = [
           showInMenu: false
         },
         component: () => import('@/views/panel-edit-test.vue')
-      }
+      },
+      {
+        path: '/test/table-widget',
+        name: 'TableWidgetTest',
+        meta: { 
+          title: 'TableWidget 测试',
+          showInMenu: false
+        },
+        component: () => import('@/views/table-widget-test.vue')
+      },
     ]
   },
   // 404 页面路由 - 必须放在最后

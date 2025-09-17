@@ -182,7 +182,7 @@ const props = withDefaults(defineProps<Props>(), {
   autoLoadDefaultMenu: true,
   menuConfig: () => ({
     showEdit: true,
-    showDuplicate: true,
+    showDuplicate: false,
     showDelete: true,
     showExport: false,
     showFullscreen: false,

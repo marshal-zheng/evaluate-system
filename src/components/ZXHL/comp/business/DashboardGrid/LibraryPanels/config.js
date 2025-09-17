@@ -25,7 +25,7 @@ export const chartComponentTypes = [
     description: '显示数据随时间变化的趋势',
     type: 'line',
     icon: 'line',
-    widget: 'chart',
+    widget: 'echarts',
     defaultConfig: {
       w: 8,
       h: 6
@@ -37,7 +37,7 @@ export const chartComponentTypes = [
     description: '比较不同类别的数据大小',
     type: 'bar',
     icon: 'barchart',
-    widget: 'chart',
+    widget: 'echarts',
     defaultConfig: {
       w: 8,
       h: 6
@@ -49,20 +49,45 @@ export const chartComponentTypes = [
     description: '显示各部分占整体的比例',
     type: 'pie',
     icon: 'pie',
-    widget: 'chart',
+    widget: 'echarts',
+    defaultConfig: {
+      w: 12,
+      h: 8
+    }
+  },
+  {
+    id: 'donut',
+    name: '环形图',
+    description: '带中心空洞的饼状图，突出显示数据比例关系',
+    type: 'donut',
+    icon: 'donut-pie',
+    size: 32,
+    widget: 'echarts',
+    defaultConfig: {
+      w: 12,
+      h: 10
+    }
+  },
+  {
+    id: 'radar',
+    name: '雷达图',
+    description: '多维度数据对比分析',
+    type: 'radar',
+    icon: 'radar-area',
+    widget: 'echarts',
     defaultConfig: {
       w: 6,
       h: 6
     }
   },
   {
-    id: 'barchart',
-    name: '雷达图',
-    description: '多维度数据对比分析',
-    type: 'radar',
+    id: 'areaRadar',
+    name: '雷达面积图',
+    description: '带填充区域的多维度数据对比分析',
+    type: 'areaRadar',
     icon: 'radar',
     size: 32,
-    widget: 'chart',
+    widget: 'echarts',
     defaultConfig: {
       w: 6,
       h: 6
@@ -74,7 +99,7 @@ export const chartComponentTypes = [
     description: '平滑的数据趋势展示',
     type: 'curve',
     icon: 'smooth-line',
-    widget: 'chart',
+    widget: 'echarts',
     defaultConfig: {
       w: 8,
       h: 6
@@ -86,7 +111,7 @@ export const chartComponentTypes = [
     description: '显示两个变量之间的关系',
     type: 'scatter',
     icon: 'scatter',
-    widget: 'chart',
+    widget: 'echarts',
     defaultConfig: {
       w: 8,
       h: 6
@@ -98,22 +123,34 @@ export const chartComponentTypes = [
     description: '强调数据量的累积效果',
     type: 'area',
     icon: 'area',
-    widget: 'chart',
+    widget: 'echarts',
     defaultConfig: {
       w: 8,
       h: 6
     }
   },
   {
+    id: 'parallel',
+    name: '平行坐标图',
+    description: '多维数据的可视化分析，适合展示高维数据间的关系',
+    type: 'parallel',
+    icon: 'parallel',
+    widget: 'echarts',
+    defaultConfig: {
+      w: 12,
+      h: 8
+    }
+  },
+  {
     id: 'table',
     name: '表格',
-    description: '以表格形式展示数据',
+    description: '以表格形式展示数据，支持自定义列配置',
     type: 'table',
     icon: 'table-panel',
     widget: 'table',
     defaultConfig: {
-      w: 8,
-      h: 6
+      w: 12,
+      h: 8
     }
   }
 ]
@@ -167,7 +204,7 @@ export function getDefaultConfig(id) {
  */
 export const componentWidgets = [
   {
-    id: 'chart',
+    id: 'vizLib',
     name: '图表组件',
     description: '各种数据可视化图表'
   }

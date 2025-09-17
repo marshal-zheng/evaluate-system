@@ -36,7 +36,7 @@
       >
         <AsyncLoadComp
           :key="String(panel.id)"
-          :name="panel.type"
+          :name="panel.widget"
           :props="getPanelProps(panel)"
         />
       </PanelComponent>
@@ -120,16 +120,18 @@ const onLayoutChange = (newLayout) => {
     if (typeof panel.updateGridPos === 'function') {
       panel.updateGridPos(newPos)
     } else {
-      // 兼容普通对象：写回 gridPos 以及顶层 x/y/w/h 字段
+      // 兼容普通对象：只写回 gridPos，不再维护顶层 x/y/w/h 字段
       panel.gridPos = panel.gridPos || {}
       panel.gridPos.x = newPos.x
       panel.gridPos.y = newPos.y
       panel.gridPos.w = newPos.w
       panel.gridPos.h = newPos.h
-      panel.x = newPos.x
-      panel.y = newPos.y
-      panel.w = newPos.w
-      panel.h = newPos.h
+      
+      // 清理可能存在的根级别位置字段，避免混淆
+      delete panel.x
+      delete panel.y
+      delete panel.w
+      delete panel.h
     }
   })
 
@@ -148,12 +150,12 @@ const buildLayout = () => {
     if (!panel.id) panel.id = panelId
     // 使用 panel.id 作为布局项 i，与子元素 key 对齐
     panelMap.value[panelId] = panel
-    // 兼容普通对象结构（x/y/w/h 在顶层）
+    // 使用 gridPos 对象获取位置信息
     const gp = panel.gridPos && typeof panel.gridPos === 'object' ? panel.gridPos : {}
-    const x = gp.x ?? panel.x ?? 0
-    const y = gp.y ?? panel.y ?? 0
-    const w = gp.w ?? panel.w ?? 4
-    const h = gp.h ?? panel.h ?? 3
+    const x = gp.x ?? 0
+    const y = gp.y ?? 0
+    const w = gp.w ?? 4
+    const h = gp.h ?? 3
     const panelPos = { i: panelId, x, y, w, h }
 
     if (panel.type === 'row') {
@@ -173,10 +175,10 @@ const panelPropsCache = new Map()
 const getPanelProps = (panel) => {
   const id = panel?.id ?? 'unknown'
   const cached = panelPropsCache.get(id)
+  
   const next = {
-    color: panel.chartType,
+    color: panel.color || '#409EFF', // 使用 panel.color 或默认颜色
     title: panel.title,
-    chartType: panel.chartType,
     panel,
     dashboard: props.dashboard,
     onPanelSizeChanged,
@@ -195,7 +197,6 @@ const getPanelProps = (panel) => {
     cached &&
     cached.color === next.color &&
     cached.title === next.title &&
-    cached.chartType === next.chartType &&
     cached.panel === next.panel &&
     cached.dashboard === next.dashboard
   ) {
@@ -292,8 +293,10 @@ const onDrop = (layout, event, layoutItem) => {
   const newPanel = {
     id: newId,
     type: payload.type,
+    widget: payload.widget,
     title: payload.title || `${payload.type} 组件`,
-    chartType: payload.chartType,
+    description: payload.description || '',
+    color: payload.color || '#409EFF', // 使用颜色而不是 chartType
     gridPos: {
       x: layoutItem.x,
       y: layoutItem.y,

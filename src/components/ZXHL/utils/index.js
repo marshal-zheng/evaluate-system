@@ -44,3 +44,48 @@ export function generateUUID() {
     return v.toString(16)
   })
 }
+
+/**
+ * 判断字符串是否为有效的JSON格式
+ * @param {string} str - 要检查的字符串
+ * @returns {boolean} 是否为有效JSON
+ */
+export function isJson(str) {
+  if (typeof str !== 'string') {
+    return false
+  }
+  
+  try {
+    const parsed = JSON.parse(str)
+    // 确保解析结果是对象或数组
+    return typeof parsed === 'object' && parsed !== null
+  } catch (error) {
+    return false
+  }
+}
+
+/**
+ * 判断数据是否为有效的JSON数据（支持字符串和对象）
+ * @param {any} data - 要检查的数据
+ * @returns {boolean} 是否为有效JSON数据
+ */
+export function isValidJsonData(data) {
+  if (!data) {
+    return false
+  }
+  
+  // 如果已经是对象或数组，直接返回true
+  if (typeof data === 'object' && data !== null) {
+    return true
+  }
+  
+  // 如果是字符串，尝试解析
+  if (typeof data === 'string') {
+    return isJson(data)
+  }
+  
+  return false
+}
+
+// 导出图表数据处理工具
+export * from './evaluationDataProcessor.js'

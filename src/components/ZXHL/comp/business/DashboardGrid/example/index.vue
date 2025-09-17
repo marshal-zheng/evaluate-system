@@ -13,8 +13,27 @@
     <div class="action-buttons">
       <el-button v-if="panels.length > 0" @click="clearAll" type="warning">清空全部</el-button>
       <el-button @click="exportLayout" type="primary">导出布局</el-button>
+      
+      <!-- 评估结果API测试按钮 -->
+      <div class="api-test-buttons">
+        <el-button @click="fetchEvaluationResult()" type="success" :loading="loading">
+          获取基础评估结果
+        </el-button>
+        <el-button @click="fetchDynamicEvaluationResult('combat')" type="info" :loading="loading">
+          获取作战场景结果
+        </el-button>
+        <el-button @click="fetchDynamicEvaluationResult('defense')" type="warning" :loading="loading">
+          获取防御场景结果
+        </el-button>
+        <el-button 
+          v-if="panels.length > 0 && evaluationData" 
+          @click="updatePanelsData" 
+          type="primary"
+        >
+          更新面板数据
+        </el-button>
+      </div>
     </div>
-    
     <!-- 空白画布 -->
     <div class="canvas-area">
       <DashboardGrid 
@@ -60,10 +79,12 @@
 </template>
 
 <script>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
+import { getEvaluationResultData, getDynamicEvaluationResult } from '@/components/ZXHL/api/modules/evaluation/index.js'
 import DashboardGrid from '../index.vue'
 import LibraryPanels from '../LibraryPanels/index.vue'
 import EditPane from '../EditPane/index.vue'
+import { transformToLineChart, transformToPieChart } from '../../../../utils/evaluationDataProcessor'
 
 export default {
   name: 'DashboardGridExample',
@@ -85,10 +106,33 @@ export default {
     })
     const exportedLayout = ref('')
     const copyHint = ref(false)
+    
+    // 评估结果数据状态
+    const evaluationData = ref(null)
+    const loading = ref(false)
+    const error = ref(null)
+    const activeCollapse = ref(['1'])
 
     // 处理面板添加（拖拽添加）
     const handlePanelAdded = (newPanel) => {
       console.log('Panel added:', newPanel)
+      
+      // 如果有评估数据，自动将数据传递给新添加的面板
+      if (evaluationData.value && newPanel) {
+        // 为新面板设置数据
+        if (typeof newPanel.setData === 'function') {
+          // 如果是 PanelModel 实例，使用 setData 方法
+          newPanel.setData(evaluationData.value)
+        } else {
+          // 如果是普通对象，直接设置 metadata
+          if (!newPanel.metadata) {
+            newPanel.metadata = {}
+          }
+          newPanel.metadata.data = JSON.stringify(evaluationData.value)
+        }
+        console.log('数据已传递给面板:', newPanel.id)
+      }
+      
       panels.value.push(newPanel)
     }
 
@@ -123,6 +167,11 @@ export default {
       if (panels.value.length > 0) {
         const p = panels.value[0]
         p.title = formData.title
+        p.description = formData.description
+        p.transparentBackground = formData.transparentBackground
+        // 也可以更新宽高信息（如果需要的话）
+        // p.width = formData.width
+        // p.height = formData.height
       }
       showEditPane.value = false
     }
@@ -145,8 +194,10 @@ export default {
         panels: panels.value.map(panel => ({
           id: panel.id,
           type: panel.type,
+          widget: panel.widget,
           title: panel.title,
-          type: panel.type,
+          description: panel.description,
+          color: panel.color,
           gridPos: panel.gridPos
         }))
       }
@@ -180,10 +231,90 @@ export default {
       // 拖拽逻辑已在LibraryPanels组件中处理
     }
 
+    // 获取评估结果数据
+    const fetchEvaluationResult = async (scenario = 'default') => {
+      loading.value = true
+      error.value = null
+      
+      try {
+        const response = await getEvaluationResultData({ scenario })
+
+        console.log('response', transformToPieChart(response.data))
+        
+        if (response.success) {
+          evaluationData.value = response.data
+          console.log('评估结果数据:', response.data)
+        } else {
+          throw new Error(response.msg || '获取数据失败')
+        }
+      } catch (err) {
+        error.value = err.message || '网络请求失败'
+        console.error('获取评估结果失败:', err)
+      } finally {
+        loading.value = false
+      }
+    }
+
+    // 获取动态评估结果数据
+    const fetchDynamicEvaluationResult = async (scenario = 'default') => {
+      loading.value = true
+      error.value = null
+      
+      try {
+        const response = await getDynamicEvaluationResult({ scenario })
+        
+        if (response.success) {
+          evaluationData.value = response.data
+          console.log('动态评估结果数据:', response.data)
+        } else {
+          throw new Error(response.msg || '获取数据失败')
+        }
+      } catch (err) {
+        error.value = err.message || '网络请求失败'
+        console.error('获取动态评估结果失败:', err)
+      } finally {
+        loading.value = false
+      }
+    }
+
+    // 更新所有面板的数据
+    const updatePanelsData = () => {
+      if (!evaluationData.value) {
+        console.warn('没有可用的评估数据')
+        return
+      }
+
+      panels.value.forEach(panel => {
+        if (typeof panel.setData === 'function') {
+          // 如果是 PanelModel 实例，使用 setData 方法
+          panel.setData(evaluationData.value)
+        } else {
+          // 如果是普通对象，直接设置 metadata
+          if (!panel.metadata) {
+            panel.metadata = {}
+          }
+          panel.metadata.data = JSON.stringify(evaluationData.value)
+        }
+      })
+      
+      console.log(`已为 ${panels.value.length} 个面板更新数据`)
+      // 可以显示一个成功提示
+      ElMessage.success(`已为 ${panels.value.length} 个面板更新数据`)
+    }
+
+    // 组件挂载时加载数据
+    onMounted(() => {
+      fetchEvaluationResult()
+    })
+
     return {
       panels,
       exportedLayout,
       copyHint,
+      evaluationData,
+      loading,
+      error,
+      activeCollapse,
       handlePanelAdded,
       handlePanelRemoved,
       handleLayoutChanged,
@@ -198,7 +329,10 @@ export default {
       handleEditCancel,
       handleEditReset,
       handleChartSelect,
-      handleChartDrag
+      handleChartDrag,
+      fetchEvaluationResult,
+      fetchDynamicEvaluationResult,
+      updatePanelsData
     }
   }
 }
@@ -216,6 +350,49 @@ export default {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
+  align-items: center;
+}
+
+.api-test-buttons {
+  display: flex;
+  gap: 10px;
+  margin-left: 20px;
+  flex-wrap: wrap;
+}
+
+.evaluation-result-section {
+  margin-top: 20px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.evaluation-result-section h3 {
+  margin: 0 0 15px 0;
+  color: #333;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.result-display {
+  margin-top: 15px;
+}
+
+.result-collapse {
+  margin-top: 15px;
+}
+
+.json-display {
+  background: #f5f5f5;
+  padding: 15px;
+  border-radius: 4px;
+  font-size: 12px;
+  line-height: 1.4;
+  max-height: 400px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
 }
 
 .canvas-area {

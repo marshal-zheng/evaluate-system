@@ -14,7 +14,7 @@ import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { getGenerateId } from '../../../utils'
 import { applyThemeToOption, createThemeWatcher } from './theme.js'
 
-import { BarChart, CustomChart, LineChart, PieChart, RadarChart } from 'echarts/charts'
+import { BarChart, CustomChart, LineChart, PieChart, RadarChart, ParallelChart, ScatterChart } from 'echarts/charts'
 import {
   DataZoomComponent,
   GraphicComponent,
@@ -22,8 +22,11 @@ import {
   LegendComponent,
   TitleComponent,
   TooltipComponent,
+  ParallelComponent,
 } from 'echarts/components'
 import { use } from 'echarts/core'
+import { DatasetComponent, TransformComponent } from 'echarts/components'
+import { BoxplotChart } from 'echarts/charts'
 import { CanvasRenderer } from 'echarts/renderers'
 import VCharts from 'vue-echarts'
 
@@ -34,13 +37,24 @@ use([
   LineChart,
   PieChart,
   RadarChart,
+  ScatterChart,
+  BoxplotChart,
+  ParallelChart,
   GridComponent,
   TooltipComponent,
   LegendComponent,
   DataZoomComponent,
+  DatasetComponent,
+  TransformComponent,
   GraphicComponent,
   TitleComponent,
+  ParallelComponent,
 ])
+
+// 提示：如果需要使用 dataset.transform: 'boxplot'，
+// 请手工在业务侧做五数概括数据预处理，
+// 或引入额外的数据统计扩展库（如 ecStat），
+// 这里不从 'echarts/transform' 引入以避免构建错误。
 
 // 定义属性
 const props = defineProps({
@@ -81,39 +95,26 @@ const themeWatcherDispose = ref(null)
 
 // 计算属性：应用主题的配置
 const themedOptions = computed(() => {
-  if (!props.enableThemeAdaptation) {
-    return props.options
-  }
-  
+  if (!props.enableThemeAdaptation) return props.options
   return applyThemeToOption(props.options, chartContainer.value)
 })
 
-// 监听配置变化，重新应用主题
-watch(
-  () => props.options,
-  () => {
-    if (props.enableThemeAdaptation && chartRef.value) {
-      // 延迟更新，确保 DOM 已更新
-      nextTick(() => {
-        chartRef.value.setOption(themedOptions.value, true)
-      })
-    }
-  },
-  { deep: true }
-)
+// 移除主动 setOption，交给 <VCharts :option="themedOptions"> 自行更新，
+// 避免 “setOption should not be called during main process” 报错。
+watch(() => props.options, () => {}, { deep: true })
 
 // 主题变化处理函数
 const handleThemeChange = (themeInfo) => {
   currentTheme.value = themeInfo
   emit('theme-change', themeInfo)
   
-  // 重新应用主题配置
-  if (props.enableThemeAdaptation && chartRef.value) {
-    nextTick(() => {
-      const newOptions = applyThemeToOption(props.options, chartContainer.value)
-      chartRef.value.setOption(newOptions, true)
-    })
-  }
+  // 触发 VCharts 依赖的 computed 重新计算：
+  // themedOptions 内部会基于 DOM 样式重新生成配置。
+  // 由于 themedOptions 依赖 props.options 与容器，
+  // 这里通过强制刷新尺寸让 VCharts 重算布局与样式。
+  nextTick(() => {
+    if (chartRef.value) chartRef.value.resize()
+  })
 }
 
 // 生命周期
@@ -130,25 +131,25 @@ onMounted(() => {
     if (chartRef.value) {
       const chart = chartRef.value
       
-      chart.on('ready', () => {
-        emit('ready', chart)
-      })
+      // chart.on('ready', () => {
+      //   emit('ready', chart)
+      // })
       
-      chart.on('click', (params) => {
-        emit('click', params)
-      })
+      // chart.on('click', (params) => {
+      //   emit('click', params)
+      // })
       
-      chart.on('dblclick', (params) => {
-        emit('dblclick', params)
-      })
+      // chart.on('dblclick', (params) => {
+      //   emit('dblclick', params)
+      // })
       
-      chart.on('mouseover', (params) => {
-        emit('mouseover', params)
-      })
+      // chart.on('mouseover', (params) => {
+      //   emit('mouseover', params)
+      // })
       
-      chart.on('mouseout', (params) => {
-        emit('mouseout', params)
-      })
+      // chart.on('mouseout', (params) => {
+      //   emit('mouseout', params)
+      // })
     }
   })
 })
@@ -181,10 +182,7 @@ defineExpose({
   },
   // 手动刷新主题
   refreshTheme: () => {
-    if (props.enableThemeAdaptation && chartRef.value) {
-      const newOptions = applyThemeToOption(props.options, chartContainer.value)
-      chartRef.value.setOption(newOptions, true)
-    }
+    if (chartRef.value) chartRef.value.resize()
   },
   // 获取当前应用的主题配置
   getThemedOptions: () => themedOptions.value,

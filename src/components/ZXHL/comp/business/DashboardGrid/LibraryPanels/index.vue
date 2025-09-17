@@ -101,14 +101,18 @@ const handleComponentSelect = (component) => {
 }
 
 const handleDragStart = (event, component) => {
+  console.log(component, event)
   // 获取组件的默认配置
   const defaultConfig = getDefaultConfig(component.id)
+
+  const { type, widget, name: title, description } = component
   
   // 设置拖拽数据 - 使用text/plain格式，与DashboardGrid期望的格式一致
   const dragPayload = {
-    type: 'echarts',
-    chartType: component.type,
-    title: component.name,
+    widget,
+    type,
+    title,
+    description,
     w: defaultConfig.w,  // 使用组件的默认宽度
     h: defaultConfig.h   // 使用组件的默认高度
   }
