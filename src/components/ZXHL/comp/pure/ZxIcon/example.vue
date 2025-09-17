@@ -177,6 +177,70 @@
         </div>
       </div>
     </div>
+
+    <div class="demo-section">
+      <h3>SVG 图标演示</h3>
+      <p style="color: #666; margin-bottom: 20px;">使用 svg-icon: 前缀来显示本地 SVG 图标</p>
+      
+      <div class="demo-section">
+        <h4>基础用法</h4>
+        <div class="icon-row">
+          <ZxIcon icon="svg-icon:barchart" :size="20" />
+          <ZxIcon icon="svg-icon:home" :size="24" color="#409EFF" />
+          <ZxIcon icon="svg-icon:setting" :size="28" color="#F56C6C" />
+          <ZxIcon icon="svg-icon:heart" :size="32" color="#67C23A" />
+        </div>
+      </div>
+      
+      <div class="demo-section">
+        <h4>不同尺寸</h4>
+        <div class="icon-row">
+          <ZxIcon icon="svg-icon:star" :size="16" />
+          <ZxIcon icon="svg-icon:star" :size="20" />
+          <ZxIcon icon="svg-icon:star" :size="24" />
+          <ZxIcon icon="svg-icon:star" :size="32" />
+          <ZxIcon icon="svg-icon:star" :size="40" />
+        </div>
+      </div>
+      
+      <div class="demo-section">
+        <h4>悬停效果</h4>
+        <div class="icon-row">
+          <ZxIcon icon="svg-icon:heart" :size="32" color="#909399" hover-color="#F56C6C" />
+          <ZxIcon icon="svg-icon:star" :size="32" color="#909399" hover-color="#E6A23C" />
+          <ZxIcon icon="svg-icon:user" :size="32" color="#909399" hover-color="#409EFF" />
+        </div>
+      </div>
+      
+      <div class="demo-section">
+        <h4>Tooltip 功能</h4>
+        <div class="icon-row">
+          <ZxIcon icon="svg-icon:edit" :size="24" tooltip="编辑" />
+          <ZxIcon icon="svg-icon:delete" :size="24" tooltip="删除" color="#F56C6C" />
+          <ZxIcon icon="svg-icon:search" :size="24" tooltip="搜索" tooltip-placement="bottom" />
+          <ZxIcon icon="svg-icon:setting" :size="24" tooltip="设置" tooltip-trigger="click" />
+        </div>
+      </div>
+      
+      <div class="demo-section">
+        <h4>禁用状态</h4>
+        <div class="icon-row">
+          <ZxIcon icon="svg-icon:edit" :size="24" disabled tooltip="当前不可编辑" />
+          <ZxIcon icon="svg-icon:delete" :size="24" disabled color="#F56C6C" />
+          <ZxIcon icon="svg-icon:heart" :size="24" disabled hover-color="#67C23A" />
+        </div>
+      </div>
+      
+      <div class="demo-section">
+        <h4>常用 SVG 图标</h4>
+        <div class="icon-grid">
+          <div class="icon-item" v-for="iconName in svgIcons" :key="iconName">
+            <ZxIcon :icon="`svg-icon:${iconName}`" :size="24" />
+            <span>{{ iconName }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -208,6 +272,11 @@ export default {
         'icon_list', 'icon_calendar', 'icon_clock', 'icon_location', 'icon_lock',
         'icon_unlock', 'icon_eye', 'icon_eye_close', 'icon_copy', 'icon_cut',
         'icon_paste', 'icon_save', 'icon_print', 'icon_export', 'icon_import'
+      ],
+      // SVG 常用图标
+      svgIcons: [
+        'user', 'home', 'setting', 'heart', 'star',
+        'barchart', 'search', 'edit', 'delete'
       ]
     }
   },

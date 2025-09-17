@@ -144,7 +144,6 @@ const onDragEnd = (event) => {
 .palette-item:active {
   cursor: grabbing;
 }
-
 .color-card {
   color: var(--dg-text-on-accent);
   text-shadow: var(--dg-text-shadow-on-accent);

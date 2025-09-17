@@ -7,9 +7,24 @@
     :placement="tooltipPlacement"
     :disabled="disabled || (!tooltip && !popoverTitle)"
   >
+    <!-- SVG 图标 (通过 svg-icon: 前缀识别) -->
+    <el-icon 
+      v-if="isLocalSvg"
+      :class="iconClasses" 
+      :size="size" 
+      :color="currentColor"
+      @mouseenter="handleMouseEnter"
+      @mouseleave="handleMouseLeave"
+      @click="handleClick"
+    >
+      <svg aria-hidden="true">
+        <use :xlink:href="symbolId" />
+      </svg>
+    </el-icon>
+    
     <!-- Element Plus 图标 -->
     <el-icon 
-      v-if="type === 'element'"
+      v-else-if="type === 'element'"
       :class="iconClasses" 
       :size="size" 
       :color="currentColor"
@@ -38,9 +53,24 @@
   
   <!-- 无 tooltip/popover 时的普通图标 -->
   <template v-else>
+    <!-- SVG 图标 (通过 svg-icon: 前缀识别) -->
+    <el-icon 
+      v-if="isLocalSvg"
+      :class="iconClasses" 
+      :size="size" 
+      :color="currentColor"
+      @mouseenter="handleMouseEnter"
+      @mouseleave="handleMouseLeave"
+      @click="handleClick"
+    >
+      <svg aria-hidden="true">
+        <use :xlink:href="symbolId" />
+      </svg>
+    </el-icon>
+    
     <!-- Element Plus 图标 -->
     <el-icon 
-      v-if="type === 'element'"
+      v-else-if="type === 'element'"
       :class="iconClasses" 
       :size="size" 
       :color="currentColor"
@@ -76,13 +106,13 @@ defineOptions({
 
 // Props 定义
 const props = defineProps({
-  // 图标类型：element | iconfont
+  // 图标类型：element | iconfont (svg 通过 icon 前缀 svg-icon: 自动识别)
   type: {
     type: String,
     default: 'element',
     validator: (value) => ['element', 'iconfont'].includes(value)
   },
-  // 图标名称
+  // 图标名称 (SVG 图标使用 svg-icon:图标名 格式)
   icon: {
     type: String,
     required: true
@@ -141,6 +171,14 @@ const emit = defineEmits(['click'])
 const isHover = ref(false)
 
 // 计算属性
+// 判断是否为本地 SVG 图标
+const isLocalSvg = computed(() => props.icon.startsWith('svg-icon:'))
+
+// SVG 图标的 symbol ID
+const symbolId = computed(() => {
+  return isLocalSvg.value ? `#icon-${props.icon.split('svg-icon:')[1]}` : ''
+})
+
 const iconComponent = computed(() => {
   return ElementPlusIconsVue[props.icon] || null
 })

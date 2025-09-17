@@ -6,6 +6,9 @@ import './components/ZXHL/styles/index.scss'
 import App from './App.vue'
 import router from './router'
 
+// 导入 SVG icons
+import 'virtual:svg-icons-register'
+
 // Element Plus setup
 import { setupElementPlus } from './plugins/element-plus.js'
 

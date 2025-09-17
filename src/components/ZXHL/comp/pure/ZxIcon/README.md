@@ -169,6 +169,104 @@ import 'virtual:svg-icons-register'
 </template>
 ```
 
+## SVG 图标
+
+ZxIcon 组件支持本地 SVG 图标，通过 SVG sprite 技术实现高效的图标管理。使用 `svg-icon:` 前缀来识别本地 SVG 图标。
+
+### 基础用法
+
+```vue
+<template>
+  <!-- 基础 SVG 图标 -->
+  <ZxIcon icon="svg-icon:user" :size="24" />
+  
+  <!-- 带颜色的 SVG 图标 -->
+  <ZxIcon icon="svg-icon:home" :size="24" color="#409EFF" />
+  
+  <!-- 悬停效果 -->
+  <ZxIcon icon="svg-icon:heart" :size="24" color="#909399" hover-color="#F56C6C" />
+</template>
+```
+
+### 配置要求
+
+如果你需要使用本地 SVG 图标，需要配置 SVG sprite：
+
+### 1. 安装 vite-plugin-svg-icons（如果使用 Vite）
+
+```bash
+yarn add vite-plugin-svg-icons -D
+```
+
+### 2. 配置 vite.config.js
+
+```javascript
+import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
+import path from 'path'
+
+export default defineConfig({
+  plugins: [
+    // ... 其他插件
+    createSvgIconsPlugin({
+      iconDirs: [path.resolve(process.cwd(), 'src/assets/svg')],
+      symbolId: 'icon-[dir]-[name]',
+    }),
+  ],
+})
+```
+
+### 3. 在 main.js 中导入
+
+```javascript
+import 'virtual:svg-icons-register'
+```
+
+### 4. 添加 SVG 文件
+
+将 SVG 文件放在 `src/assets/svg/` 目录下，文件名即为图标名称。
+
+### SVG 图标使用方式
+
+SVG 图标通过 `svg-icon:` 前缀自动识别，无需设置 `type` 属性：
+
+| 图标类型 | 使用方式 | 示例 |
+|----------|----------|------|
+| Element Plus 图标 | 直接使用图标名 | `icon="User"` |
+| iconfont 图标 | 设置 type="iconfont" | `type="iconfont" icon="icon-user"` |
+| 本地 SVG 图标 | 使用 svg-icon: 前缀 | `icon="svg-icon:user"` |
+
+### SVG 图标属性
+
+| 属性名 | 类型 | 默认值 | 说明 |
+|--------|------|--------|------|
+| icon | String | - | SVG 图标名称，格式：svg-icon:图标名 |
+| size | Number/String | 16 | 图标大小 |
+| color | String | - | 图标颜色 |
+| hoverColor | String | - | 悬停时的颜色 |
+
+### 示例
+
+```vue
+<template>
+  <div>
+    <!-- 不同尺寸 -->
+    <ZxIcon icon="svg-icon:star" :size="16" />
+    <ZxIcon icon="svg-icon:star" :size="24" />
+    <ZxIcon icon="svg-icon:star" :size="32" />
+    
+    <!-- 不同颜色 -->
+    <ZxIcon icon="svg-icon:heart" color="#F56C6C" />
+    <ZxIcon icon="svg-icon:heart" color="#67C23A" />
+    
+    <!-- 悬停效果 -->
+    <ZxIcon icon="svg-icon:user" color="#909399" hover-color="#409EFF" />
+    
+    <!-- 带 Tooltip -->
+    <ZxIcon icon="svg-icon:setting" tooltip="设置" />
+  </div>
+</template>
+```
+
 ### 方式三：Element Plus 图标
 
 #### 基础配置要求

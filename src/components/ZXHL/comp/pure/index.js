@@ -12,7 +12,7 @@ import ZxSplitBox from './ZxSplitBox'
 import ZxButton from './ZxButton'
 import ZxDialog from './ZxDialog'
 import ZxConfirmInput from './ZxConfirmInput'
-import ZxCollapsibleContainer from './ZxCollapsibleContainer'
+import ZxFloatingPanel from './ZxFloatingPanel'
 import ZxDrawer from './ZxDrawer'
 import ZxExpandToggle from './ZxExpandToggle'
 
@@ -31,7 +31,7 @@ const components = [
   ZxButton,
   ZxDialog,
   ZxConfirmInput,
-  ZxCollapsibleContainer,
+  ZxFloatingPanel,
   ZxDrawer,
   ZxExpandToggle
 ]
@@ -62,7 +62,7 @@ export {
   ZxButton,
   ZxDialog,
   ZxConfirmInput,
-  ZxCollapsibleContainer,
+  ZxFloatingPanel,
   ZxDrawer,
   ZxExpandToggle,
   install
@@ -83,7 +83,7 @@ export default {
   ZxButton,
   ZxDialog,
   ZxConfirmInput,
-  ZxCollapsibleContainer,
+  ZxFloatingPanel,
   ZxDrawer,
   ZxExpandToggle,
   install

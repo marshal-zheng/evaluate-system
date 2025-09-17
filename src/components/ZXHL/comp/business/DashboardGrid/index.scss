@@ -67,10 +67,14 @@
   }
   
   .vue-resizable-handle {
-    transition: opacity 150ms ease;
-    
+    transition: background-color 150ms ease, opacity 150ms ease;
+    /* Use SVG as mask so color comes from CSS variables */
+    -webkit-mask: url('@/assets/svg/resize-handle.svg') no-repeat center / contain;
+    mask: url('@/assets/svg/resize-handle.svg') no-repeat center / contain;
+    background-color: var(--dg-resize-handle-color);
     &:hover {
-      opacity: 0.8;
+      background-color: var(--dg-resize-handle-color-hover, var(--dg-resize-handle-color));
+      opacity: 0.9;
     }
   }
 }

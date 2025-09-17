@@ -237,20 +237,12 @@ export const componentRoutes = [
         component: () => import('@/components/ZXHL/comp/pure/ZxConfirmInput/example.vue')
       },
       {
-        path: 'zx-confirm-input-theme-test',
-        name: 'ZxConfirmInputThemeTest',
-        meta: { 
-          title: 'ZxConfirmInput 主题测试'
+        path: 'zx-floating-panel',
+        name: 'ZxFloatingPanelDemo',
+        meta: {
+          title: 'ZxFloatingPanel 浮动面板组件'
         },
-        component: () => import('@/views/zx-confirm-input-theme-test.vue')
-      },
-      {
-        path: 'zx-collapsible-container',
-        name: 'ZxCollapsibleContainerDemo',
-        meta: { 
-          title: 'ZxCollapsibleContainer 可折叠容器组件'
-        },
-        component: () => import('@/components/ZXHL/comp/pure/ZxCollapsibleContainer/example.vue')
+        component: () => import('@/components/ZXHL/comp/pure/ZxFloatingPanel/example.vue')
       },
       {
         path: 'zx-form-create',

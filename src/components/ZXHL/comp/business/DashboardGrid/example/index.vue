@@ -3,8 +3,11 @@
     <h2>DashboardGrid 示例 - 拖拽画布</h2>
     <p>从下面的组件调色板拖拽组件到画布中</p>
     
-    <!-- 拖拽组件调色板 -->
-    <DraggableChartPalette />
+    <!-- 图表库面板 -->
+    <LibraryPanels 
+      @chart-select="handleChartSelect"
+      @chart-drag="handleChartDrag"
+    />
     
     <!-- 操作按钮 -->
     <div class="action-buttons">
@@ -59,14 +62,15 @@
 <script>
 import { ref, reactive } from 'vue'
 import DashboardGrid from '../index.vue'
-import DraggableChartPalette from './DraggableChartPalette.vue'
+import LibraryPanels from '../LibraryPanels/index.vue'
 import EditPane from '../EditPane/index.vue'
 
 export default {
   name: 'DashboardGridExample',
   components: {
     DashboardGrid,
-    DraggableChartPalette
+    LibraryPanels,
+    EditPane
   },
   setup() {
     const panels = ref([])
@@ -164,6 +168,18 @@ export default {
       event.target.select()
     }
 
+    // 处理图表选择
+    const handleChartSelect = (chart) => {
+      console.log('Chart selected:', chart)
+      // 可以在这里处理图表选择逻辑，比如显示图表详情等
+    }
+
+    // 处理图表拖拽
+    const handleChartDrag = ({ event, chart }) => {
+      console.log('Chart drag started:', chart)
+      // 拖拽逻辑已在LibraryPanels组件中处理
+    }
+
     return {
       panels,
       exportedLayout,
@@ -180,7 +196,9 @@ export default {
       openEditPane,
       handleEditConfirm,
       handleEditCancel,
-      handleEditReset
+      handleEditReset,
+      handleChartSelect,
+      handleChartDrag
     }
   }
 }
@@ -220,10 +238,10 @@ export default {
   pointer-events: none;
 }
 
-.empty-content {
+/* .empty-content {
   text-align: center;
   color: #909399;
-}
+} */
 
 .empty-content i {
   font-size: 48px;
