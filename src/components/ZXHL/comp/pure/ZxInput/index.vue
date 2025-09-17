@@ -1,5 +1,6 @@
 <template>
-  <div class="zx-input" :class="inputClasses">
+  <div class="zx-input-wrapper">
+    <div class="zx-input" :class="inputClasses">
     <ZxTooltipOrPopover
       v-if="hasTooltip"
       :content="tooltipContent"
@@ -40,6 +41,7 @@
         <el-button :icon="Search" @click="handleSearch" />
       </template>
     </component>
+    </div>
   </div>
 </template>
 

@@ -1,37 +1,20 @@
 // ZxSearch 组件样式
+@import './var.scss';
 
 // 变量定义
 $zx-search-prefix: 'zx-search';
-$zx-search-border-radius: 4px;
-$zx-search-gap: 8px;
-
-// 主题变量
-:root {
-  --zx-search-primary-color: #409eff;
-  --zx-search-text-color: #303133;
-  --zx-search-text-color-secondary: #606266;
-  --zx-search-border-color-base: #dcdfe6;
-  --zx-search-background-color: #ffffff;
-  --zx-search-disabled-bg: #f5f7fa;
-  --zx-search-disabled-color: #c0c4cc;
-}
-
-// 暗色主题
-[data-theme="dark"] {
-  --zx-search-text-color: #e4e7ed;
-  --zx-search-text-color-secondary: #c0c4cc;
-  --zx-search-border-color-base: #4c4d4f;
-  --zx-search-background-color: #1d1e1f;
-}
 
 // 组件主体样式
 .#{$zx-search-prefix} {
   position: relative;
   width: 100%;
+  color: var(--cmp-search-text-color);
   
   &.is-disabled {
     opacity: 0.6;
     pointer-events: none;
+    background-color: var(--cmp-search-disabled-bg);
+    color: var(--cmp-search-disabled-color);
   }
   
   &__input-wrapper {
@@ -40,9 +23,34 @@ $zx-search-gap: 8px;
     .el-input {
       width: 100%;
       
+      .el-input__wrapper {
+        background-color: var(--cmp-search-input-bg);
+        border-color: var(--cmp-search-input-border);
+        border-radius: var(--cmp-search-input-radius);
+        transition: var(--cmp-search-transition-duration) var(--cmp-search-transition-timing);
+        
+        &:hover {
+          border-color: var(--cmp-search-input-border-hover);
+        }
+        
+        &.is-focus {
+          border-color: var(--cmp-search-input-border-focus);
+          box-shadow: var(--cmp-search-shadow-focus);
+        }
+      }
+      
+      .el-input__inner {
+        color: var(--cmp-search-text-color);
+        font-size: var(--cmp-search-input-font-size);
+        
+        &::placeholder {
+          color: var(--cmp-search-placeholder-color);
+        }
+      }
+      
       .el-input-group__prepend {
-        background-color: var(--el-fill-color-light);
-        border-color: var(--el-border-color);
+        background-color: var(--cmp-search-input-bg);
+        border-color: var(--cmp-search-input-border);
         
         .el-select {
           .el-input__wrapper {
@@ -59,15 +67,21 @@ $zx-search-gap: 8px;
           border: none;
           border-radius: 0;
           margin: 0;
-          transition: none !important;
+          transition: var(--cmp-search-transition-duration) var(--cmp-search-transition-timing);
           transform: none !important;
+          background-color: var(--cmp-search-button-bg);
+          color: var(--cmp-search-button-text-color);
           
           &:hover {
             transform: none !important;
+            background-color: var(--cmp-search-button-bg-hover);
+            border-color: var(--cmp-search-button-border-hover);
           }
           
           &:active {
             transform: none !important;
+            background-color: var(--cmp-search-button-bg-active);
+            border-color: var(--cmp-search-button-border-active);
           }
         }
       }
@@ -109,7 +123,8 @@ $zx-search-gap: 8px;
   .#{$zx-search-prefix} {
     flex-direction: column;
     align-items: stretch;
-    gap: 8px;
+    gap: var(--cmp-search-mobile-gap);
+    padding: var(--cmp-search-mobile-padding);
     
     &__mode-wrapper {
       align-self: flex-start;
@@ -117,6 +132,10 @@ $zx-search-gap: 8px;
     
     &__button {
       width: 100%;
+    }
+    
+    .el-input__inner {
+      font-size: var(--cmp-search-mobile-font-size);
     }
   }
 }

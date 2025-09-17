@@ -1,51 +1,186 @@
-// // Custom SCSS variables and mixins for the evaluate-system project
-// // This file is automatically imported in all Vue components via Vite config
+// Custom SCSS variables and mixins for the evaluate-system project
+// This file is automatically imported in all Vue components via Vite config
 
-// // Primary colors - 深蓝色主题
-// $primary-color: #3949ab;
-// $success-color: #27ae60;
-// $warning-color: #f39c12;
-// $danger-color: #e74c3c;
-// $info-color: #7f8c8d;
+// Primary colors - 深蓝色主题
+$primary-color: #3949ab;
+$success-color: #27ae60;
+$warning-color: #f39c12;
+$danger-color: #e74c3c;
+$info-color: #7f8c8d;
 
-// // Font sizes
-// $font-size-large: 18px;
-// $font-size-medium: 16px;
-// $font-size-small: 14px;
-// $font-size-mini: 12px;
+// Font sizes
+$font-size-large: 18px;
+$font-size-medium: 16px;
+$font-size-small: 14px;
+$font-size-mini: 12px;
 
-// // Spacing
-// $spacing-mini: 4px;
-// $spacing-small: 8px;
-// $spacing-medium: 16px;
-// $spacing-large: 24px;
-// $spacing-xl: 32px;
+// Spacing
+$spacing-mini: 4px;
+$spacing-small: 8px;
+$spacing-medium: 16px;
+$spacing-large: 24px;
+$spacing-xl: 32px;
 
-// // Border radius
-// $border-radius-small: 2px;
-// $border-radius-medium: 4px;
-// $border-radius-large: 6px;
+// Border radius
+$border-radius-small: 2px;
+$border-radius-medium: 4px;
+$border-radius-large: 6px;
 
-// // Box shadows
-// $box-shadow-light: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
-// $box-shadow-base: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.12);
-// $box-shadow-dark: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.18);
+// Box shadows
+$box-shadow-light: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+$box-shadow-base: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.12);
+$box-shadow-dark: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.18);
 
-// // Mixins
-// @mixin flex-center {
-//   display: flex;
-//   align-items: center;
-//   justify-content: center;
-// }
+// Mixins
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-// @mixin flex-between {
-//   display: flex;
-//   align-items: center;
-//   justify-content: space-between;
-// }
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
 
-// @mixin ellipsis {
-//   overflow: hidden;
-//   white-space: nowrap;
-//   text-overflow: ellipsis;
-// }
+@mixin ellipsis {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+// EditPane 组件相关的全局样式
+// 替代之前的 :deep() 用法，使用全局样式类
+
+// 必填项标识样式类
+.form-item-required {
+  .el-form-item__label {
+    position: relative;
+    
+    &::before {
+      content: '*';
+      color: var(--el-color-danger);
+      margin-right: 4px;
+      font-weight: bold;
+    }
+  }
+}
+
+// EditPane 表单项样式
+.panel-edit-pane {
+  .el-form-item {
+    margin-bottom: 20px;
+
+    .el-form-item__label {
+      font-weight: 500;
+      color: var(--el-text-color-regular);
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+
+    .el-form-item__content {
+      line-height: 1.4;
+    }
+
+    .el-form-item__error {
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    // 动画效果
+    transition: all 0.2s ease;
+  }
+
+  // 输入框样式
+  .el-input {
+    .el-input__wrapper {
+      border-radius: 6px;
+      transition: all 0.2s ease;
+      
+      &:hover {
+        box-shadow: 0 0 0 1px var(--el-color-primary-light-7);
+      }
+      
+      &.is-focus {
+        box-shadow: 0 0 0 1px var(--el-color-primary);
+      }
+    }
+  }
+
+  // 文本域样式
+  .el-textarea {
+    .el-textarea__inner {
+      border-radius: 6px;
+      transition: all 0.2s ease;
+      font-family: inherit;
+      
+      &:hover {
+        border-color: var(--el-color-primary-light-7);
+      }
+      
+      &:focus {
+        border-color: var(--el-color-primary);
+        box-shadow: 0 0 0 1px var(--el-color-primary-light-8);
+      }
+    }
+  }
+
+  // 数字输入框样式
+  .el-input-number {
+    width: 100%;
+    
+    .el-input__wrapper {
+      border-radius: 6px;
+    }
+  }
+
+  // 表单验证状态样式
+  .el-form-item.is-error {
+    .el-input__wrapper,
+    .el-textarea__inner {
+      border-color: var(--el-color-danger);
+      box-shadow: 0 0 0 1px var(--el-color-danger-light-8);
+    }
+  }
+
+  .el-form-item.is-success {
+    .el-input__wrapper,
+    .el-textarea__inner {
+      border-color: var(--el-color-success);
+    }
+  }
+
+  // 响应式设计
+  @media (max-width: 768px) {
+    .el-form-item {
+      margin-bottom: 16px;
+    }
+  }
+}
+
+// 抽屉头部样式增强
+.zx-drawer {
+  .zx-drawer-header-container {
+    .zx-drawer-title-text {
+      font-weight: 600;
+      font-size: 16px;
+    }
+  }
+
+  // 头部右侧操作按钮样式
+  .zx-drawer-right-operation {
+    .el-button {
+      margin-left: 8px;
+      
+      &.is-text {
+        color: var(--el-color-primary);
+        
+        &:hover {
+          color: var(--el-color-primary-dark-2);
+          background-color: var(--el-color-primary-light-9);
+        }
+      }
+    }
+  }
+}

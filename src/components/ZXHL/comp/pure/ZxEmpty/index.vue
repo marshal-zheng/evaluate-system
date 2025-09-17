@@ -1,5 +1,5 @@
 <template>
-  <div class="zx-empty" :class="{ simple: simple }">
+  <div class="zx-empty-wrapper" :class="{ simple: simple }">
     <el-empty :description="description" :image="image" :image-size="imageSize">
       <template v-if="$slots.image" #image>
         <slot name="image" />
@@ -47,35 +47,7 @@ const props = defineProps({
 // const description = computed(() => props.description || t('common.noData'))
 </script>
 
-<style lang="scss" scoped>
-.zx-empty {
-  width: 100%;
-  min-height: 200px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  
-  :deep(.el-empty) {
-    padding: 40px 0;
-  }
-  
-  // 简洁模式样式
-  &.simple {
-    min-height: 120px;
-    
-    :deep(.el-empty) {
-      padding: 20px 0;
-      
-      .el-empty__image {
-        width: 60px;
-        height: 60px;
-      }
-      
-      .el-empty__description {
-        font-size: 12px;
-        color: var(--el-text-color-secondary);
-      }
-    }
-  }
-}
+<style lang="scss">
+// 引入组件样式
+@import './index.scss';
 </style>

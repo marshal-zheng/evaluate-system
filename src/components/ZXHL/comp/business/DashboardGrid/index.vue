@@ -31,26 +31,13 @@
         :noPadding="panel.contentNoPadding"
         :isEditable="isEditable"
         @remove-panel="handleRemovePanel"
+        @duplicate-panel="handleDuplicatePanel"
+        @edit-panel="handleEditPanel"
       >
         <AsyncLoadComp
+          :key="String(panel.id)"
           :name="panel.type"
-          :props="{
-            color: panel.chartType,
-            title: panel.title,
-            chartType: panel.chartType,
-            panel,
-            dashboard: dashboard,
-            onPanelSizeChanged: onPanelSizeChanged,
-            onPanelDataReceived: onPanelDataReceived,
-            onEditPanel: onEditPanel,
-            onRemovePanel: onRemovePanel,
-            onDuplicatePanel: onDuplicatePanel,
-            onCopyPanel: onCopyPanel,
-            onSharePanel: onSharePanel,
-            onInspectPanel: onInspectPanel,
-            onViewPanel: onViewPanel,
-            onMorePanel: onMorePanel
-          }"
+          :props="getPanelProps(panel)"
         />
       </PanelComponent>
     </div>
@@ -59,7 +46,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import VueGridLayoutProvider, { WidthProvider } from "@marsio/vue-grid-layout";
 import { Subscription } from 'rxjs'
 
@@ -89,7 +76,7 @@ const props = defineProps({
 })
 
 // Emits
-const emit = defineEmits(['panel-added', 'panel-removed', 'layout-changed'])
+const emit = defineEmits(['panel-added', 'panel-removed', 'layout-changed', 'edit-panel'])
 
 // 响应式数据
 const panelMap = ref({})
@@ -181,6 +168,43 @@ const buildLayout = () => {
   return layout
 }
 
+// 为异步加载组件提供稳定的 props 引用，避免父级无关更新导致子组件重新渲染
+const panelPropsCache = new Map()
+const getPanelProps = (panel) => {
+  const id = panel?.id ?? 'unknown'
+  const cached = panelPropsCache.get(id)
+  const next = {
+    color: panel.chartType,
+    title: panel.title,
+    chartType: panel.chartType,
+    panel,
+    dashboard: props.dashboard,
+    onPanelSizeChanged,
+    onPanelDataReceived,
+    onEditPanel,
+    onRemovePanel,
+    onDuplicatePanel,
+    onCopyPanel,
+    onSharePanel,
+    onInspectPanel,
+    onViewPanel,
+    onMorePanel
+  }
+  // 仅当关键字段变化时才更新缓存对象，保持引用稳定
+  if (
+    cached &&
+    cached.color === next.color &&
+    cached.title === next.title &&
+    cached.chartType === next.chartType &&
+    cached.panel === next.panel &&
+    cached.dashboard === next.dashboard
+  ) {
+    return cached
+  }
+  panelPropsCache.set(id, next)
+  return next
+}
+
 // Panel 事件处理方法
 const onPanelSizeChanged = (panelId, size) => {
   // 处理面板大小变化
@@ -226,6 +250,17 @@ const onMorePanel = (panel) => {
 const handleRemovePanel = (panelId) => {
   // 将删除事件向外抛出，由使用者决定如何从数据源中移除
   emit('panel-removed', panelId)
+}
+
+// 统一处理来自子组件的复制事件（受控模式用）
+const handleDuplicatePanel = (newPanel) => {
+  // 将新增事件向外抛出，由使用者决定如何插入到数据源
+  emit('panel-added', newPanel)
+}
+
+// 统一处理来自子组件的编辑事件（由页面统一弹出编辑抽屉）
+const handleEditPanel = (panel) => {
+  emit('edit-panel', panel)
 }
 
 // 拖拽相关方法

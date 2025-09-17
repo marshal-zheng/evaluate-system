@@ -19,7 +19,25 @@ const routes = [
         ...route,
         path: `/demo/${route.path}`
       })),
-      // 保留的测试页面已移除
+      // 测试页面路由
+      {
+        path: '/test/panel-header-menu',
+        name: 'PanelHeaderMenuTest',
+        meta: { 
+          title: 'PanelHeaderMenu 测试',
+          showInMenu: false
+        },
+        component: () => import('@/views/panel-header-menu-test.vue')
+      },
+      {
+        path: '/test/edit-pane',
+        name: 'EditPaneTest',
+        meta: { 
+          title: 'EditPane 测试',
+          showInMenu: false
+        },
+        component: () => import('@/views/panel-edit-test.vue')
+      }
     ]
   },
   // 404 页面路由 - 必须放在最后

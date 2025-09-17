@@ -2,6 +2,29 @@
   <div class="grid-list-example">
     <h2>ZxGridList 使用示例</h2>
     
+    <!-- 控制选项 -->
+    <div class="demo-controls" style="margin-bottom: 16px; padding: 16px; background: #f5f7fa; border-radius: 4px;">
+      <el-space wrap>
+        <span>控制选项：</span>
+        <el-switch 
+          v-model="showTableBorder" 
+          active-text="显示表格内边框" 
+          inactive-text="隐藏表格内边框"
+        />
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span>分页底部间距：</span>
+          <el-input-number 
+            v-model="paginationPaddingBottom" 
+            :min="0" 
+            :max="50" 
+            size="small" 
+            style="width: 120px;"
+          />
+          <span>px</span>
+        </div>
+      </el-space>
+    </div>
+    
     <el-tabs v-model="activeTab" class="demo-tabs">
       <el-tab-pane label="有数据状态" name="withData">
         <ZxGridList
@@ -11,6 +34,8 @@
           :page-sizes="[10, 20, 50]"
           :default-page-size="20"
           :auto-refresh="{ enabled: false, interval: 30000 }"
+          :show-table-border="showTableBorder"
+          :pagination-padding-bottom="paginationPaddingBottom"
           @before-load="handleBeforeLoad"
           @data-loaded="handleDataLoaded"
           @load-error="handleLoadError"
@@ -167,6 +192,10 @@ const gridRef = ref()
 
 // 当前激活的标签页
 const activeTab = ref('withData')
+
+// 控制选项
+const showTableBorder = ref(false)
+const paginationPaddingBottom = ref(12)
 
 // 选中的行
 const selectedRows = ref([])

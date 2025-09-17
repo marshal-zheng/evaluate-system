@@ -281,12 +281,25 @@ const drawerWidth = ref(props.width)
 const isToggling = ref(false) // 防止快速切换时的状态混乱
 
 // 计算抽屉尺寸，确保稳定性
+// 兼容数字与数字字符串（如 '600' => '600px'），避免 size 设置不生效导致只有遮罩没有抽屉内容
 const computedDrawerSize = computed(() => {
+  const toCssSize = (val) => {
+    if (val == null) return undefined
+    // number 直接返回（Element Plus 会按 px 解析）
+    if (typeof val === 'number') return val
+    // '100%' 等百分比字符串直接返回
+    if (typeof val === 'string' && val.trim().endsWith('%')) return val
+    // 纯数字字符串转为 px
+    if (typeof val === 'string' && /^\d+$/.test(val.trim())) return `${val.trim()}px`
+    // 其他情况（已带单位）原样返回
+    return val
+  }
+
   if (isToggling.value) {
     // 切换过程中保持当前状态
-    return fullScreenAPI.isFullScreen ? '100%' : drawerWidth.value
+    return fullScreenAPI.isFullScreen ? '100%' : toCssSize(drawerWidth.value)
   }
-  return fullScreenAPI.isFullScreen ? '100%' : drawerWidth.value
+  return fullScreenAPI.isFullScreen ? '100%' : toCssSize(drawerWidth.value)
 })
 
 // 监听 modelValue 变化

@@ -31,6 +31,7 @@
         }
 
         .el-dialog__headerbtn {
+          background-color: transparent;
           .el-dialog__close {
             color: var(--cmp-dialog-text-secondary);
             font-size: 18px;

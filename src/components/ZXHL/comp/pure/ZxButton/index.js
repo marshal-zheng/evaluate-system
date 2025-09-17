@@ -1,7 +1,7 @@
-import Component from './index.vue'
+// ZxButton 组件导出文件
+import ZxButton from './index.vue'
 
-Component.install = (app) => {
-  app.component('ZxButton', Component)
-}
+export default ZxButton
 
-export default Component
+
+

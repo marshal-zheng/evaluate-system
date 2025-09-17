@@ -29,7 +29,7 @@
             :key="chart.type"
             class="palette-item chart-item"
             draggable="true"
-            @dragstart="onDragStart($event, { type: 'ChartWidget', chartType: chart.type, title: chart.name, w: 10, h: 8 })"
+            @dragstart="onDragStart($event, { type: 'echarts', chartType: chart.type, title: chart.name, w: 10, h: 8 })"
             @dragend="onDragEnd"
           >
             <i :class="chart.icon"></i>

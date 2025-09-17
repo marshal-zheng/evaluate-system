@@ -1,43 +1,16 @@
 // ZxSplitBox 分割面板组件样式
 // 基于 Element Plus 的分割面板组件样式定义
 
-// CSS 变量定义
-:root {
-  // 容器相关
-  --zx-split-box-bg: #ffffff;
-  --zx-split-box-border: #e4e7ed;
-  --zx-split-box-radius: 4px;
-  
-  // 分割线相关
-  --zx-split-box-divider-bg: #f5f7fa;
-  --zx-split-box-divider-hover-bg: #409eff;
-  --zx-split-box-divider-active-bg: #337ecc;
-  --zx-split-box-divider-width: 6px;
-  --zx-split-box-divider-line-color: #e4e7ed;
-  
-  // 展开按钮相关
-  --zx-split-box-expand-bg: #f5f7fa;
-  --zx-split-box-expand-hover-bg: #e4e7ed;
-  --zx-split-box-expand-active-bg: #d3d4d6;
-  --zx-split-box-expand-icon-color: #409eff;
-  --zx-split-box-expand-icon-hover-color: #66b1ff;
-  
-  // 动画相关
-  --zx-split-box-transition: all 0.3s ease;
-  --zx-split-box-resize-transition: none;
-  
-  // 阴影相关
-  --zx-split-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  --zx-split-box-divider-shadow: 0 0 4px rgba(64, 158, 255, 0.3);
-}
+// 导入变量定义
+@import './var.scss';
 
 // 主容器样式
 .zx-split-box {
   position: relative;
   width: 100%;
   height: 100%;
-  background-color: var(--zx-split-box-bg);
-  border-radius: var(--zx-split-box-radius);
+  background-color: var(--cmp-split-box-bg);
+  border-radius: var(--cmp-split-box-radius);
   overflow: hidden;
   
   // 水平布局
@@ -55,28 +28,28 @@
   // 展开状态
   &--expanded {
     .zx-split-box__first {
-      transition: var(--zx-split-box-transition);
+      transition: var(--cmp-split-box-transition);
     }
   }
   
   // 动画状态
   &--animating {
     .zx-split-box__first {
-      transition: var(--zx-split-box-transition);
+      transition: var(--cmp-split-box-transition);
     }
     
     .zx-split-box__second {
-      transition: var(--zx-split-box-transition);
+      transition: var(--cmp-split-box-transition);
     }
   }
   
   // 禁用状态
   &--disabled {
     .zx-split-box__divider {
-      cursor: not-allowed;
+      cursor: var(--cmp-split-box-disabled-cursor);
       
       &:hover {
-        background-color: var(--zx-split-box-divider-bg);
+        background-color: var(--cmp-split-box-divider-bg);
       }
     }
     
@@ -90,14 +63,16 @@
 .zx-split-box__first {
   position: relative;
   overflow: hidden;
-  background-color: var(--zx-split-box-bg);
+  background-color: var(--cmp-split-box-bg);
+  padding: var(--cmp-split-box-panel-padding);
+  margin: var(--cmp-split-box-panel-margin);
   
   &.zx-split-box__left {
-    border-right: 1px solid var(--zx-split-box-border);
+    border-right: 1px solid var(--cmp-split-box-border);
   }
   
   &.zx-split-box__top {
-    border-bottom: 1px solid var(--zx-split-box-border);
+    border-bottom: 1px solid var(--cmp-split-box-border);
   }
 }
 
@@ -106,7 +81,9 @@
   position: relative;
   flex: 1;
   overflow: hidden;
-  background-color: var(--zx-split-box-bg);
+  background-color: var(--cmp-split-box-bg);
+  padding: var(--cmp-split-box-panel-padding);
+  margin: var(--cmp-split-box-panel-margin);
   
   &.zx-split-box__right {
     // 右侧面板样式
@@ -120,95 +97,96 @@
 // 分割线
 .zx-split-box__divider {
   position: relative;
-  background-color: var(--zx-split-box-divider-bg);
-  transition: var(--zx-split-box-transition);
-  z-index: 10;
+  background-color: var(--cmp-split-box-divider-bg);
+  transition: var(--cmp-split-box-transition);
+  z-index: var(--cmp-split-box-divider-z-index);
   
   // 水平分割线
   &--horizontal {
-    width: var(--zx-split-box-divider-width);
+    width: var(--cmp-split-box-divider-width);
     cursor: col-resize;
     display: flex;
     align-items: center;
     justify-content: center;
     
     &:hover {
-      background-color: var(--zx-split-box-divider-hover-bg);
-      box-shadow: var(--zx-split-box-divider-shadow);
+      background-color: var(--cmp-split-box-divider-hover-bg);
+      box-shadow: var(--cmp-split-box-divider-shadow);
       
       .zx-split-box__divider-line {
-        background-color: rgba(255, 255, 255, 0.8);
+        background-color: rgba(255, 255, 255, var(--cmp-split-box-divider-line-hover-opacity));
       }
     }
     
     &:active {
-      background-color: var(--zx-split-box-divider-active-bg);
+      background-color: var(--cmp-split-box-divider-active-bg);
     }
   }
   
   // 垂直分割线
   &--vertical {
-    height: var(--zx-split-box-divider-width);
+    height: var(--cmp-split-box-divider-width);
     cursor: row-resize;
     display: flex;
     align-items: center;
     justify-content: center;
     
     &:hover {
-      background-color: var(--zx-split-box-divider-hover-bg);
-      box-shadow: var(--zx-split-box-divider-shadow);
+      background-color: var(--cmp-split-box-divider-hover-bg);
+      box-shadow: var(--cmp-split-box-divider-shadow);
       
       .zx-split-box__divider-line {
-        background-color: rgba(255, 255, 255, 0.8);
+        background-color: rgba(255, 255, 255, var(--cmp-split-box-divider-line-hover-opacity));
       }
     }
     
     &:active {
-      background-color: var(--zx-split-box-divider-active-bg);
+      background-color: var(--cmp-split-box-divider-active-bg);
     }
   }
 }
 
 // 分割线内部线条
 .zx-split-box__divider-line {
-  background-color: var(--zx-split-box-divider-line-color);
-  transition: var(--zx-split-box-transition);
+  background-color: var(--cmp-split-box-divider-line-color);
+  transition: var(--cmp-split-box-transition);
+  opacity: var(--cmp-split-box-divider-line-opacity);
   
   .zx-split-box__divider--horizontal & {
-    width: 1px;
-    height: 20px;
+    width: var(--cmp-split-box-divider-line-width);
+    height: var(--cmp-split-box-divider-line-length);
   }
   
   .zx-split-box__divider--vertical & {
-    width: 20px;
-    height: 1px;
+    width: var(--cmp-split-box-divider-line-length);
+    height: var(--cmp-split-box-divider-line-width);
   }
 }
 
 // 展开/收起按钮
 .zx-split-box__expand-trigger {
   position: absolute;
-  z-index: 20;
+  z-index: var(--cmp-split-box-expand-z-index);
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--zx-split-box-expand-bg);
-  border-radius: 4px;
+  background-color: var(--cmp-split-box-expand-bg);
+  border-radius: var(--cmp-split-box-expand-radius);
   cursor: pointer;
-  transition: var(--zx-split-box-transition);
-  opacity: 0;
+  transition: var(--cmp-split-box-transition);
+  opacity: var(--cmp-split-box-expand-opacity);
   
   &:hover {
-    opacity: 1;
-    background-color: var(--zx-split-box-expand-hover-bg);
+    opacity: var(--cmp-split-box-expand-hover-opacity);
+    background-color: var(--cmp-split-box-expand-hover-bg);
     
     .zx-split-box__expand-icon {
-      color: var(--zx-split-box-expand-icon-hover-color);
+      color: var(--cmp-split-box-expand-icon-hover-color);
     }
   }
   
   &:active {
-    background-color: var(--zx-split-box-expand-active-bg);
+    background-color: var(--cmp-split-box-expand-active-bg);
   }
   
   // 左侧展开按钮
@@ -216,9 +194,9 @@
     top: 50%;
     left: 0;
     transform: translateY(-50%);
-    width: 24px;
-    height: 48px;
-    border-radius: 0 4px 4px 0;
+    width: var(--cmp-split-box-expand-width);
+    height: var(--cmp-split-box-expand-height);
+    border-radius: 0 var(--cmp-split-box-expand-radius) var(--cmp-split-box-expand-radius) 0;
   }
   
   // 右侧展开按钮
@@ -226,9 +204,9 @@
     top: 50%;
     right: 0;
     transform: translateY(-50%);
-    width: 24px;
-    height: 48px;
-    border-radius: 4px 0 0 4px;
+    width: var(--cmp-split-box-expand-width);
+    height: var(--cmp-split-box-expand-height);
+    border-radius: var(--cmp-split-box-expand-radius) 0 0 var(--cmp-split-box-expand-radius);
   }
   
   // 顶部展开按钮
@@ -236,38 +214,38 @@
     top: 0;
     left: 50%;
     transform: translateX(-50%);
-    width: 48px;
-    height: 24px;
-    border-radius: 0 0 4px 4px;
+    width: var(--cmp-split-box-expand-height);
+    height: var(--cmp-split-box-expand-width);
+    border-radius: 0 0 var(--cmp-split-box-expand-radius) var(--cmp-split-box-expand-radius);
   }
 }
 
 // 展开按钮图标
 .zx-split-box__expand-icon {
-  color: var(--zx-split-box-expand-icon-color);
-  font-size: 14px;
-  transition: var(--zx-split-box-transition);
+  color: var(--cmp-split-box-expand-icon-color);
+  font-size: var(--cmp-split-box-expand-icon-size);
+  transition: var(--cmp-split-box-transition);
 }
 
 // 悬停时显示展开按钮
 .zx-split-box__first:hover,
 .zx-split-box__second:hover {
   .zx-split-box__expand-trigger {
-    opacity: 1;
+    opacity: var(--cmp-split-box-expand-hover-opacity);
   }
 }
 
 // 拖拽时的样式
 .zx-split-box--resizing {
-  user-select: none;
+  user-select: var(--cmp-split-box-resizing-user-select);
   
   .zx-split-box__first,
   .zx-split-box__second {
-    pointer-events: none;
+    pointer-events: var(--cmp-split-box-resizing-pointer-events);
   }
   
   .zx-split-box__divider {
-    background-color: var(--zx-split-box-divider-active-bg);
+    background-color: var(--cmp-split-box-divider-active-bg);
   }
 }
 
@@ -281,7 +259,7 @@
     
     .zx-split-box__divider--horizontal {
       width: 100%;
-      height: var(--zx-split-box-divider-width);
+      height: var(--cmp-split-box-mobile-divider-width);
       cursor: row-resize;
     }
     
@@ -289,50 +267,39 @@
       // 移动端增大触摸区域
       &--left,
       &--right {
-        width: 32px;
-        height: 56px;
+        width: var(--cmp-split-box-mobile-expand-width);
+        height: var(--cmp-split-box-mobile-expand-height);
       }
       
       &--top {
-        width: 56px;
-        height: 32px;
+        width: var(--cmp-split-box-mobile-expand-height);
+        height: var(--cmp-split-box-mobile-expand-width);
       }
     }
   }
 }
 
-// 暗色主题支持
-@media (prefers-color-scheme: dark) {
-  :root {
-    --zx-split-box-bg: #1d1e1f;
-    --zx-split-box-border: #414243;
-    --zx-split-box-divider-bg: #2d2e2f;
-    --zx-split-box-divider-line-color: #414243;
-    --zx-split-box-expand-bg: #2d2e2f;
-    --zx-split-box-expand-hover-bg: #3d3e3f;
-    --zx-split-box-expand-active-bg: #4d4e4f;
-  }
-}
+// 主题跟随 Element Plus 系统，无需额外的暗色主题定义
 
 // 滚动条样式
 .zx-split-box__first,
 .zx-split-box__second {
   &::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: var(--cmp-split-box-scrollbar-width);
+    height: var(--cmp-split-box-scrollbar-height);
   }
   
   &::-webkit-scrollbar-track {
-    background: var(--zx-split-box-bg);
-    border-radius: 3px;
+    background: var(--cmp-split-box-scrollbar-track);
+    border-radius: var(--cmp-split-box-scrollbar-radius);
   }
   
   &::-webkit-scrollbar-thumb {
-    background: var(--zx-split-box-border);
-    border-radius: 3px;
+    background: var(--cmp-split-box-scrollbar-thumb);
+    border-radius: var(--cmp-split-box-scrollbar-radius);
     
     &:hover {
-      background: var(--zx-split-box-divider-hover-bg);
+      background: var(--cmp-split-box-scrollbar-thumb-hover);
     }
   }
 }

@@ -12,14 +12,6 @@ export const componentRoutes = [
     component: PureRouterView,
     children: [
       {
-        path: 'dashboard',
-        name: 'dashboard',
-        meta: { 
-          title: '报表布局'
-        },
-        component: () => import('@/components/ZXHL/pages/dashboard/index.vue')
-      },
-      {
         path: 'pure-components',
         name: 'PureComponentsDemo',
         meta: { 
@@ -141,6 +133,14 @@ export const componentRoutes = [
         component: () => import('@/components/ZXHL/comp/pure/ZxMoreSettingCollapse/example.vue')
       },
       {
+        path: 'zx-expand-toggle',
+        name: 'ZxExpandToggleDemo',
+        meta: { 
+          title: 'ZxExpandToggle 展开收起组件'
+        },
+        component: () => import('@/components/ZXHL/comp/pure/ZxExpandToggle/example.vue')
+      },
+      {
         path: 'zx-popconfirm',
         name: 'ZxPopconfirmDemo',
         meta: { 
@@ -251,6 +251,14 @@ export const componentRoutes = [
           title: 'ZxCollapsibleContainer 可折叠容器组件'
         },
         component: () => import('@/components/ZXHL/comp/pure/ZxCollapsibleContainer/example.vue')
+      },
+      {
+        path: 'zx-form-create',
+        name: 'ZxFormCreateDemo',
+        meta: { 
+          title: 'ZxFormCreate 表单创建组件'
+        },
+        component: () => import('@/components/ZXHL/comp/pure/ZxFormCreate/example.vue')
       }
     ]
   }

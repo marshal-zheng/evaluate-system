@@ -67,20 +67,34 @@
     </div>
 
     <div class="example-section">
-      <h3>自定义主题</h3>
+      <h3>主题自动适配演示</h3>
       <el-card>
         <div class="example-controls">
-          <el-radio-group v-model="currentTheme" @change="handleThemeChange">
-            <el-radio label="default">默认主题</el-radio>
-            <el-radio label="dark">暗色主题</el-radio>
-            <el-radio label="vintage">复古主题</el-radio>
-          </el-radio-group>
+          <el-space>
+            <el-button type="primary" @click="switchToLight">浅色主题</el-button>
+            <el-button type="primary" @click="switchToDark">深色主题</el-button>
+            <el-button type="primary" @click="switchToDarkBlue">深蓝主题</el-button>
+            <el-button @click="refreshAllCharts">刷新所有图表</el-button>
+          </el-space>
+          <div class="theme-info">
+            <el-tag>当前主题: {{ currentSystemTheme }}</el-tag>
+            <el-tag type="info">主题适配: {{ themeAdaptationEnabled ? '已启用' : '已禁用' }}</el-tag>
+          </div>
         </div>
         <ZxChart 
+          ref="themeChartRef"
           :options="themeChartOptions" 
-          :theme="currentTheme"
+          :enable-theme-adaptation="themeAdaptationEnabled"
           height="300px"
+          @theme-change="handleChartThemeChange"
         />
+        <div class="example-controls" style="margin-top: 16px;">
+          <el-switch 
+            v-model="themeAdaptationEnabled" 
+            active-text="启用主题适配" 
+            inactive-text="禁用主题适配"
+          />
+        </div>
       </el-card>
     </div>
   </div>
@@ -90,10 +104,13 @@
 import { ref, reactive, onMounted } from 'vue'
 import ZxChart from './index.vue'
 import { ElMessage } from 'element-plus'
+import { setTheme, getCurrentTheme, THEME_TYPES } from '@/utils/theme.js'
 
 // 响应式数据
 const dynamicChartRef = ref()
-const currentTheme = ref('default')
+const themeChartRef = ref()
+const currentSystemTheme = ref('light')
+const themeAdaptationEnabled = ref(true)
 
 // 基础柱状图配置
 const barChartOptions = reactive({
@@ -312,11 +329,15 @@ const dynamicChartOptions = reactive({
 // 主题图表配置
 const themeChartOptions = reactive({
   title: {
-    text: '主题切换示例',
+    text: '主题切换示例 - 多条折线',
     left: 'center'
   },
   tooltip: {
     trigger: 'axis'
+  },
+  legend: {
+    data: ['销售额', '访问量', '转化率', '用户数', '收入'],
+    top: 30
   },
   xAxis: {
     type: 'category',
@@ -327,10 +348,64 @@ const themeChartOptions = reactive({
   },
   series: [
     {
-      name: '数据',
+      name: '销售额',
       type: 'line',
       data: [150, 230, 224, 218, 135, 147, 260],
-      smooth: true
+      smooth: true,
+      itemStyle: {
+        color: '#409EFF'
+      },
+      lineStyle: {
+        width: 2
+      }
+    },
+    {
+      name: '访问量',
+      type: 'line',
+      data: [320, 280, 310, 290, 350, 380, 420],
+      smooth: true,
+      itemStyle: {
+        color: '#67C23A'
+      },
+      lineStyle: {
+        width: 2
+      }
+    },
+    {
+      name: '转化率',
+      type: 'line',
+      data: [80, 95, 88, 92, 105, 110, 125],
+      smooth: true,
+      itemStyle: {
+        color: '#E6A23C'
+      },
+      lineStyle: {
+        width: 2
+      }
+    },
+    {
+      name: '用户数',
+      type: 'line',
+      data: [200, 180, 220, 240, 190, 210, 280],
+      smooth: true,
+      itemStyle: {
+        color: '#F56C6C'
+      },
+      lineStyle: {
+        width: 2
+      }
+    },
+    {
+      name: '收入',
+      type: 'line',
+      data: [180, 210, 195, 205, 160, 175, 230],
+      smooth: true,
+      itemStyle: {
+        color: '#909399'
+      },
+      lineStyle: {
+        width: 2
+      }
     }
   ]
 })
@@ -365,12 +440,46 @@ const resizeChart = () => {
   }
 }
 
-const handleThemeChange = (theme) => {
-  ElMessage.info(`切换到 ${theme} 主题`)
+// 主题切换方法
+const switchToLight = () => {
+  setTheme(THEME_TYPES.LIGHT)
+  currentSystemTheme.value = 'light'
+  ElMessage.success('已切换到浅色主题')
+}
+
+const switchToDark = () => {
+  setTheme(THEME_TYPES.DARK)
+  currentSystemTheme.value = 'dark'
+  ElMessage.success('已切换到深色主题')
+}
+
+const switchToDarkBlue = () => {
+  setTheme(THEME_TYPES.DARK_BLUE)
+  currentSystemTheme.value = 'dark-blue'
+  ElMessage.success('已切换到深蓝主题')
+}
+
+const refreshAllCharts = () => {
+  // 刷新所有图表的主题
+  if (themeChartRef.value) {
+    themeChartRef.value.refreshTheme()
+  }
+  if (dynamicChartRef.value) {
+    dynamicChartRef.value.refreshTheme()
+  }
+  ElMessage.info('所有图表主题已刷新')
+}
+
+const handleChartThemeChange = (theme) => {
+  currentSystemTheme.value = theme
+  console.log('图表主题已变更:', theme)
+  ElMessage.info(`图表主题已自动切换到: ${theme}`)
 }
 
 onMounted(() => {
   console.log('ZxChart 示例页面已加载')
+  // 初始化当前主题
+  currentSystemTheme.value = getCurrentTheme()
 })
 </script>
 
@@ -421,6 +530,13 @@ onMounted(() => {
       .el-radio {
         margin-right: 20px;
       }
+    }
+    
+    .theme-info {
+      margin-top: 12px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
     }
   }
 }

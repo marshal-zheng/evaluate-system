@@ -19,7 +19,7 @@ Widget/
 ├── index.js               # 导出入口
 ├── AsyncLoadComp.vue      # 核心组件（基于 import.meta.glob）
 ├── components/            # 放置可异步加载的 Widget 组件（默认扫描目录）
-│   └── ChartWidget.vue
+│   └── EChartsWidget.vue
 └── README.md
 ```
 
@@ -42,7 +42,7 @@ import { AsyncLoadComp } from '@/components/ZXHL/comp/business/Widget'
 import { ref } from 'vue'
 import { AsyncLoadComp } from '@/components/ZXHL/comp/business/Widget'
 
-// 也可使用 path：'ChartWidget' / 'components/ChartWidget.vue'
+// 也可使用 path：'echarts' / 'components/EChartsWidget.vue'
 const widgetProps = ref({ title: '图表组件' })
 const widgetData = ref({ type: 'line' })
 </script>
@@ -56,7 +56,7 @@ const widgetData = ref({ type: 'line' })
    - 在同目录下创建可选文件 `widget.aliases.ts|js`，默认导出一个映射：
      ```ts
      export default {
-       echarts: 'components/ChartWidget.vue',
+       echarts: 'components/EChartsWidget.vue',
      }
      ```
    - 使用：`<AsyncLoadComp name="echarts" />`

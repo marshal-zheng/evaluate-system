@@ -139,10 +139,32 @@ const customColor = computed(() => {
 
 // 计算提示内容
 const tooltipContent = computed(() => {
+  // 如果有自定义 tooltip 插槽，使用插槽内容
   if (slots.tooltipContent) {
-    return ''
+    const tooltipSlot = slots.tooltipContent()
+    return tooltipSlot?.[0]?.children || tooltipSlot?.[0]?.props?.content || ''
   }
-  return slots.default?.()?.[0]?.children || ''
+  
+  // 否则使用默认插槽的文本内容作为 tooltip
+  const defaultSlot = slots.default?.()
+  if (defaultSlot && defaultSlot.length > 0) {
+    // 递归获取文本内容
+    const getTextContent = (vnode) => {
+      if (typeof vnode === 'string') return vnode
+      if (typeof vnode === 'number') return String(vnode)
+      if (vnode?.children) {
+        if (typeof vnode.children === 'string') return vnode.children
+        if (Array.isArray(vnode.children)) {
+          return vnode.children.map(getTextContent).join('')
+        }
+      }
+      return ''
+    }
+    
+    return defaultSlot.map(getTextContent).join('').trim()
+  }
+  
+  return ''
 })
 
 // 事件处理

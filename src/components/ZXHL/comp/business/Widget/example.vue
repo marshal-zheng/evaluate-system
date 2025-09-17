@@ -30,9 +30,9 @@
         <div class="example-demo">
           <div class="component-container">
             <AsyncLoadComp
-              path="./components/ChartWidget.vue"
+              path="./components/EChartsWidget.vue"
               :props="{ hasChartTitle: true, title: '通过path加载的图表' }"
-              :data="{ type: 'bar', message: 'Welcome to ChartWidget!' }"
+              :data="{ type: 'bar', message: 'Welcome to EChartsWidget!' }"
             />
           </div>
         </div>

@@ -1,5 +1,5 @@
 <template>
-  <div class="zx-collapsible-container" :class="{ 'collapsed': isCollapsed }">
+  <div class="zx-collapsible-container-wrapper" :class="{ 'collapsed': isCollapsed }">
     <!-- 标题栏 -->
     <div class="collapsible-header">
       <h3 v-if="!isCollapsed && title">{{ title }}</h3>

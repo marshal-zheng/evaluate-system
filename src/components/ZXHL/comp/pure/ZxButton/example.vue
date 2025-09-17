@@ -278,6 +278,7 @@ const handleEventDemo = async () => {
   }
   
   await new Promise(resolve => setTimeout(resolve, 1500))
+  console.log(2222)
   ElMessage.success('事件演示完成！')
 }
 

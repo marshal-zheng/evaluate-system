@@ -1,7 +1,7 @@
 <template>
   <ZxTooltipOrPopover
     v-bind="tooltipProps"
-    :class="['zx-auto-complete', { 'zx-auto-complete--with-tooltip': hasTooltip }]"
+    :class="['zx-auto-complete-wrapper', { 'zx-auto-complete--with-tooltip': hasTooltip }]"
   >
     <el-autocomplete
       v-model="inputValue"
@@ -14,8 +14,24 @@
       @select="handleSelect"
       @change="handleChange"
     >
+      <template #suffix>
+        <el-icon 
+          v-if="loading" 
+          class="zx-auto-complete__loading is-loading"
+          :style="{ 
+            animation: 'zx-loading-rotate 2s linear infinite',
+            color: 'var(--el-color-primary)',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }"
+        >
+          <Loading />
+        </el-icon>
+        <slot name="suffix" v-else />
+      </template>
       <template v-for="(_, name) in $slots" #[name]="slotData">
-        <slot :name="name" v-bind="slotData" />
+        <slot v-if="name !== 'suffix'" :name="name" v-bind="slotData" />
       </template>
     </el-autocomplete>
   </ZxTooltipOrPopover>
@@ -23,7 +39,8 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
-import { ElAutocomplete } from 'element-plus'
+import { ElAutocomplete, ElIcon } from 'element-plus'
+import { Loading } from '@element-plus/icons-vue'
 import ZxTooltipOrPopover from '../ZxTooltipOrPopover/index.vue'
 
 // 组件名称
@@ -93,22 +110,36 @@ const tooltipProps = computed(() => {
 })
 
 const selectOptions = computed(() => {
-  return internalOptions.value.map(option => {
+  const result = internalOptions.value.map(option => {
     if (option.options) {
       return {
         label: option[props.labelKey],
-        options: option.options.map(subOption => ({
-          label: subOption[props.labelKey],
-          value: subOption[props.valueKey]
-        }))
+        options: option.options.map(subOption => {
+          // 为子选项创建新对象，确保 value 字段用于显示
+          const { [props.valueKey]: originalValue, [props.labelKey]: displayLabel, ...otherProps } = subOption
+          return {
+            value: displayLabel, // el-autocomplete 显示的文本
+            label: displayLabel, // 保持兼容性
+            originalValue: originalValue, // 保存原始值
+            ...otherProps
+          }
+        })
       }
     }
+    
+    // 为顶级选项创建新对象，确保 value 字段用于显示
+    const { [props.valueKey]: originalValue, [props.labelKey]: displayLabel, ...otherProps } = option
     return {
-      label: option[props.labelKey],
-      value: option[props.valueKey],
-      ...option
+      value: displayLabel, // el-autocomplete 显示的文本 (北京市)
+      label: displayLabel, // 保持兼容性
+      originalValue: originalValue, // 保存原始值 (beijing)  
+      ...otherProps // 其他属性如 code, population, region
     }
   })
+  
+
+  
+  return result
 })
 
 // 默认过滤函数
@@ -135,7 +166,12 @@ const loadOptions = async (params) => {
   }
 }
 
-const handleFetchSuggestions = (queryString, callback) => {
+const handleFetchSuggestions = async (queryString, callback) => {
+  // 如果 options 是函数（异步加载），则调用它
+  if (typeof props.options === 'function') {
+    await loadOptions(queryString)
+  }
+  
   const filterFn = props.filterOption || defaultFilterOption
   const filteredOptions = selectOptions.value.filter(item => {
     return queryString ? filterFn(queryString, item) : true
@@ -158,7 +194,20 @@ const handleBlur = (event) => {
 }
 
 const handleSelect = (item) => {
-  emit('select', item)
+  // 如果有 originalValue，则使用原始值，否则使用 value
+  const selectedValue = item.originalValue !== undefined ? item.originalValue : item.value
+  
+  // 更新输入框的值为显示文本
+  inputValue.value = item.value
+  
+  // 发送选中事件，包含完整的选项信息
+  emit('select', {
+    ...item,
+    selectedValue // 添加实际选中的值
+  })
+  
+  // 更新 modelValue 为显示文本（保持与输入框一致）
+  emit('update:modelValue', item.value)
 }
 
 const handleChange = (value) => {

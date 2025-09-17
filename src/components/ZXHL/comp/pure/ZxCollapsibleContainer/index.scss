@@ -1,35 +1,46 @@
 // ZxCollapsibleContainer 可折叠容器组件样式
 // 支持展开收起的侧边容器组件，具有状态指示和平滑动画效果
 
-.zx-collapsible-container {
+// 引入变量定义
+@import './var.scss';
+
+// 主容器样式
+.zx-collapsible-container-wrapper {
   position: absolute;
   top: 0;
   left: 0;
   height: 100%;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-  transition: width 0.3s ease;
+  background: var(--cmp-container-background);
+  border-radius: var(--cmp-container-border-radius);
+  box-shadow: var(--cmp-container-box-shadow);
+  transition: var(--cmp-transition-all);
   overflow: hidden;
-  z-index: 100;
+  z-index: var(--cmp-z-index-normal);
 
-  &.collapsed {
-    width: 60px !important;
+  // 悬停效果
+  &:hover {
+    box-shadow: var(--el-box-shadow, 0 4px 16px 0 rgba(0, 0, 0, 0.12));
   }
 
-  .container-header {
+  // 折叠状态
+  &.collapsed {
+    width: var(--cmp-container-collapsed-width) !important;
+  }
+
+  // 标题栏
+  .collapsible-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px 20px;
-    border-bottom: 1px solid #ebeef5;
-    background: #f8f9fa;
-    min-height: 60px;
+    padding: var(--cmp-container-header-padding);
+    border-bottom: var(--cmp-header-border-bottom);
+    background: var(--cmp-header-background);
+    min-height: var(--cmp-container-header-height);
 
-    .header-title {
-      font-size: 16px;
-      font-weight: 600;
-      color: #303133;
+    h3 {
+      font-size: var(--cmp-header-title-font-size);
+      font-weight: var(--cmp-header-title-font-weight);
+      color: var(--cmp-header-title-color);
       margin: 0;
       white-space: nowrap;
       overflow: hidden;
@@ -39,98 +50,140 @@
     .header-actions {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: var(--cmp-status-gap);
       flex-shrink: 0;
 
-      .toggle-btn {
-        padding: 4px;
+      .collapse-btn {
+        padding: var(--cmp-button-padding);
         border: none;
         background: transparent;
         cursor: pointer;
-        border-radius: 4px;
-        transition: all 0.2s ease;
-        color: #606266;
+        border-radius: var(--cmp-button-border-radius);
+        transition: var(--cmp-transition-all);
+        color: var(--cmp-button-color);
 
         &:hover {
-          background: #e6f7ff;
-          color: #409eff;
+          background: var(--cmp-button-hover-background);
+          color: var(--cmp-button-hover-color);
         }
 
         .el-icon {
-          font-size: 16px;
+          font-size: var(--cmp-button-icon-size);
+        }
+      }
+
+      .status-indicator {
+        .loading-indicator,
+        .completed-indicator {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          font-size: var(--cmp-status-font-size);
+
+          .el-icon {
+            font-size: var(--cmp-loading-icon-size);
+          }
+        }
+
+        .loading-indicator {
+          color: var(--cmp-loading-color);
+        }
+
+        .completed-indicator {
+          color: var(--cmp-success-color);
         }
       }
     }
   }
 
-  .container-content {
-    padding: 20px;
-    height: calc(100% - 60px);
+  // 内容区域
+  .collapsible-content {
+    padding: var(--cmp-container-content-padding);
+    height: calc(100% - var(--cmp-container-header-height));
     overflow-y: auto;
 
+    .content-scrollbar {
+      height: 100%;
+    }
+
+    // 滚动条样式
     &::-webkit-scrollbar {
-      width: 6px;
+      width: var(--cmp-scrollbar-width);
     }
 
     &::-webkit-scrollbar-track {
-      background: #f1f1f1;
-      border-radius: 3px;
+      background: var(--cmp-scrollbar-track-background);
+      border-radius: var(--cmp-scrollbar-border-radius);
     }
 
     &::-webkit-scrollbar-thumb {
-      background: #c1c1c1;
-      border-radius: 3px;
+      background: var(--cmp-scrollbar-thumb-background);
+      border-radius: var(--cmp-scrollbar-border-radius);
 
       &:hover {
-        background: #a8a8a8;
+        background: var(--cmp-scrollbar-thumb-hover-background);
       }
+    }
+
+    // 默认内容样式
+    .default-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--cmp-default-content-color);
+      font-size: var(--cmp-default-content-font-size);
     }
   }
 
   // 折叠状态下的样式
   &.collapsed {
-    .container-header {
-      padding: 16px 8px;
+    .collapsible-header {
+      padding: var(--cmp-container-collapsed-padding);
       justify-content: center;
 
-      .header-title {
+      h3 {
         display: none;
       }
 
       .header-actions {
-        .toggle-btn {
-          padding: 8px;
+        .status-indicator {
+          display: none;
+        }
+
+        .collapse-btn {
+          padding: var(--cmp-button-padding);
         }
       }
     }
 
-    .container-content {
+    .collapsible-content {
       display: none;
     }
   }
 
   // 加载状态
   &.loading {
-    .container-content {
+    .collapsible-content {
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #909399;
+      color: var(--cmp-loading-color);
     }
   }
 
   // 响应式设计
-  @media (max-width: 768px) {
+  @media (max-width: #{var(--cmp-mobile-breakpoint)}) {
     position: fixed;
     top: 0;
     left: 0;
     width: 100% !important;
     height: 100%;
-    z-index: 1000;
+    z-index: var(--cmp-z-index-mobile);
     border-radius: 0;
 
     &.collapsed {
-      width: 60px !important;
+      width: var(--cmp-container-collapsed-width) !important;
     }
   }
 }
@@ -138,15 +191,15 @@
 // 动画效果
 .zx-collapsible-container-enter-active,
 .zx-collapsible-container-leave-active {
-  transition: all 0.3s ease;
+  transition: var(--cmp-transition-all);
 }
 
 .zx-collapsible-container-enter-from {
-  transform: translateX(-100%);
-  opacity: 0;
+  transform: var(--cmp-enter-transform);
+  opacity: var(--cmp-enter-opacity);
 }
 
 .zx-collapsible-container-leave-to {
-  transform: translateX(-100%);
-  opacity: 0;
+  transform: var(--cmp-leave-transform);
+  opacity: var(--cmp-leave-opacity);
 }

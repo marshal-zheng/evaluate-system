@@ -1,5 +1,10 @@
 <template>
-  <component :is="Component" v-bind="finalProps" :content-class="''">
+  <component 
+    :is="Component" 
+    v-bind="finalProps" 
+    :popper-class="popperClass"
+    :content-class="contentClass"
+  >
     <template v-if="isPopover" #reference>
       <slot></slot>
     </template>
@@ -39,18 +44,41 @@ const props = defineProps({
   }
 })
 
+
+
 const attrs = useAttrs()
 
 // 计算属性
 const isPopover = computed(() => Boolean(props.title))
 const Component = computed(() => (isPopover.value ? ElPopover : ElTooltip))
 
-// 合并最终的 props
-const finalProps = computed(() => ({
-  trigger: props.trigger,
-  placement: props.placement,
-  content: props.content,
-  title: props.title,
-  ...attrs
-}))
+// CSS 类名计算
+const popperClass = computed(() => {
+  const baseClass = 'zx-tooltip-or-popover'
+  const typeClass = isPopover.value ? 'zx-popover' : 'zx-tooltip'
+  const customClass = attrs.popperClass || ''
+  return [baseClass, typeClass, customClass].filter(Boolean).join(' ')
+})
+
+const contentClass = computed(() => {
+  const baseClass = 'zx-tooltip-or-popover-content'
+  const customClass = attrs.contentClass || ''
+  return [baseClass, customClass].filter(Boolean).join(' ')
+})
+
+// 合并最终的 props (移除 effect 默认值，让组件跟随系统主题)
+const finalProps = computed(() => {
+  const { popperClass: _, contentClass: __, ...restAttrs } = attrs
+  return {
+    trigger: props.trigger,
+    placement: props.placement,
+    content: props.content,
+    title: props.title,
+    ...restAttrs
+  }
+})
 </script>
+
+<style lang="scss">
+@import './index.scss';
+</style>

@@ -1,16 +1,17 @@
 <template>
-  <div 
-    class="zx-detail-card" 
-    :style="{ 
-      padding: props.padding, 
-      borderRadius: props.enableBorderRadius ? 'var(--zx-detail-card-border-radius, 8px)' : '0' 
-    }"
-  >
+  <div class="zx-detail-card-wrapper">
+    <div 
+      class="zx-detail-card" 
+      :style="{ 
+        padding: props.padding, 
+        borderRadius: props.enableBorderRadius ? 'var(--cmp-detail-card-border-radius, 8px)' : '0' 
+      }"
+    >
     <div class="zx-detail-card-title">
       <div class="flex flex-1 items-center gap-[8px]">
         <slot name="titlePrefix"></slot>
         <ZxTooltipOrPopover :content="props.title">
-          <div class="one-line-text max-w-[300px] font-medium text-[var(--zx-detail-card-title-color)]">
+          <div class="one-line-text max-w-[300px] font-medium text-[var(--cmp-detail-card-title-color)]">
             {{ props.title }}
           </div>
         </ZxTooltipOrPopover>
@@ -31,7 +32,7 @@
         ]"
         :style="{ width: item.width }"
       >
-        <div class="whitespace-nowrap text-[var(--zx-detail-card-label-color)]">
+        <div class="whitespace-nowrap text-[var(--cmp-detail-card-label-color)]">
           {{ item.locale }}
         </div>
         <div v-if="Array.isArray(item.value)" class="pr-[24px]">
@@ -40,16 +41,16 @@
         <slot v-else :name="item.key" :value="item.value">
           <ZxTooltipOrPopover :content="item.value" :disabled="isEmpty(item.value)" :placement="item.tooltipPosition">
             <div
-              class="text-ov overflow-hidden overflow-ellipsis whitespace-nowrap pr-[24px] text-[var(--zx-detail-card-value-color)]"
+              class="text-ov overflow-hidden overflow-ellipsis whitespace-nowrap pr-[24px] text-[var(--cmp-detail-card-value-color)]"
               >{{ item.value || '-' }}</div
             >
           </ZxTooltipOrPopover>
         </slot>
       </div>
     </div>
-    <ZxButton
+    <button
       v-if="props.simpleShowCount !== undefined && props.simpleShowCount > 0"
-      type="text"
+      type="button"
       class="more-btn"
       @click="toggleExpand"
     >
@@ -61,14 +62,14 @@
         {{ '更多' }}
         <ZxIcon icon="ArrowDown" :size="14" />
       </div>
-    </ZxButton>
+    </button>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
 import { isEmpty } from 'lodash-es'
-import ZxButton from '../ZxButton/index.vue'
 import ZxTagGroup from '../ZxTag/ZxTagGroup/index.vue'
 import ZxTooltipOrPopover from '../ZxTooltipOrPopover/index.vue'
 import ZxIcon from '../ZxIcon/index.vue'

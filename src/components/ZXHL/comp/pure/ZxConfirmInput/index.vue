@@ -56,17 +56,17 @@
       <div class="zx-confirm-input__footer">
         <slot name="footer-left"></slot>
         <div class="zx-confirm-input__actions">
-          <ZxButton 
+          <el-button 
             type="danger" 
             :class="{ 'zx-confirm-input__btn--rounded': rounded }"
             :disabled="confirmDisabled || isLoading" 
             :loading="isLoading" 
-            size="medium"
+            size="default"
             @click="tryConfirm"
             class="zx-confirm-input__confirm-btn"
           >
             {{ okText || '确认删除' }}
-          </ZxButton>
+          </el-button>
         </div>
       </div>
     </template>
@@ -192,8 +192,13 @@ const errorTextComputed = computed(() => {
   return '请输入内容'
 })
 
-const confirmDisabled = computed(() => props.disabledWhenMismatch ? !localValid.value : false)
 const localValid = ref(!props.requireKeyword)
+
+// 修复按钮禁用逻辑：当输入正确时，按钮应该可用（显示 danger 色）
+const confirmDisabled = computed(() => {
+  if (!props.disabledWhenMismatch) return false
+  return !localValid.value
+})
 
 watch(
   () => form.value,

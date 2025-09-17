@@ -41,19 +41,26 @@
     </div>
 
     <div class="demo-section">
-      <h2>异步数据加载</h2>
-      <p>支持异步函数作为数据源，适用于远程搜索场景。</p>
+      <h2>异步数据加载 (真实网络请求)</h2>
+      <p>演示真实的异步API请求，使用fetch调用远程接口，4秒超时后从catch中获取备用数据。</p>
       <div class="demo-block">
         <ZxAutoComplete
           v-model="asyncValue"
           :options="loadAsyncOptions"
-          placeholder="异步加载数据"
-          style="width: 300px"
+          placeholder="输入城市名称搜索（如：北京、上海）"
+          style="width: 350px"
           @select="handleAsyncSelect"
         />
         <div class="demo-result">
           <p>当前值: {{ asyncValue }}</p>
           <p>选中项: {{ JSON.stringify(selectedAsyncItem) }}</p>
+          <p v-if="isLoading" class="loading-text">
+            <el-icon class="is-loading"><Loading /></el-icon>
+            正在请求远程API接口 (4秒超时)...
+          </p>
+          <p v-if="lastSearchTime" class="search-info">
+            网络请求耗时: {{ lastSearchTime }}ms (含4秒API超时)
+          </p>
         </div>
       </div>
     </div>
@@ -132,6 +139,7 @@
 <script setup>
 import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
+import { Loading } from '@element-plus/icons-vue'
 import ZxAutoComplete from './index.vue'
 
 // 基础用法
@@ -154,6 +162,8 @@ const tooltipValue = ref('')
 // 异步数据
 const asyncValue = ref('')
 const selectedAsyncItem = ref(null)
+const isLoading = ref(false)
+const lastSearchTime = ref(0)
 
 // 自定义过滤
 const customFilterValue = ref('')
@@ -177,38 +187,86 @@ const sizeValue3 = ref('')
 // 方法
 const handleBasicSelect = (item) => {
   selectedBasicItem.value = item
-  ElMessage.success(`选中了: ${item.label}`)
+  const displayText = item.label || item.value
+  const actualValue = item.originalValue || item.selectedValue || item.value
+  ElMessage.success(`选中了: ${displayText} (值: ${actualValue})`)
 }
 
 const handleAsyncSelect = (item) => {
   selectedAsyncItem.value = item
-  ElMessage.success(`异步选中了: ${item.label}`)
+  const displayText = item.label || item.value
+  const actualValue = item.originalValue || item.selectedValue || item.value
+  ElMessage.success(`异步选中了: ${displayText} (值: ${actualValue})`)
 }
 
-// 模拟异步数据加载
+// 模拟异步数据加载 - 使用真实的 fetch 请求
 const loadAsyncOptions = async (query) => {
-  // 模拟网络延迟
-  await new Promise(resolve => setTimeout(resolve, 500))
+  const startTime = Date.now()
+  isLoading.value = true
   
-  const mockData = [
-    { label: '北京市', value: 'beijing' },
-    { label: '上海市', value: 'shanghai' },
-    { label: '广州市', value: 'guangzhou' },
-    { label: '深圳市', value: 'shenzhen' },
-    { label: '杭州市', value: 'hangzhou' },
-    { label: '南京市', value: 'nanjing' },
-    { label: '武汉市', value: 'wuhan' },
-    { label: '成都市', value: 'chengdu' }
-  ]
-  
-  // 根据查询参数过滤数据
-  if (query && query.trim()) {
-    return mockData.filter(item => 
-      item.label.includes(query) || item.value.includes(query)
-    )
+  try {
+    // 模拟调用一个不存在的API，4秒后超时，然后在catch中处理数据
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 4000) // 4秒超时
+    
+    const response = await fetch('https://mock-api-nonexistent.example.com/cities', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ query: query || '' }),
+      signal: controller.signal
+    })
+    
+    clearTimeout(timeoutId)
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    
+    const data = await response.json()
+    return data.cities || []
+    
+  } catch (error) {
+    // 在 catch 中处理模拟数据，模拟真实的异步响应
+    console.log('API请求失败，使用本地数据:', error.message)
+    
+    const mockData = [
+      { label: '北京市', value: 'beijing', code: '110000', population: '2154万', region: '华北' },
+      { label: '郑州市', value: 'zhengzhou', code: '410100', population: '1260万', region: '华中' },
+      { label: '长沙市', value: 'changsha', code: '430100', population: '1005万', region: '华中' }
+    ]
+    
+    // 根据查询参数过滤数据
+    let filteredData = mockData
+    if (query && query.trim()) {
+      const searchTerm = query.toLowerCase()
+      filteredData = mockData.filter(item => 
+        item.label.toLowerCase().includes(searchTerm) || 
+        item.value.toLowerCase().includes(searchTerm) ||
+        item.code.includes(searchTerm) ||
+        item.region.toLowerCase().includes(searchTerm)
+      )
+    }
+    
+    const endTime = Date.now()
+    lastSearchTime.value = endTime - startTime
+    
+    // 模拟可能的空结果
+    if (query && query.length > 0 && filteredData.length === 0) {
+      ElMessage.warning(`未找到包含 "${query}" 的城市`)
+      return []
+    }
+    
+    // 模拟成功获取数据的提示
+    if (query && query.length > 0) {
+      ElMessage.success(`从备用数据源获取到 ${filteredData.length} 条城市数据`)
+    }
+    
+    return filteredData
+  } finally {
+    isLoading.value = false
   }
-  
-  return mockData
 }
 
 // 自定义过滤函数
@@ -275,6 +333,23 @@ const customFilter = (queryString, item) => {
         p {
           margin: 5px 0;
         }
+
+        .loading-text {
+          color: var(--el-color-primary) !important;
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          font-weight: 500;
+
+          .el-icon {
+            animation: rotating 2s linear infinite;
+          }
+        }
+
+        .search-info {
+          color: var(--el-color-success) !important;
+          font-weight: 500;
+        }
       }
 
       .size-demo {
@@ -295,6 +370,15 @@ const customFilter = (queryString, item) => {
         }
       }
     }
+  }
+}
+
+@keyframes rotating {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }
 

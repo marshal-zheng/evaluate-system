@@ -25,7 +25,9 @@ export function setupPureComponentsSelective(app, componentNames = []) {
     ZxSearch, 
     ZxSelect, 
     ZxTooltipOrPopover, 
-    ZxPureRouterView 
+    ZxPureRouterView,
+    ZxDrawer,
+    ZxButton
   } = PureComponents
   
   const componentMap = {
@@ -33,7 +35,9 @@ export function setupPureComponentsSelective(app, componentNames = []) {
     ZxSearch,
     ZxSelect,
     ZxTooltipOrPopover,
-    ZxPureRouterView
+    ZxPureRouterView,
+    ZxDrawer,
+    ZxButton
   }
   
   componentNames.forEach(name => {

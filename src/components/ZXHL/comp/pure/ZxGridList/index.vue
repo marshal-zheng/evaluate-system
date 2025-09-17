@@ -1,5 +1,6 @@
 <template>
-  <div class="zx-grid-list">
+  <div class="zx-grid-list-wrapper">
+    <div class="zx-grid-list" :class="{ 'show-table-border': showTableBorder }">
     <!-- 查询表单区域 -->
     <div v-if="$slots.form" class="zx-grid-list__toolbar">
       <slot name="form" :query="gridState.query" :data="gridState" :loading="isLoading" />
@@ -56,6 +57,7 @@
     <div 
       v-if="showPagination && (hasData || hasPagination)" 
       class="zx-grid-list__pagination"
+      :style="paginationStyles"
     >
       <slot name="pagination" :pager="gridState.pager">
         <el-pagination
@@ -71,6 +73,7 @@
           @current-change="handlePageChange"
         />
       </slot>
+    </div>
     </div>
   </div>
 </template>
@@ -240,6 +243,16 @@ const props = defineProps({
   showRefreshButton: {
     type: Boolean,
     default: false
+  },
+  // 是否显示表格内边框
+  showTableBorder: {
+    type: Boolean,
+    default: false
+  },
+  // 分页组件底部内边距
+  paginationPaddingBottom: {
+    type: [String, Number],
+    default: '0px'
   }
 })
 
@@ -296,6 +309,14 @@ const currentPage = computed(() => {
 })
 const totalPages = computed(() => {
   return Math.ceil(gridState.pager.total / gridState.pager.size) || 1
+})
+const paginationStyles = computed(() => {
+  const paddingValue = typeof props.paginationPaddingBottom === 'number' 
+    ? `${props.paginationPaddingBottom}px` 
+    : props.paginationPaddingBottom
+  return {
+    '--cmp-grid-list-pagination-padding-bottom': paddingValue
+  }
 })
 
 // 工具函数

@@ -9,12 +9,12 @@
     :show-arrow="false"
     @command="handleMenuCommand"
   >
-     <ZxIcon
-      type="element"
-      icon="MoreFilled"
-      :hover-color="iconHoverColor"
-      class="zx-panel-header-menu__trigger-icon"
-    />
+    <el-icon
+      :class="['zx-panel-header-menu__trigger-icon']"
+      :style="{ color: iconHoverColor }"
+    >
+      <MoreFilled />
+    </el-icon>
     <template #dropdown>
       <el-dropdown-menu>
         <template v-for="(item, index) in visibleMenuItems" :key="`${item.text}-${index}`">
@@ -92,6 +92,7 @@ import { computed } from 'vue'
 import { ElDropdown, ElDropdownMenu, ElDropdownItem } from 'element-plus'
 import ZxIcon from '../../../../pure/ZxIcon/index.vue'
 import type { PanelMenuItem } from './types'
+import { MoreFilled } from '@element-plus/icons-vue'
 
 interface Props {
   /** 菜单项列表 */

@@ -1,24 +1,26 @@
 <template>
-  <TooltipOrPopover v-if="!isEmpty(tooltip)" v-bind="tooltip">
+  <div class="zx-button-wrapper">
+    <TooltipOrPopover v-if="!isEmpty(tooltip)" v-bind="tooltip">
+      <el-button
+        v-bind="buttonAttrs"
+        :loading="enableLoading && loading"
+        @click="handleClick"
+      >
+        <slot />
+      </el-button>
+      <template v-slot:content>
+        <slot name="tooltip-content" />
+      </template>
+    </TooltipOrPopover>
     <el-button
+      v-else
       v-bind="buttonAttrs"
       :loading="enableLoading && loading"
       @click="handleClick"
     >
       <slot />
     </el-button>
-    <template v-slot:content>
-      <slot name="tooltip-content" />
-    </template>
-  </TooltipOrPopover>
-  <el-button
-    v-else
-    v-bind="buttonAttrs"
-    :loading="enableLoading && loading"
-    @click="handleClick"
-  >
-    <slot />
-  </el-button>
+  </div>
 </template>
   
 <script>
@@ -28,7 +30,13 @@ import { debounce, throttle, omit, isEmpty } from 'lodash-es'
 import TooltipOrPopover from '../ZxTooltipOrPopover/index.vue'
 
 export default defineComponent({
-  name: 'TooltipButton',
+  name: 'ZxButton',
+  // ZxButton 基于 Element Plus 的 el-button，默认跟随系统主题
+  // 支持通过 CSS 变量自定义样式：
+  // --zx-button-border-radius: 自定义圆角
+  // --zx-button-font-weight: 自定义字重  
+  // --zx-button-transition: 自定义过渡动画
+  // --zx-button-box-shadow: 自定义悬停阴影效果
   components: {
     ElButton,
     TooltipOrPopover,
@@ -109,3 +117,7 @@ export default defineComponent({
   },
 })
 </script>
+
+<style lang="scss">
+@import './index.scss';
+</style>

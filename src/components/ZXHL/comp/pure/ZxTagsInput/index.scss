@@ -1,33 +1,8 @@
 // ZxTagsInput 标签输入组件样式
 // 纯净组件样式，不包含主题配置
 
-:root {
-  --zx-tags-input-bg: #ffffff;
-  --zx-tags-input-border-color: #dcdfe6;
-  --zx-tags-input-border-radius: 4px;
-  --zx-tags-input-padding: 8px 12px;
-  --zx-tags-input-min-height: 32px;
-  --zx-tags-input-gap: 6px;
-  
-  --zx-tags-input-tag-margin: 2px 4px 2px 0;
-  --zx-tags-input-tag-max-width: 200px;
-  
-  --zx-tags-input-input-min-width: 120px;
-  --zx-tags-input-input-flex: 1;
-  
-  --zx-tags-input-error-color: #f56c6c;
-  --zx-tags-input-error-font-size: 12px;
-  --zx-tags-input-error-margin-top: 4px;
-  
-  --zx-tags-input-tip-color: #909399;
-  --zx-tags-input-tip-font-size: 12px;
-  --zx-tags-input-tip-margin-top: 4px;
-  
-  --zx-tags-input-focus-border-color: #409eff;
-  --zx-tags-input-hover-border-color: #c0c4cc;
-  --zx-tags-input-disabled-bg: #f5f7fa;
-  --zx-tags-input-disabled-color: #c0c4cc;
-}
+// 导入 CSS 变量定义
+@import './var.scss';
 
 // 标签输入组件容器
 .zx-tags-input {
@@ -37,31 +12,31 @@
   .zx-tags-input-container {
     display: flex;
     align-items: flex-start;
-    gap: var(--zx-tags-input-gap);
-    min-height: var(--zx-tags-input-min-height);
-    padding: var(--zx-tags-input-padding);
-    background-color: var(--zx-tags-input-bg);
-    border: 1px solid var(--zx-tags-input-border-color);
-    border-radius: var(--zx-tags-input-border-radius);
+    gap: var(--cmp-tags-input-gap);
+    min-height: var(--cmp-tags-input-min-height);
+    padding: var(--cmp-tags-input-padding);
+    background-color: var(--cmp-tags-input-bg);
+    border: 1px solid var(--cmp-tags-input-border-color);
+    border-radius: var(--cmp-tags-input-border-radius);
     transition: border-color 0.2s ease;
     
     &:hover {
-      border-color: var(--zx-tags-input-hover-border-color);
+      border-color: var(--cmp-tags-input-hover-border-color);
     }
     
     &:focus-within {
-      border-color: var(--zx-tags-input-focus-border-color);
-      box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
+      border-color: var(--cmp-tags-input-focus-border-color);
+      box-shadow: var(--cmp-tags-input-focus-shadow);
     }
     
     // 禁用状态
     &.is-disabled {
-      background-color: var(--zx-tags-input-disabled-bg);
-      color: var(--zx-tags-input-disabled-color);
+      background-color: var(--cmp-tags-input-disabled-bg);
+      color: var(--cmp-tags-input-disabled-color);
       cursor: not-allowed;
       
       &:hover {
-        border-color: var(--zx-tags-input-border-color);
+        border-color: var(--cmp-tags-input-border-color);
       }
     }
   }
@@ -75,8 +50,8 @@
     
     // 标签样式
     .el-tag {
-      margin: var(--zx-tags-input-tag-margin);
-      max-width: var(--zx-tags-input-tag-max-width);
+      margin: var(--cmp-tags-input-tag-margin);
+      max-width: var(--cmp-tags-input-tag-max-width);
       
       // 标签内容截断
       .el-tag__content {
@@ -95,8 +70,8 @@
   
   // 输入框样式
   .zx-tags-input-input {
-    flex: var(--zx-tags-input-input-flex);
-    min-width: var(--zx-tags-input-input-min-width);
+    flex: var(--cmp-tags-input-input-flex);
+    min-width: var(--cmp-tags-input-input-min-width);
     
     // 移除输入框边框，使用容器边框
     :deep(.el-input__wrapper) {
@@ -132,29 +107,29 @@
   
   // 错误提示
   .zx-tags-input-error {
-    color: var(--zx-tags-input-error-color);
-    font-size: var(--zx-tags-input-error-font-size);
-    margin-top: var(--zx-tags-input-error-margin-top);
+    color: var(--cmp-tags-input-error-color);
+    font-size: var(--cmp-tags-input-error-font-size);
+    margin-top: var(--cmp-tags-input-error-margin-top);
     line-height: 1.4;
   }
   
   // 提示信息
   .zx-tags-input-tip {
-    color: var(--zx-tags-input-tip-color);
-    font-size: var(--zx-tags-input-tip-font-size);
-    margin-top: var(--zx-tags-input-tip-margin-top);
+    color: var(--cmp-tags-input-tip-color);
+    font-size: var(--cmp-tags-input-tip-font-size);
+    margin-top: var(--cmp-tags-input-tip-margin-top);
     line-height: 1.4;
   }
   
   // 只读状态
   &.is-readonly {
     .zx-tags-input-container {
-      background-color: var(--zx-tags-input-disabled-bg);
-      border-color: var(--zx-tags-input-border-color);
+      background-color: var(--cmp-tags-input-disabled-bg);
+      border-color: var(--cmp-tags-input-border-color);
       cursor: default;
       
       &:hover {
-        border-color: var(--zx-tags-input-border-color);
+        border-color: var(--cmp-tags-input-border-color);
       }
     }
     
@@ -170,12 +145,12 @@
   // 禁用状态
   &.is-disabled {
     .zx-tags-input-container {
-      background-color: var(--zx-tags-input-disabled-bg);
-      color: var(--zx-tags-input-disabled-color);
+      background-color: var(--cmp-tags-input-disabled-bg);
+      color: var(--cmp-tags-input-disabled-color);
       cursor: not-allowed;
       
       &:hover {
-        border-color: var(--zx-tags-input-border-color);
+        border-color: var(--cmp-tags-input-border-color);
       }
     }
   }
@@ -186,16 +161,16 @@
   // 大尺寸
   &.zx-tags-input--large {
     .zx-tags-input-container {
-      min-height: 40px;
-      padding: 10px 15px;
+      min-height: var(--cmp-tags-input-large-min-height);
+      padding: var(--cmp-tags-input-large-padding);
     }
   }
   
   // 小尺寸
   &.zx-tags-input--small {
     .zx-tags-input-container {
-      min-height: 28px;
-      padding: 6px 10px;
+      min-height: var(--cmp-tags-input-small-min-height);
+      padding: var(--cmp-tags-input-small-padding);
     }
     
     .zx-tags-input-input {

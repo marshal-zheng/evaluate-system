@@ -1,47 +1,34 @@
 // ZxList 组件样式文件
 // 基于 Element Plus 的列表组件样式定义
 
-// CSS 变量定义
-.zx-list {
-  --zx-list-bg: #ffffff;
-  --zx-list-border: #e4e7ed;
-  --zx-list-item-bg: #ffffff;
-  --zx-list-item-hover-bg: #f5f7fa;
-  --zx-list-item-focus-bg: #ecf5ff;
-  --zx-list-item-text: #303133;
-  --zx-list-item-text-secondary: #909399;
-  --zx-list-empty-text: #909399;
-  --zx-list-loading-text: #909399;
-  --zx-list-radius: 4px;
-  --zx-list-item-padding: 12px 16px;
-  --zx-list-transition: all 0.3s ease;
-}
+// 导入 CSS 变量定义
+@import './var.scss';
 
 // 组件样式
 .zx-list {
-  background-color: var(--zx-list-bg);
-  border: 1px solid var(--zx-list-border);
-  border-radius: var(--zx-list-radius);
+  background-color: var(--cmp-list-bg);
+  border: 1px solid var(--cmp-list-border-color);
+  border-radius: var(--cmp-list-border-radius);
   overflow: hidden;
 
   &__container {
     overflow-y: auto;
     
     &::-webkit-scrollbar {
-      width: 6px;
+      width: var(--cmp-list-scrollbar-width);
     }
     
     &::-webkit-scrollbar-track {
-      background: #f1f1f1;
-      border-radius: 3px;
+      background: var(--cmp-list-scrollbar-track-bg);
+      border-radius: var(--cmp-list-scrollbar-border-radius);
     }
     
     &::-webkit-scrollbar-thumb {
-      background: #c1c1c1;
-      border-radius: 3px;
+      background: var(--cmp-list-scrollbar-thumb-bg);
+      border-radius: var(--cmp-list-scrollbar-border-radius);
       
       &:hover {
-        background: #a8a8a8;
+        background: var(--cmp-list-scrollbar-thumb-hover-bg);
       }
     }
   }
@@ -52,12 +39,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 16px;
-    color: var(--zx-list-loading-text);
-    font-size: 14px;
+    padding: var(--cmp-list-loading-padding);
+    color: var(--cmp-list-loading-text-color);
+    font-size: var(--cmp-list-loading-font-size);
 
     .el-icon {
-      margin-right: 8px;
+      margin-right: var(--cmp-list-loading-icon-margin);
     }
   }
 
@@ -66,22 +53,22 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 40px 20px;
-    color: var(--zx-list-empty-text);
-    font-size: 14px;
+    padding: var(--cmp-list-empty-padding);
+    color: var(--cmp-list-empty-text-color);
+    font-size: var(--cmp-list-empty-font-size);
 
     .el-icon {
-      font-size: 48px;
-      margin-bottom: 16px;
-      opacity: 0.5;
+      font-size: var(--cmp-list-empty-icon-size);
+      margin-bottom: var(--cmp-list-empty-icon-margin);
+      opacity: var(--cmp-list-empty-icon-opacity);
     }
   }
 
   &__no-more {
-     padding: 16px;
+     padding: var(--cmp-list-no-more-padding);
      text-align: center;
-     color: var(--zx-list-loading-text);
-     font-size: 12px;
+     color: var(--cmp-list-loading-text-color);
+     font-size: var(--cmp-list-no-more-font-size);
    }
 }
 
@@ -89,11 +76,11 @@
 .zx-list-item {
   display: flex;
   align-items: center;
-  padding: var(--zx-list-item-padding);
-  background-color: var(--zx-list-item-bg);
-  color: var(--zx-list-item-text);
-  transition: var(--zx-list-transition);
-  border-bottom: 1px solid var(--zx-list-border);
+  padding: var(--cmp-list-item-padding);
+  background-color: var(--cmp-list-item-bg);
+  color: var(--cmp-list-item-text-color);
+  transition: var(--cmp-list-item-transition);
+  border-bottom: 1px solid var(--cmp-list-item-border-color);
   cursor: pointer;
   
   &:last-child {
@@ -101,13 +88,13 @@
   }
   
   &:hover {
-    background-color: var(--zx-list-item-hover-bg);
+    background-color: var(--cmp-list-item-hover-bg);
   }
   
   &--focus {
-    background-color: var(--zx-list-item-focus-bg);
-    outline: 2px solid #409eff;
-    outline-offset: -2px;
+    background-color: var(--cmp-list-item-focus-bg);
+    outline: var(--cmp-list-item-focus-outline-width) solid var(--cmp-list-item-focus-outline-color);
+    outline-offset: var(--cmp-list-item-focus-outline-offset);
   }
   
   &__content {
@@ -121,34 +108,34 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: var(--cmp-list-item-main-gap);
   }
   
   &__title {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--zx-list-item-text);
-    line-height: 1.4;
+    font-size: var(--cmp-list-item-title-font-size);
+    font-weight: var(--cmp-list-item-title-font-weight);
+    color: var(--cmp-list-item-text-color);
+    line-height: var(--cmp-list-item-line-height);
   }
   
   &__description {
-    font-size: 12px;
-    color: var(--zx-list-item-text-secondary);
-    line-height: 1.4;
+    font-size: var(--cmp-list-item-desc-font-size);
+    color: var(--cmp-list-item-text-secondary);
+    line-height: var(--cmp-list-item-line-height);
   }
   
   &__actions {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-left: 12px;
+    gap: var(--cmp-list-item-actions-gap);
+    margin-left: var(--cmp-list-item-actions-margin);
   }
   
   &__more-btn {
-    padding: 4px;
+    padding: var(--cmp-list-item-more-btn-padding);
     
     .el-icon {
-      font-size: 16px;
+      font-size: var(--cmp-list-item-more-icon-size);
     }
   }
 }
@@ -157,19 +144,19 @@
 @media (max-width: 768px) {
   .zx-list {
     &__container {
-      padding: 8px;
+      padding: var(--cmp-list-mobile-container-padding);
     }
   }
   
   .zx-list-item {
-    padding: 12px;
+    padding: var(--cmp-list-mobile-item-padding);
     
     &__title {
-      font-size: 13px;
+      font-size: var(--cmp-list-mobile-title-font-size);
     }
     
     &__description {
-      font-size: 11px;
+      font-size: var(--cmp-list-mobile-desc-font-size);
     }
   }
 }

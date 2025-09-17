@@ -157,6 +157,7 @@
 
   // 确认按钮样式 - 危险操作红色
   .zx-confirm-input__confirm-btn {
+    // 直接针对 el-button 的样式
     border-radius: 4px;
     font-weight: 500;
     padding: 8px 16px;
@@ -165,29 +166,29 @@
     min-width: 100px;
     
     // 危险操作样式
-    background: var(--cmp-confirm-input-danger);
-    border-color: var(--cmp-confirm-input-danger);
-    color: #ffffff;
+    background: var(--cmp-confirm-input-danger) !important;
+    border-color: var(--cmp-confirm-input-danger) !important;
+    color: #ffffff !important;
 
     &:hover:not(:disabled) {
-      background: var(--cmp-confirm-input-danger-strong);
-      border-color: var(--cmp-confirm-input-danger-strong);
+      background: var(--cmp-confirm-input-danger-strong) !important;
+      border-color: var(--cmp-confirm-input-danger-strong) !important;
       transform: translateY(-1px);
-      box-shadow: 0 4px 8px rgba(220, 38, 38, 0.25);
+      box-shadow: 0 4px 8px rgba(220, 38, 38, 0.25) !important;
     }
 
     &:active:not(:disabled) {
       transform: translateY(0);
-      box-shadow: 0 2px 4px rgba(220, 38, 38, 0.25);
+      box-shadow: 0 2px 4px rgba(220, 38, 38, 0.25) !important;
     }
 
     &:disabled {
-      background: var(--cmp-confirm-input-border);
-      border-color: var(--cmp-confirm-input-border);
-      color: var(--cmp-confirm-input-text-muted);
+      background: var(--cmp-confirm-input-border) !important;
+      border-color: var(--cmp-confirm-input-border) !important;
+      color: var(--cmp-confirm-input-text-muted) !important;
       cursor: not-allowed;
       transform: none;
-      box-shadow: none;
+      box-shadow: none !important;
     }
 
     // 圆角变体
@@ -210,13 +211,13 @@
     }
     
     .zx-confirm-input__confirm-btn {
-      background: var(--cmp-confirm-input-warning);
-      border-color: var(--cmp-confirm-input-warning);
+      background: var(--cmp-confirm-input-warning) !important;
+      border-color: var(--cmp-confirm-input-warning) !important;
 
       &:hover:not(:disabled) {
-        background: var(--cmp-confirm-input-warning-strong);
-        border-color: var(--cmp-confirm-input-warning-strong);
-        box-shadow: 0 4px 8px rgba(245, 158, 11, 0.25);
+        background: var(--cmp-confirm-input-warning-strong) !important;
+        border-color: var(--cmp-confirm-input-warning-strong) !important;
+        box-shadow: 0 4px 8px rgba(245, 158, 11, 0.25) !important;
       }
     }
   }
@@ -227,13 +228,13 @@
     }
     
     .zx-confirm-input__confirm-btn {
-      background: var(--cmp-confirm-input-info);
-      border-color: var(--cmp-confirm-input-info);
+      background: var(--cmp-confirm-input-info) !important;
+      border-color: var(--cmp-confirm-input-info) !important;
 
       &:hover:not(:disabled) {
-        background: var(--cmp-confirm-input-info-strong);
-        border-color: var(--cmp-confirm-input-info-strong);
-        box-shadow: 0 4px 8px rgba(37, 99, 235, 0.25);
+        background: var(--cmp-confirm-input-info-strong) !important;
+        border-color: var(--cmp-confirm-input-info-strong) !important;
+        box-shadow: 0 4px 8px rgba(37, 99, 235, 0.25) !important;
       }
     }
   }

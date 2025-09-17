@@ -20,6 +20,7 @@
         @panel-added="handlePanelAdded"
         @panel-removed="handlePanelRemoved"
         @layout-changed="handleLayoutChanged"
+        @edit-panel="openEditPane"
       />
       
       <!-- 空状态提示 -->
@@ -32,6 +33,16 @@
       </div>
     </div>
     
+    <!-- 页面级 EditPane 抽屉 -->
+    <EditPane
+      v-model="showEditPane"
+      :panel-data="editingPanelData"
+      :mode="editMode"
+      @confirm="handleEditConfirm"
+      @cancel="handleEditCancel"
+      @reset="handleEditReset"
+    />
+
     <!-- 布局导出区域 -->
     <div v-if="exportedLayout" class="export-area">
       <h3>导出的布局配置：</h3>
@@ -46,9 +57,10 @@
 </template>
 
 <script>
-import { ref } from 'vue'
+import { ref, reactive } from 'vue'
 import DashboardGrid from '../index.vue'
 import DraggableChartPalette from './DraggableChartPalette.vue'
+import EditPane from '../EditPane/index.vue'
 
 export default {
   name: 'DashboardGridExample',
@@ -58,6 +70,15 @@ export default {
   },
   setup() {
     const panels = ref([])
+    const showEditPane = ref(false)
+    const editMode = ref('edit')
+    const editingPanelData = reactive({
+      title: '',
+      description: '',
+      transparentBackground: false,
+      width: 400,
+      height: 300
+    })
     const exportedLayout = ref('')
     const copyHint = ref(false)
 
@@ -80,6 +101,33 @@ export default {
       console.log('Layout changed:', layout)
       // 可以在这里保存布局到本地存储或发送到服务器
     }
+
+    // 打开编辑抽屉（来自 DashboardGrid 的 edit-panel 事件）
+    const openEditPane = (panel) => {
+      editMode.value = 'edit'
+      editingPanelData.title = panel?.title || ''
+      editingPanelData.description = panel?.description || ''
+      editingPanelData.transparentBackground = !!panel?.transparentBackground
+      // 可选：把当前 panel 的宽高传入（若有统一定义）
+      editingPanelData.width = panel?.gridPos?.w ? panel.gridPos.w * 50 : 400
+      editingPanelData.height = panel?.gridPos?.h ? panel.gridPos.h * 50 : 300
+      showEditPane.value = true
+    }
+
+    const handleEditConfirm = (formData) => {
+      // 这里仅作演示：找到一个面板并更新其标题等；实际项目应根据 panelId 定位
+      if (panels.value.length > 0) {
+        const p = panels.value[0]
+        p.title = formData.title
+      }
+      showEditPane.value = false
+    }
+
+    const handleEditCancel = () => {
+      showEditPane.value = false
+    }
+
+    const handleEditReset = () => {}
 
     // 清空所有面板
     const clearAll = () => {
@@ -125,7 +173,14 @@ export default {
       handleLayoutChanged,
       clearAll,
       exportLayout,
-      selectAll
+      selectAll,
+      showEditPane,
+      editMode,
+      editingPanelData,
+      openEditPane,
+      handleEditConfirm,
+      handleEditCancel,
+      handleEditReset
     }
   }
 }

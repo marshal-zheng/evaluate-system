@@ -2,22 +2,19 @@
   <el-collapse
     v-model="activeNames"
     class="zx-more-setting-collapse"
+    :class="{ 'zx-more-setting-collapse--no-border': disableBorder }"
     :accordion="false"
   >
     <el-collapse-item name="moreSetting">
       <template #title>
-        <el-button
+        <ZxButton
           type="text"
           class="zx-more-setting-collapse__trigger"
           :style="{ padding: props.titlePadding }"
           @click.stop="toggleCollapse"
         >
           {{ title }}
-          <el-icon class="zx-more-setting-collapse__icon">
-            <ArrowDown v-if="isExpanded" />
-            <ArrowRight v-else />
-          </el-icon>
-        </el-button>
+        </ZxButton>
       </template>
       <div 
         class="zx-more-setting-collapse__content"
@@ -31,7 +28,7 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
-import { ArrowDown, ArrowRight } from '@element-plus/icons-vue'
+import ZxButton from '../ZxButton/index.vue'
 
 const props = defineProps({
   modelValue: {
@@ -53,6 +50,10 @@ const props = defineProps({
   contentPadding: {
     type: String,
     default: ''
+  },
+  disableBorder: {
+    type: Boolean,
+    default: true
   }
 })
 
@@ -104,6 +105,6 @@ defineExpose({
 })
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 @import './index.scss';
 </style>

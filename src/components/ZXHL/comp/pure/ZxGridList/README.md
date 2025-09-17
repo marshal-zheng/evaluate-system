@@ -169,6 +169,8 @@ const handleDelete = (row) => {
 | pageFrom0 | 分页是否从 0 开始 | Boolean | `false` |
 | debounceDelay | 防抖延迟(ms) | Number | `300` |
 | defaultPageSize | 默认分页大小 | Number | `20` |
+| showTableBorder | 是否显示表格内边框 | Boolean | `false` |
+| paginationPaddingBottom | 分页组件底部内边距 | String/Number | `'12px'` |
 
 ## Events
 
@@ -283,6 +285,67 @@ const paramsTransform = (params) => {
 </script>
 ```
 
+### 样式定制高级用法
+
+```vue
+<template>
+  <ZxGridList
+    :load-data="loadData"
+    :show-table-border="dynamicBorderControl"
+    :pagination-padding-bottom="computedPadding"
+    class="custom-grid-list"
+  >
+    <!-- 插槽内容 -->
+  </ZxGridList>
+</template>
+
+<script setup>
+import { ref, computed, onMounted } from 'vue'
+
+// 响应式样式控制
+const screenSize = ref('desktop')
+const userPreference = ref({ showBorder: true, compactMode: false })
+
+// 动态边框控制
+const dynamicBorderControl = computed(() => {
+  return screenSize.value === 'mobile' ? false : userPreference.value.showBorder
+})
+
+// 计算分页间距
+const computedPadding = computed(() => {
+  if (userPreference.value.compactMode) {
+    return screenSize.value === 'mobile' ? 8 : 6
+  }
+  return screenSize.value === 'mobile' ? 16 : 12
+})
+
+// 监听屏幕尺寸变化
+onMounted(() => {
+  const updateScreenSize = () => {
+    screenSize.value = window.innerWidth < 768 ? 'mobile' : 'desktop'
+  }
+  
+  window.addEventListener('resize', updateScreenSize)
+  updateScreenSize()
+})
+</script>
+
+<style scoped>
+.custom-grid-list {
+  /* 自定义 CSS 变量 */
+  --zx-grid-list-table-inner-border-color: var(--el-color-primary-light-7);
+  --zx-grid-list-table-inner-border-width: 2px;
+}
+
+/* 响应式样式定制 */
+@media (max-width: 768px) {
+  .custom-grid-list {
+    --zx-grid-list-pagination-padding-bottom: 8px;
+  }
+}
+</style>
+```
+
 ## 样式定制
 
 组件支持 CSS 变量定制：
@@ -302,6 +365,105 @@ const paramsTransform = (params) => {
   }
 }
 ```
+
+### 表格边框控制
+
+组件提供了表格内边框的显示控制功能：
+
+#### 通过 Props 控制
+```vue
+<ZxGridList 
+  :show-table-border="true"
+  :load-data="loadData"
+>
+  <!-- 插槽内容 -->
+</ZxGridList>
+```
+
+#### 通过 CSS 变量控制
+```scss
+:root {
+  // 表格内边框颜色
+  --zx-grid-list-table-inner-border-color: #dcdfe6;
+  // 表格内边框宽度
+  --zx-grid-list-table-inner-border-width: 1px;
+}
+```
+
+### 分页间距控制
+
+组件提供了分页组件底部间距的灵活配置：
+
+#### 通过 Props 控制（推荐）
+```vue
+<ZxGridList 
+  :pagination-padding-bottom="16"
+  <!-- 或者使用字符串格式 -->
+  :pagination-padding-bottom="'20px'"
+  :load-data="loadData"
+>
+  <!-- 插槽内容 -->
+</ZxGridList>
+```
+
+#### 通过 CSS 变量控制（全局）
+```scss
+:root {
+  // 分页组件底部内边距
+  --zx-grid-list-pagination-padding-bottom: 16px;
+}
+```
+
+#### 动态控制示例
+```vue
+<template>
+  <div>
+    <!-- 控制面板 -->
+    <div class="controls">
+      <el-switch 
+        v-model="showBorder" 
+        active-text="显示表格边框"
+      />
+      <el-input-number 
+        v-model="paddingBottom" 
+        :min="0" 
+        :max="50"
+        placeholder="分页间距"
+      />
+    </div>
+    
+    <!-- 列表组件 -->
+    <ZxGridList 
+      :show-table-border="showBorder"
+      :pagination-padding-bottom="paddingBottom"
+      :load-data="loadData"
+    >
+      <!-- 插槽内容 -->
+    </ZxGridList>
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+
+const showBorder = ref(false)
+const paddingBottom = ref(12)
+</script>
+```
+
+### CSS 变量优先级
+
+1. **Props 属性** > **CSS 变量** > **默认值**
+2. Props 方式具有最高优先级，可以覆盖全局 CSS 变量设置
+3. 适合需要动态控制或组件级别定制的场景
+
+### 可用的 CSS 变量
+
+| 变量名 | 说明 | 默认值 |
+|--------|------|--------|
+| `--zx-grid-list-table-inner-border-color` | 表格内边框颜色 | `#dcdfe6` |
+| `--zx-grid-list-table-inner-border-width` | 表格内边框宽度 | `1px` |
+| `--zx-grid-list-pagination-padding-bottom` | 分页底部内边距 | `12px` |
 
 ## 迁移指南
 

@@ -314,12 +314,10 @@
 
     &:hover {
       color: var(--cmp-drawer-hover-color);
-      background-color: var(--cmp-drawer-hover-bg-color, rgba(64, 158, 255, 0.1));
     }
 
     &:focus {
       color: var(--cmp-drawer-hover-color);
-      background-color: var(--cmp-drawer-hover-bg-color, rgba(64, 158, 255, 0.1));
     }
   }
 

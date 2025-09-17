@@ -1,101 +1,63 @@
 // ZxTabs 标签页组件样式
 // 基于 Element Plus 的增强标签页组件样式
 
-// CSS 变量定义
-:root {
-  // 基础颜色
-  --zx-tabs-primary-color: #409eff;
-  --zx-tabs-text-color: #303133;
-  --zx-tabs-text-color-secondary: #606266;
-  --zx-tabs-border-color: #e4e7ed;
-  --zx-tabs-background-color: #ffffff;
-  
-  // 标签页相关
-  --zx-tabs-header-height: 40px;
-  --zx-tabs-content-padding: 20px;
-  --zx-tabs-border-radius: 4px;
-  
-  // 拖拽相关
-  --zx-tabs-drag-cursor: grab;
-  --zx-tabs-drag-active-cursor: grabbing;
-  --zx-tabs-drag-opacity: 0.8;
-  
-  // 加载状态
-  --zx-tabs-loading-color: #909399;
-  --zx-tabs-loading-bg: rgba(255, 255, 255, 0.9);
-  
-  // 动画
-  --zx-tabs-transition-duration: 0.3s;
-  --zx-tabs-transition-timing: ease;
-  
-  // 间距
-  --zx-tabs-gap: 8px;
-  --zx-tabs-padding-horizontal: 16px;
-  --zx-tabs-padding-vertical: 8px;
-}
-
-// 暗色主题
-[data-theme="dark"] {
-  --zx-tabs-text-color: #e4e7ed;
-  --zx-tabs-text-color-secondary: #c0c4cc;
-  --zx-tabs-border-color: #4c4d4f;
-  --zx-tabs-background-color: #1d1e1f;
-  --zx-tabs-loading-bg: rgba(29, 30, 31, 0.9);
-}
+// 引入 CSS 变量定义
+@import './var.scss';
 
 // 主组件样式
 .zx-tabs {
   width: 100%;
   
   // Element Plus 标签页基础样式覆盖
-  :deep(.el-tabs__header) {
-    margin: 0 0 var(--zx-tabs-gap) 0;
+  .el-tabs__header {
+    margin: var(--cmp-tabs-header-margin);
     
     .el-tabs__nav-wrap {
       &::after {
-        background-color: var(--zx-tabs-border-color);
+        background-color: var(--cmp-tabs-border-color);
       }
     }
     
     .el-tabs__nav {
       .el-tabs__item {
-        height: var(--zx-tabs-header-height);
-        line-height: var(--zx-tabs-header-height);
-        padding: 0 var(--zx-tabs-padding-horizontal);
-        color: var(--zx-tabs-text-color-secondary);
-        transition: all var(--zx-tabs-transition-duration) var(--zx-tabs-transition-timing);
+        height: var(--cmp-tabs-header-height);
+        line-height: var(--cmp-tabs-header-height);
+        padding: 0 var(--cmp-tabs-item-padding-h);
+        color: var(--cmp-tabs-text-secondary);
+        transition: all var(--cmp-tabs-transition-duration) var(--cmp-tabs-transition-timing);
         
         &:hover {
-          color: var(--zx-tabs-primary-color);
+          color: var(--cmp-tabs-item-hover-color);
         }
         
         &.is-active {
-          color: var(--zx-tabs-primary-color);
+          color: var(--cmp-tabs-item-active-color);
         }
         
         &.is-disabled {
-          color: var(--el-text-color-disabled);
+          color: var(--cmp-tabs-disabled-color);
           cursor: not-allowed;
         }
       }
       
       .el-tabs__active-bar {
-        background-color: var(--zx-tabs-primary-color);
+        background-color: var(--cmp-tabs-active-bar-bg);
+        height: var(--cmp-tabs-active-bar-height);
       }
     }
     
     // 新增和关闭按钮
     .el-tabs__new-tab {
-      color: var(--zx-tabs-text-color-secondary);
+      color: var(--cmp-tabs-new-btn-color);
       
       &:hover {
-        color: var(--zx-tabs-primary-color);
+        color: var(--cmp-tabs-new-btn-hover-color);
       }
     }
   }
   
   // 内容区域
-  :deep(.el-tabs__content) {
+  .el-tabs__content {
     .el-tab-pane {
       // 基础内容样式在这里可以自定义
     }
@@ -103,71 +65,72 @@
   
   // 拖拽功能样式
   &.zx-tabs-draggable {
-    :deep(.el-tabs__item) {
-      cursor: var(--zx-tabs-drag-cursor);
+    .el-tabs__item {
+      cursor: var(--cmp-tabs-drag-cursor);
       user-select: none;
       
       &:active {
-        cursor: var(--zx-tabs-drag-active-cursor);
+        cursor: var(--cmp-tabs-drag-active-cursor);
       }
       
       &.is-dragging {
-        opacity: var(--zx-tabs-drag-opacity);
-        transform: scale(0.95);
+        opacity: var(--cmp-tabs-drag-opacity);
+        transform: scale(var(--cmp-tabs-drag-scale));
       }
     }
   }
   
   // URL同步标识
   &.zx-tabs-url-sync {
-    :deep(.el-tabs__item.is-active) {
+    .el-tabs__item.is-active {
       position: relative;
       
       &::after {
         content: '';
         position: absolute;
-        top: 2px;
-        right: 4px;
-        width: 4px;
-        height: 4px;
-        background-color: var(--zx-tabs-primary-color);
+        top: var(--cmp-tabs-url-indicator-position-top);
+        right: var(--cmp-tabs-url-indicator-position-right);
+        width: var(--cmp-tabs-url-indicator-size);
+        height: var(--cmp-tabs-url-indicator-size);
+        background-color: var(--cmp-tabs-url-indicator-color);
         border-radius: 50%;
-        opacity: 0.6;
+        opacity: var(--cmp-tabs-url-indicator-opacity);
       }
     }
   }
-}
-
-// 标签页内容样式
-.zx-tabs-content {
-  min-height: 200px;
-  padding: var(--zx-tabs-content-padding);
-  background-color: var(--zx-tabs-background-color);
-  border-radius: var(--zx-tabs-border-radius);
-  transition: all var(--zx-tabs-transition-duration) var(--zx-tabs-transition-timing);
   
-  // 内容淡入动画
-  animation: zx-tabs-content-fade-in var(--zx-tabs-transition-duration) var(--zx-tabs-transition-timing);
-}
-
-// 加载状态样式
-.zx-tabs-loading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 120px;
-  color: var(--zx-tabs-loading-color);
-  background-color: var(--zx-tabs-loading-bg);
-  border-radius: var(--zx-tabs-border-radius);
-  
-  .el-icon {
-    font-size: 24px;
-    margin-bottom: var(--zx-tabs-gap);
+  // 标签页内容样式
+  .zx-tabs-content {
+    min-height: var(--cmp-tabs-content-min-height);
+    padding: var(--cmp-tabs-content-padding);
+    background-color: var(--cmp-tabs-content-bg);
+    color: var(--cmp-tabs-content-color);
+    border-radius: var(--cmp-tabs-content-border-radius);
+    transition: var(--cmp-tabs-content-transition);
+    
+    // 内容淡入动画
+    animation: zx-tabs-content-fade-in var(--cmp-tabs-transition-duration) var(--cmp-tabs-transition-timing);
   }
   
-  span {
-    font-size: 14px;
+  // 加载状态样式
+  .zx-tabs-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--cmp-tabs-loading-min-height);
+    color: var(--cmp-tabs-loading-color);
+    background-color: var(--cmp-tabs-loading-bg);
+    border-radius: var(--cmp-tabs-content-border-radius);
+    
+    .el-icon {
+      font-size: var(--cmp-tabs-loading-icon-size);
+      margin-bottom: var(--cmp-tabs-gap);
+    }
+    
+    span {
+      font-size: var(--cmp-tabs-loading-text-size);
+    }
   }
 }
 
@@ -186,27 +149,27 @@
 // 卡片类型样式增强
 .zx-tabs {
   &.el-tabs--card {
-    :deep(.el-tabs__header) {
+    .el-tabs__header {
       .el-tabs__item {
-        border: 1px solid var(--zx-tabs-border-color);
+        border: 1px solid var(--cmp-tabs-card-border);
         border-bottom: none;
-        border-radius: var(--zx-tabs-border-radius) var(--zx-tabs-border-radius) 0 0;
-        background-color: var(--el-fill-color-light);
+        border-radius: var(--cmp-tabs-card-border-radius) var(--cmp-tabs-card-border-radius) 0 0;
+        background-color: var(--cmp-tabs-card-bg);
         
         &.is-active {
-          background-color: var(--zx-tabs-background-color);
-          border-color: var(--zx-tabs-primary-color);
+          background-color: var(--cmp-tabs-card-active-bg);
+          border-color: var(--cmp-tabs-primary-color);
         }
       }
     }
   }
   
   &.el-tabs--border-card {
-    border: 1px solid var(--zx-tabs-border-color);
-    border-radius: var(--zx-tabs-border-radius);
+    border: 1px solid var(--cmp-tabs-border-card-border);
+    border-radius: var(--cmp-tabs-border-card-radius);
     
-    :deep(.el-tabs__content) {
-      padding: var(--zx-tabs-content-padding);
+    .el-tabs__content {
+      padding: var(--cmp-tabs-content-padding);
     }
   }
 }
@@ -214,31 +177,31 @@
 // 响应式设计
 @media (max-width: 768px) {
   .zx-tabs {
-    :deep(.el-tabs__header) {
+    .el-tabs__header {
       .el-tabs__item {
-        padding: 0 12px;
-        font-size: 14px;
+        padding: var(--cmp-tabs-mobile-item-padding);
+        font-size: var(--cmp-tabs-mobile-item-font-size);
       }
     }
-  }
-  
-  .zx-tabs-content {
-    padding: 16px;
+    
+    .zx-tabs-content {
+      padding: var(--cmp-tabs-mobile-content-padding);
+    }
   }
 }
 
 @media (max-width: 480px) {
   .zx-tabs {
-    :deep(.el-tabs__header) {
+    .el-tabs__header {
       .el-tabs__item {
-        padding: 0 8px;
-        font-size: 13px;
+        padding: var(--cmp-tabs-small-item-padding);
+        font-size: var(--cmp-tabs-small-item-font-size);
       }
     }
-  }
-  
-  .zx-tabs-content {
-    padding: 12px;
+    
+    .zx-tabs-content {
+      padding: var(--cmp-tabs-small-content-padding);
+    }
   }
 }
 
@@ -246,10 +209,10 @@
 .zx-tabs {
   &.el-tabs--left,
   &.el-tabs--right {
-    :deep(.el-tabs__header) {
+    .el-tabs__header {
       .el-tabs__item {
-        text-align: left;
-        padding: var(--zx-tabs-padding-vertical) var(--zx-tabs-padding-horizontal);
+        text-align: var(--cmp-tabs-vertical-item-text-align);
+        padding: var(--cmp-tabs-item-padding-v) var(--cmp-tabs-item-padding-h);
       }
     }
   }
@@ -257,15 +220,15 @@
 
 // 可编辑标签页样式
 .zx-tabs {
-  :deep(.el-tabs__item) {
+  .el-tabs__item {
     .el-icon-close {
       margin-left: 6px;
       border-radius: 50%;
-      transition: all var(--zx-tabs-transition-duration) var(--zx-tabs-transition-timing);
+      transition: all var(--cmp-tabs-transition-duration) var(--cmp-tabs-transition-timing);
       
       &:hover {
-        background-color: var(--el-color-danger);
-        color: #fff;
+        background-color: var(--cmp-tabs-close-btn-hover-bg);
+        color: var(--cmp-tabs-close-btn-hover-color);
       }
     }
   }
@@ -274,7 +237,7 @@
 // 拉伸样式
 .zx-tabs {
   &.el-tabs--stretch {
-    :deep(.el-tabs__nav) {
+    .el-tabs__nav {
       .el-tabs__item {
         flex: 1;
         text-align: center;

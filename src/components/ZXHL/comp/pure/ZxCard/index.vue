@@ -1,18 +1,19 @@
 <template>
-  <el-card
-    v-loading="loading"
-    :class="[
-      'zx-card',
-      {
-        'zx-card--simple': simple,
-        'zx-card--no-content-padding': noContentPadding,
-        'zx-card--no-bottom-radius': noBottomRadius,
-        'zx-card--fullscreen': isFullscreen || isFullScreen
-      }
-    ]"
-    :style="cardStyle"
-    :shadow="shadow"
-  >
+  <div class="zx-card-wrapper">
+    <el-card
+      v-loading="loading"
+      :class="[
+        'zx-card',
+        {
+          'zx-card--simple': simple,
+          'zx-card--no-content-padding': noContentPadding,
+          'zx-card--no-bottom-radius': noBottomRadius,
+          'zx-card--fullscreen': isFullscreen || isFullScreen
+        }
+      ]"
+      :style="cardStyle"
+      :shadow="shadow"
+    >
     <!-- 自定义头部 -->
     <template v-if="!simple" #header>
       <div class="zx-card-header">
@@ -93,7 +94,8 @@
         </div>
       </slot>
     </div>
-  </el-card>
+    </el-card>
+  </div>
 </template>
 
 <script setup>

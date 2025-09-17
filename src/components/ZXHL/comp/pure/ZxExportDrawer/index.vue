@@ -16,6 +16,7 @@
     :with-header="withHeader"
     :modal-append-to-body="modalAppendToBody"
     :append-to-body="appendToBody"
+    :show-full-screen="false"
     class="zx-export-drawer"
   >
     <template #header v-if="$slots.header">
@@ -34,6 +35,7 @@
             :key="field.key"
             class="field-item"
             :class="{ 'selected': isFieldSelected(field.key) }"
+            @click="() => toggleField(field)"
           >
             <el-checkbox 
               :model-value="isFieldSelected(field.key)"

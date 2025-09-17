@@ -80,7 +80,6 @@
       <div class="demo-content">
         <div class="button-row">
           <ZxTooltipOrPopover 
-            type="popover" 
             title="标题信息"
             content="这是 Popover 的内容，可以包含更丰富的信息"
             trigger="click"
@@ -89,7 +88,6 @@
           </ZxTooltipOrPopover>
           
           <ZxTooltipOrPopover 
-            type="popover" 
             title="悬停触发"
             content="这是悬停触发的 Popover"
             trigger="hover"
@@ -104,7 +102,7 @@
       <h3>自定义内容</h3>
       <div class="demo-content">
         <div class="button-row">
-          <ZxTooltipOrPopover type="popover" trigger="click">
+          <ZxTooltipOrPopover title="自定义内容" trigger="click">
             <template #content>
               <div class="custom-content">
                 <h4>自定义内容</h4>

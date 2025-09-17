@@ -1,140 +1,112 @@
-:root {
-  // ZxDetailCard 组件 CSS 变量
-  --zx-detail-card-bg-color: #ffffff;
-  --zx-detail-card-border-radius: 8px;
-  --zx-detail-card-padding: 16px;
-  --zx-detail-card-gap: 8px;
-  --zx-detail-card-border-color: #e4e7ed;
-  --zx-detail-card-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
-  
-  // 新增的 CSS 变量
-  --zx-detail-card-bg: #ffffff;
-  --zx-detail-card-border: 1px solid #e4e7ed;
-  --zx-detail-card-value-color: #606266;
-  
-  // 标题相关
-  --zx-detail-card-title-color: #303133;
-  --zx-detail-card-title-font-size: 16px;
-  --zx-detail-card-title-font-weight: 500;
-  --zx-detail-card-title-gap: 16px;
-  
-  // 描述相关
-  --zx-detail-card-label-color: #909399;
-  --zx-detail-card-label-font-size: 14px;
-  --zx-detail-card-value-color: #303133;
-  --zx-detail-card-value-font-size: 14px;
-  --zx-detail-card-desc-gap: 8px;
-  --zx-detail-card-desc-item-padding: 24px;
-  
-  // 更多按钮相关
-  --zx-detail-card-more-btn-color: #409eff;
-  --zx-detail-card-more-btn-font-size: 12px;
-  --zx-detail-card-more-btn-line-height: 16px;
-}
+// 导入变量定义
+@import './var.scss';
 
-.zx-detail-card {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  background-color: var(--zx-detail-card-bg-color);
-  border-radius: var(--zx-detail-card-border-radius);
-  gap: var(--zx-detail-card-gap);
-  
-  .zx-detail-card-title {
+.zx-detail-card-wrapper {
+  .zx-detail-card {
+    position: relative;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--zx-detail-card-title-gap);
+    flex-direction: column;
+    background-color: var(--cmp-detail-card-bg);
+    border-radius: var(--cmp-detail-card-border-radius);
+    gap: var(--cmp-detail-card-gap);
+    transition: var(--cmp-detail-card-transition);
     
-    .one-line-text {
-      font-size: var(--zx-detail-card-title-font-size);
-      font-weight: var(--zx-detail-card-title-font-weight);
-      color: var(--zx-detail-card-title-color);
-    }
-  }
-  
-  .zx-detail-card-desc {
-    display: flex;
-    flex-wrap: wrap;
-    overflow: hidden;
-    
-    .zx-detail-card-desc-item {
+    .zx-detail-card-title {
       display: flex;
       align-items: center;
-      gap: var(--zx-detail-card-desc-gap);
-      width: calc(100% / 3);
-      margin-bottom: 12px;
+      justify-content: space-between;
+      gap: var(--cmp-detail-card-title-gap);
       
-      > div:first-child {
-        white-space: nowrap;
-        color: var(--zx-detail-card-label-color);
-        font-size: var(--zx-detail-card-label-font-size);
-      }
-      
-      .text-ov {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        padding-right: var(--zx-detail-card-desc-item-padding);
-        color: var(--zx-detail-card-value-color);
-        font-size: var(--zx-detail-card-value-font-size);
+      .one-line-text {
+        font-size: var(--cmp-detail-card-title-font-size);
+        font-weight: var(--cmp-detail-card-title-font-weight);
+        color: var(--cmp-detail-card-title-color);
       }
     }
     
-    .zx-detail-card-desc-tag {
-      // 标签类型的特殊样式
-      .pr-\[24px\] {
-        padding-right: var(--zx-detail-card-desc-item-padding);
+    .zx-detail-card-desc {
+      display: flex;
+      flex-wrap: wrap;
+      overflow: hidden;
+      
+      .zx-detail-card-desc-item {
+        display: flex;
+        align-items: center;
+        gap: var(--cmp-detail-card-desc-gap);
+        width: var(--cmp-detail-card-desktop-item-width);
+        margin-bottom: var(--cmp-detail-card-desc-item-margin-bottom);
+        
+        > div:first-child {
+          white-space: nowrap;
+          color: var(--cmp-detail-card-label-color);
+          font-size: var(--cmp-detail-card-label-font-size);
+        }
+        
+        .text-ov {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          padding-right: var(--cmp-detail-card-desc-item-padding);
+          color: var(--cmp-detail-card-value-color);
+          font-size: var(--cmp-detail-card-value-font-size);
+        }
+      }
+      
+      .zx-detail-card-desc-tag {
+        // 标签类型的特殊样式
+        .pr-\[24px\] {
+          padding-right: var(--cmp-detail-card-desc-item-padding);
+        }
       }
     }
-  }
-  
-  .more-btn {
-    position: absolute;
-    bottom: 2px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: var(--zx-detail-card-more-btn-font-size);
-    line-height: var(--zx-detail-card-more-btn-line-height);
-    color: var(--zx-detail-card-more-btn-color);
     
-    &:hover {
-      color: var(--zx-detail-card-more-btn-color);
-      opacity: 0.8;
+    .more-btn {
+      position: absolute;
+      bottom: 2px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: var(--cmp-detail-card-more-btn-font-size);
+      line-height: var(--cmp-detail-card-more-btn-line-height);
+      color: var(--cmp-detail-card-more-btn-color);
+      transition: var(--cmp-detail-card-transition);
+      
+      // 原生按钮样式重置
+      background: none;
+      border: none;
+      padding: 4px 8px;
+      cursor: pointer;
+      outline: none;
+      
+      &:hover {
+        color: var(--cmp-detail-card-more-btn-color);
+        opacity: var(--cmp-detail-card-more-btn-hover-opacity);
+      }
     }
   }
 }
 
 // 响应式设计
 @media (max-width: 768px) {
-  .zx-detail-card {
-    .zx-detail-card-desc {
-      .zx-detail-card-desc-item {
-        width: 100%;
-        margin-bottom: 8px;
+  .zx-detail-card-wrapper {
+    .zx-detail-card {
+      .zx-detail-card-desc {
+        .zx-detail-card-desc-item {
+          width: var(--cmp-detail-card-mobile-item-width);
+          margin-bottom: 8px;
+        }
       }
     }
   }
 }
 
 @media (max-width: 1200px) and (min-width: 769px) {
-  .zx-detail-card {
-    .zx-detail-card-desc {
-      .zx-detail-card-desc-item {
-        width: 50%;
+  .zx-detail-card-wrapper {
+    .zx-detail-card {
+      .zx-detail-card-desc {
+        .zx-detail-card-desc-item {
+          width: var(--cmp-detail-card-tablet-item-width);
+        }
       }
     }
-  }
-}
-
-// 暗色主题支持
-@media (prefers-color-scheme: dark) {
-  :root {
-    --zx-detail-card-bg-color: #1d1e1f;
-    --zx-detail-card-border-color: #414243;
-    --zx-detail-card-title-color: #e5eaf3;
-    --zx-detail-card-label-color: #a3a6ad;
-    --zx-detail-card-value-color: #e5eaf3;
-    --zx-detail-card-shadow: 0 2px 4px rgba(0, 0, 0, 0.24), 0 0 6px rgba(0, 0, 0, 0.08);
   }
 }

@@ -1,12 +1,16 @@
 <template>
-  <slot
-    :menu-items="menuItems"
-    :loading="loading"
-    :add-menu-item="addMenuItem"
-    :remove-menu-item="removeMenuItem"
-    :update-menu-item="updateMenuItem"
-    :clear-menu-items="clearMenuItems"
-  />
+  <div>
+    <slot
+      :menu-items="menuItems"
+      :loading="loading"
+      :add-menu-item="addMenuItem"
+      :remove-menu-item="removeMenuItem"
+      :update-menu-item="updateMenuItem"
+      :clear-menu-items="clearMenuItems"
+    />
+    
+    <!-- EditPane 已移至页面级统一管理，这里不再内置 -->
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -56,6 +60,7 @@ const emit = defineEmits<{
 const loading = ref(false)
 const menuItems = ref<PanelMenuItem[]>([])
 
+
 // 默认菜单项生成器
 const createDefaultMenuItems = (): PanelMenuItem[] => {
   const items: PanelMenuItem[] = []
@@ -66,7 +71,7 @@ const createDefaultMenuItems = (): PanelMenuItem[] => {
       type: 'item',
       text: '编辑',
       iconClassName: 'Edit',
-      onClick: () => handleMenuAction('edit')
+      onClick: () => handleEditAction()
     })
   }
 
@@ -133,6 +138,12 @@ const createDefaultMenuItems = (): PanelMenuItem[] => {
 // 菜单操作处理
 const handleMenuAction = (action: string, data?: any) => {
   emit('menu-action', action, props.panelId, data)
+}
+
+// EditPane 相关方法
+const handleEditAction = () => {
+  // 不在此处弹出抽屉，改为将动作透传，由上层统一处理
+  emit('menu-action', 'edit', props.panelId)
 }
 
 // 菜单项管理方法
