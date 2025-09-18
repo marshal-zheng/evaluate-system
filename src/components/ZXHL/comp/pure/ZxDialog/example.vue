@@ -171,6 +171,27 @@
     </div>
 
     <div class="example-section">
+      <h3>Hooks 使用示例</h3>
+      <div class="hooks-demo">
+        <h4>useDialogState - 基础状态管理</h4>
+        <el-button @click="hookStateDialog.open()">基础状态对话框</el-button>
+        <el-button @click="showLoadingDialog">带加载状态</el-button>
+        
+        <h4 style="margin-top: 20px;">useDialogConfirm - 确认对话框</h4>
+        <el-button @click="hookConfirmDialog.open()">确认对话框</el-button>
+        <el-button type="danger" @click="hookDeleteDialog.open()">删除确认</el-button>
+        
+        <h4 style="margin-top: 20px;">useDialogForm - 表单对话框</h4>
+        <el-button @click="hookFormDialog.open()">表单对话框</el-button>
+        <el-button @click="fillFormData">填充示例数据</el-button>
+        
+        <h4 style="margin-top: 20px;">useDialogData - 数据展示对话框</h4>
+        <el-button @click="hookDataDialog.open()">数据展示对话框</el-button>
+        <el-button @click="hookDataDialog.refreshData()">刷新数据</el-button>
+      </div>
+    </div>
+
+    <div class="example-section">
       <h3>特殊配置</h3>
       <el-button @click="noMaskDialog = true">无遮罩</el-button>
       <el-button @click="noPaddingDialog = true">无内边距</el-button>
@@ -210,6 +231,121 @@
           <p>这是一个没有默认标题栏的对话框，您可以完全自定义头部内容。</p>
         </div>
       </ZxDialog>
+      
+      <!-- Hooks 使用示例对话框 -->
+      
+      <!-- useDialogState 示例 -->
+      <ZxDialog v-bind="hookStateDialog.baseProps.value" v-on="hookStateDialog.baseEvents.value">
+        <div class="hook-example-content">
+          <h4>useDialogState Hook 示例</h4>
+          <p>这是一个使用 useDialogState Hook 管理的对话框。</p>
+          <p>当前状态：{{ hookStateDialog.loading.value ? '加载中...' : '正常' }}</p>
+          <p>按钮状态：{{ hookStateDialog.disabled.value ? '禁用' : '可用' }}</p>
+          
+          <div class="hook-demo-actions">
+            <el-button @click="hookStateDialog.setDisabled(!hookStateDialog.disabled.value)">
+              {{ hookStateDialog.disabled.value ? '启用按钮' : '禁用按钮' }}
+            </el-button>
+            <el-button @click="hookStateDialog.setLoading(!hookStateDialog.loading.value)">
+              {{ hookStateDialog.loading.value ? '停止加载' : '开始加载' }}
+            </el-button>
+          </div>
+        </div>
+      </ZxDialog>
+      
+      <!-- useDialogConfirm 示例 -->
+      <ZxDialog v-bind="hookConfirmDialog.confirmProps.value" v-on="hookConfirmDialog.confirmEvents.value">
+        <div class="hook-example-content">
+          <h4>useDialogConfirm Hook 示例</h4>
+          <p>这是一个确认对话框，点击确认后会执行异步操作。</p>
+          <p>支持自动处理加载状态和错误处理。</p>
+        </div>
+      </ZxDialog>
+      
+      <ZxDialog v-bind="hookDeleteDialog.confirmProps.value" v-on="hookDeleteDialog.confirmEvents.value">
+        <div class="hook-example-content">
+          <el-alert title="警告" type="warning" :closable="false" style="margin-bottom: 15px;">
+            此操作不可撤销，请谨慎操作！
+          </el-alert>
+          <h4>删除确认示例</h4>
+          <p>确定要删除这个项目吗？删除后将无法恢复。</p>
+        </div>
+      </ZxDialog>
+      
+      <!-- useDialogForm 示例 -->
+      <ZxDialog v-bind="hookFormDialog.formProps.value" v-on="hookFormDialog.formEvents.value">
+        <div class="hook-example-content">
+          <h4>useDialogForm Hook 示例</h4>
+          <el-form :model="hookFormDialog.formData" label-width="80px">
+            <el-form-item label="姓名">
+              <el-input 
+                v-model="hookFormDialog.formData.name" 
+                placeholder="请输入姓名"
+              />
+            </el-form-item>
+            
+            <el-form-item label="邮箱">
+              <el-input 
+                v-model="hookFormDialog.formData.email" 
+                placeholder="请输入邮箱"
+              />
+            </el-form-item>
+            
+            <el-form-item label="年龄">
+              <el-input-number 
+                v-model="hookFormDialog.formData.age" 
+                :min="1" 
+                :max="120"
+                style="width: 100%"
+              />
+            </el-form-item>
+            
+            <el-form-item label="描述">
+              <el-input 
+                v-model="hookFormDialog.formData.description" 
+                type="textarea" 
+                :rows="3"
+                placeholder="请输入描述信息"
+              />
+            </el-form-item>
+          </el-form>
+          
+          <div style="margin-top: 20px; padding: 10px; background: #f5f7fa; border-radius: 4px;">
+            <h5>当前表单数据：</h5>
+            <pre style="font-size: 12px;">{{ JSON.stringify(hookFormDialog.formData, null, 2) }}</pre>
+          </div>
+        </div>
+      </ZxDialog>
+      
+      <!-- useDialogData 示例 -->
+      <ZxDialog v-bind="hookDataDialog.dataProps.value" v-on="hookDataDialog.dataEvents.value">
+        <div class="hook-example-content">
+          <h4>useDialogData Hook 示例</h4>
+          
+          <div v-if="hookDataDialog.dataError.value" class="error-state">
+            <el-alert 
+              title="数据加载失败" 
+              :description="hookDataDialog.dataError.value.message"
+              type="error" 
+              :closable="false"
+              style="margin-bottom: 20px;"
+            />
+            <el-button type="primary" @click="hookDataDialog.loadData()">重新加载</el-button>
+          </div>
+          
+          <!-- 这里应该使用 ZxDialog 的 descValue 插槽，但为了简化示例，我们直接显示数据 -->
+          
+          <div v-if="hookDataDialog.data.value" style="margin-top: 20px; padding: 15px; background: #fafbfc; border-radius: 6px;">
+            <h5 style="margin: 0 0 10px 0; color: #606266;">原始数据：</h5>
+            <pre style="font-size: 12px; color: #909399; margin: 0; white-space: pre-wrap;">{{ JSON.stringify(hookDataDialog.data.value, null, 2) }}</pre>
+          </div>
+          
+          <div style="margin-top: 15px; display: flex; gap: 10px;">
+            <el-button @click="hookDataDialog.refreshData()">刷新数据</el-button>
+            <el-button @click="hookDataDialog.clearData()">清除数据</el-button>
+          </div>
+        </div>
+      </ZxDialog>
     </div>
   </div>
 </template>
@@ -219,6 +355,7 @@ import { ref, reactive } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Download, View, QuestionFilled } from '@element-plus/icons-vue'
 import ZxDialog from './index.vue'
+import { useDialogState, useDialogConfirm, useDialogForm, useDialogData } from './hooks/index.js'
 
 // 基础对话框
 const basicDialog = ref(false)
@@ -261,6 +398,80 @@ const customPaddingStyle = {
   '--zx-dialog-body-padding': '60px',
   '--zx-dialog-footer-padding': '25px 30px'
 }
+
+// Hooks 示例
+// useDialogState 示例
+const hookStateDialog = useDialogState({
+  title: 'Hook 基础状态示例',
+  width: '500px'
+})
+
+// useDialogConfirm 示例
+const hookConfirmDialog = useDialogConfirm({
+  title: '确认操作',
+  okText: '确认',
+  cancelText: '取消',
+  onConfirm: async () => {
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    ElMessage.success('操作完成！')
+  },
+  onCancel: () => {
+    ElMessage.info('操作已取消')
+  }
+})
+
+const hookDeleteDialog = useDialogConfirm({
+  title: '删除确认',
+  okText: '删除',
+  cancelText: '取消',
+  onConfirm: async () => {
+    await new Promise(resolve => setTimeout(resolve, 1500))
+    ElMessage.success('删除成功！')
+  }
+})
+
+// useDialogForm 示例
+const hookFormDialog = useDialogForm({
+  title: '用户信息表单',
+  width: '600px',
+  initialData: {
+    name: '',
+    email: '',
+    age: '',
+    description: ''
+  },
+  onSubmit: async (formData) => {
+    console.log('提交的表单数据:', formData)
+    await new Promise(resolve => setTimeout(resolve, 2000))
+    ElMessage.success('用户信息保存成功！')
+  }
+})
+
+// useDialogData 示例
+const hookDataDialog = useDialogData({
+  title: '用户详情数据',
+  width: '700px',
+  autoLoad: true,
+  dataSource: async () => {
+    await new Promise(resolve => setTimeout(resolve, 2000))
+    return {
+      id: 1001,
+      username: 'admin',
+      realName: '系统管理员',
+      email: 'admin@example.com',
+      phone: '138****8888',
+      role: '超级管理员',
+      status: '正常',
+      lastLogin: '2023-12-01 10:30:00',
+      createTime: '2023-01-01 09:00:00',
+      loginCount: 156
+    }
+  },
+  onDataLoad: (data) => {
+    console.log('数据加载完成:', data)
+    ElMessage.success('数据加载成功')
+  }
+})
 
 // 特殊配置对话框
 const noMaskDialog = ref(false)
@@ -326,6 +537,29 @@ const resetForm = () => {
   form.name = ''
   form.type = ''
   form.description = ''
+}
+
+// Hooks 相关方法
+const showLoadingDialog = async () => {
+  hookStateDialog.open()
+  hookStateDialog.setLoading(true)
+  
+  // 模拟异步操作
+  setTimeout(() => {
+    hookStateDialog.setLoading(false)
+    hookStateDialog.close()
+    ElMessage.success('操作完成')
+  }, 3000)
+}
+
+const fillFormData = () => {
+  hookFormDialog.setFormData({
+    name: '张三',
+    email: 'zhangsan@example.com',
+    age: 25,
+    description: '这是一个示例用户'
+  })
+  ElMessage.success('已填充示例数据')
 }
 
 // 工具函数
@@ -406,5 +640,45 @@ const getRoleType = (role) => {
 .text-red-600 {
   color: #e74c3c;
   font-weight: 600;
+}
+
+/* Hooks 示例样式 */
+.hooks-demo h4 {
+  margin: 15px 0 10px 0;
+  color: #409eff;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.hooks-demo .el-button {
+  margin-right: 10px;
+  margin-bottom: 8px;
+}
+
+.hook-example-content {
+  padding: 10px 0;
+}
+
+.hook-example-content h4 {
+  margin: 0 0 15px 0;
+  color: #409eff;
+  font-size: 16px;
+}
+
+.hook-example-content h5 {
+  margin: 0 0 8px 0;
+  color: #606266;
+  font-size: 14px;
+}
+
+.hook-demo-actions {
+  margin-top: 15px;
+  display: flex;
+  gap: 10px;
+}
+
+.error-state {
+  text-align: center;
+  padding: 20px;
 }
 </style>

@@ -6,7 +6,7 @@
       :show-pagination="true"
       :page-sizes="[10, 20, 50, 100]"
       :default-page-size="10"
-      :load-on-mounted="true"
+      :load-on-mounted="false"
       :clear-selection-on-load="true"
       class="evaluation-grid"
     >
@@ -55,6 +55,7 @@
               <div class="op-col__wrap">
                 <ZxButton link type="primary" @click="viewDetail(row)">查看</ZxButton>
                 <ZxButton link type="primary" @click="editEvaluation(row)">编辑</ZxButton>
+                <ZxButton link type="danger">删除</ZxButton>
               </div>
             </template>
           </el-table-column>
@@ -65,7 +66,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, nextTick, onMounted } from 'vue'
 import { Loading } from '@element-plus/icons-vue'
 import { evaluationApi } from '@/components/ZXHL/api/modules/evaluation/index.js'
 import ZxGridList from '@/components/ZXHL/comp/pure/ZxGridList/index.vue'
@@ -75,14 +76,33 @@ import { ZxSearch, ZxButton } from '@/components/ZXHL/comp/pure/index.js'
 // 组件引用
 const gridRef = ref(null)
 
-// 数据加载函数 - 适配 ZxGridList
+// 组件挂载后手动加载数据
+onMounted(() => {
+  nextTick(() => {
+    gridRef.value?.refresh()
+  })
+})
+
+// 数据加载函数 - 适配 ZxGridList  
 const loadEvaluationData = async (params) => {
-  console.log('params', params)
-  // 直接传递 params 给 API，让 HTTP 层处理数据格式转换
-  const response = await evaluationApi.getEvaluationList(params)
+  console.log('=== loadEvaluationData 开始 ===')
+  console.log('请求参数:', params)
   
-  // HTTP 层已经处理了数据格式转换，直接返回
-  return response.data
+  try {
+    const data = await evaluationApi.getEvaluationList(params)
+    console.log('API 响应数据:', data)
+    console.log('数据类型:', typeof data)
+    console.log('数据结构:', {
+      hasData: !!data,
+      hasDataProp: !!data?.data,
+      hasList: !!data?.list || !!data?.data?.list,
+      hasPager: !!data?.pager || !!data?.data?.pager
+    })
+    return data
+  } catch (error) {
+    console.error('loadEvaluationData 请求失败:', error)
+    throw error
+  }
 }
 
 // 状态类型映射
@@ -122,9 +142,19 @@ const handleCreate = () => {
   console.log('新建评估')
 }
 
-const onFilterChange = () => {
+const onFilterChange = (value) => {
+  console.log('=== onFilterChange 触发 ===')
+  console.log('选择的状态值:', value)
+  console.log('当前 query 状态:', gridRef.value?.gridState?.query)
+  
+  // 先更新页码，再刷新
   gridRef.value?.updateState('pager.page', 1)
-  gridRef.value?.refresh()
+  
+  // 使用 nextTick 确保状态更新后再刷新
+  nextTick(() => {
+    console.log('准备刷新，当前 query:', gridRef.value?.gridState?.query)
+    gridRef.value?.refresh()
+  })
 }
 
 const onSearch = () => {

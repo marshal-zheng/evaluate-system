@@ -26,7 +26,7 @@
     </div>
     
     <el-tabs v-model="activeTab" class="demo-tabs">
-      <el-tab-pane label="有数据状态" name="withData">
+      <el-tab-pane label="传统方式 (Ref调用)" name="withData">
         <ZxGridList
           ref="gridRef"
           :load-data="loadUserData"
@@ -178,6 +178,248 @@
       </template>
         </ZxGridList>
       </el-tab-pane>
+
+      <!-- Hook 方式示例 -->
+      <el-tab-pane label="Hook方式 (推荐)" name="withHook">
+        <div class="hook-demo">
+          <h3>使用 useGridList Hook 的方式</h3>
+          <p>通过 Hook 管理状态，避免 ref 调用的复杂性</p>
+          
+          <!-- 搜索表单 -->
+          <el-form inline class="search-form">
+            <el-form-item label="用户名">
+              <el-input 
+                v-model="hookGrid.state.query.username" 
+                placeholder="请输入用户名"
+                clearable
+                @clear="hookGrid.search()"
+                @keyup.enter="hookGrid.search()"
+              />
+            </el-form-item>
+            
+            <el-form-item label="邮箱">
+              <el-input 
+                v-model="hookGrid.state.query.email" 
+                placeholder="请输入邮箱"
+                clearable
+                @clear="hookGrid.search()"
+                @keyup.enter="hookGrid.search()"
+              />
+            </el-form-item>
+            
+            <el-form-item label="状态">
+              <el-select v-model="hookGrid.state.query.status" placeholder="请选择状态" clearable>
+                <el-option label="全部" value="" />
+                <el-option label="启用" value="active" />
+                <el-option label="禁用" value="inactive" />
+              </el-select>
+            </el-form-item>
+            
+            <el-form-item>
+              <el-button 
+                type="primary" 
+                @click="hookGrid.search()"
+                :loading="hookGrid.state.loading"
+              >
+                搜索
+              </el-button>
+              <el-button @click="hookGrid.resetSearch()">
+                重置
+              </el-button>
+              <el-button @click="hookGrid.refresh()">
+                刷新
+              </el-button>
+            </el-form-item>
+          </el-form>
+
+          <!-- 操作工具栏 -->
+          <div class="toolbar" style="margin-bottom: 16px;">
+            <el-space>
+              <el-text type="info">
+                已选择 {{ hookGrid.state.selection.length }} 项
+              </el-text>
+              <el-button 
+                type="danger" 
+                size="small"
+                :disabled="hookGrid.state.selection.length === 0"
+                @click="handleBatchDelete"
+              >
+                批量删除
+              </el-button>
+              <el-button 
+                type="success" 
+                size="small"
+                @click="handleExport"
+                :loading="hookGrid.state.loading"
+              >
+                导出数据
+              </el-button>
+            </el-space>
+          </div>
+
+          <!-- 数据表格 -->
+          <el-table 
+            :data="hookGrid.state.list" 
+            :loading="hookGrid.state.loading"
+            :border="showTableBorder"
+            stripe
+            @sort-change="handleHookSortChange"
+            @selection-change="hookGrid.setSelection"
+          >
+            <el-table-column type="selection" width="55" />
+            <el-table-column type="index" label="序号" width="60" />
+            
+            <el-table-column 
+              prop="username" 
+              label="用户名" 
+              sortable="custom"
+              min-width="120"
+            />
+            
+            <el-table-column 
+              prop="email" 
+              label="邮箱" 
+              sortable="custom"
+              min-width="180"
+            />
+            
+            <el-table-column 
+              prop="phone" 
+              label="电话" 
+              min-width="120"
+            />
+            
+            <el-table-column prop="status" label="状态" width="100">
+              <template #default="{ row }">
+                <el-tag :type="getStatusType(row.status)">
+                  {{ getStatusText(row.status) }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            
+            <el-table-column 
+              prop="createTime" 
+              label="创建时间" 
+              sortable="custom"
+              width="180"
+            >
+              <template #default="{ row }">
+                {{ formatDate(row.createTime) }}
+              </template>
+            </el-table-column>
+            
+            <el-table-column label="操作" width="180" fixed="right">
+              <template #default="{ row }">
+                <el-button size="small" @click="handleView(row)">
+                  查看
+                </el-button>
+                <el-button size="small" type="primary" @click="handleEdit(row)">
+                  编辑
+                </el-button>
+                <el-button 
+                  size="small" 
+                  type="danger" 
+                  @click="handleHookDelete(row)"
+                >
+                  删除
+                </el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+
+          <!-- 分页 -->
+          <div class="hook-pagination" style="margin-top: 16px; display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: var(--el-text-color-regular); font-size: 14px;">
+              共 {{ hookGrid.state.pager.total }} 条记录，已选择 {{ hookGrid.state.selection.length }} 项
+            </span>
+            <el-pagination
+              :total="hookGrid.state.pager.total"
+              :current-page="hookGrid.currentPage"
+              :page-size="hookGrid.state.pager.size"
+              :page-sizes="[10, 20, 50, 100]"
+              layout="sizes, prev, pager, next, jumper"
+              background
+              @size-change="hookGrid.changePageSize"
+              @current-change="hookGrid.changePage"
+            />
+          </div>
+
+          <!-- 状态信息 -->
+          <div class="status-info" style="margin-top: 16px; padding: 12px; background: #f5f7fa; border-radius: 4px;">
+            <el-row :gutter="16">
+              <el-col :span="6">
+                <el-statistic title="总记录数" :value="hookGrid.state.pager.total" />
+              </el-col>
+              <el-col :span="6">
+                <el-statistic title="当前页" :value="hookGrid.currentPage" />
+              </el-col>
+              <el-col :span="6">
+                <el-statistic title="总页数" :value="hookGrid.totalPages" />
+              </el-col>
+              <el-col :span="6">
+                <el-statistic title="已选择" :value="hookGrid.state.selection.length" />
+              </el-col>
+            </el-row>
+          </div>
+        </div>
+      </el-tab-pane>
+
+      <!-- 简化Hook示例 -->
+      <el-tab-pane label="简化Hook示例" name="simpleHook">
+        <div class="simple-hook-demo">
+          <h3>使用 useSimpleGridList Hook</h3>
+          <p>适用于简单场景的轻量级Hook</p>
+          
+          <!-- 简单搜索 -->
+          <el-form inline class="search-form">
+            <el-form-item label="关键词">
+              <el-input 
+                v-model="searchKeyword" 
+                placeholder="搜索用户名或邮箱"
+                clearable
+                @keyup.enter="handleSimpleSearch"
+              />
+            </el-form-item>
+            <el-form-item>
+              <el-button type="primary" @click="handleSimpleSearch">
+                搜索
+              </el-button>
+              <el-button @click="simpleGrid.refresh()">
+                刷新
+              </el-button>
+            </el-form-item>
+          </el-form>
+
+          <!-- 简单表格 -->
+          <el-table 
+            :data="simpleGrid.list" 
+            :loading="simpleGrid.loading"
+            stripe
+          >
+            <el-table-column type="index" label="序号" width="60" />
+            <el-table-column prop="username" label="用户名" />
+            <el-table-column prop="email" label="邮箱" />
+            <el-table-column prop="status" label="状态">
+              <template #default="{ row }">
+                <el-tag :type="getStatusType(row.status)">
+                  {{ getStatusText(row.status) }}
+                </el-tag>
+              </template>
+            </el-table-column>
+          </el-table>
+
+          <!-- 简单分页 -->
+          <el-pagination
+            v-if="simpleGrid.total > 0"
+            :total="simpleGrid.total"
+            :current-page="simpleGrid.page"
+            :page-size="simpleGrid.pageSize"
+            layout="prev, pager, next"
+            style="margin-top: 16px; text-align: center;"
+            @current-change="simpleGrid.changePage"
+          />
+        </div>
+      </el-tab-pane>
     </el-tabs>
   </div>
 </template>
@@ -186,6 +428,7 @@
 import { ref, reactive } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import ZxGridList from './index.vue'
+import { useGridList, useSimpleGridList } from './hooks/useGridList.js'
 
 // 组件引用
 const gridRef = ref()
@@ -200,7 +443,7 @@ const paginationPaddingBottom = ref(12)
 // 选中的行
 const selectedRows = ref([])
 
-// 模拟 API 调用
+// ===== 模拟 API 调用 =====  
 const loadUserData = async (params) => {
   console.log('加载数据参数:', params)
   
@@ -261,6 +504,121 @@ const loadUserData = async (params) => {
       total
     }
   }
+}
+
+// ===== Hook 方式示例 =====
+// 使用完整的 useGridList Hook
+const hookGrid = useGridList({
+  loadData: loadUserData,
+  initialQuery: {},
+  defaultPageSize: 20,
+  loadOnMounted: true,
+  debounceDelay: 300,
+  onBeforeLoad: (params) => {
+    console.log('Hook: 开始加载数据:', params)
+  },
+  onDataLoaded: (response) => {
+    console.log('Hook: 数据加载完成:', response)
+    ElMessage.success('Hook: 数据加载成功')
+  },
+  onLoadError: (error) => {
+    console.error('Hook: 数据加载失败:', error)
+    ElMessage.error('Hook: 数据加载失败，请重试')
+  }
+})
+
+// 简化Hook示例
+const searchKeyword = ref('')
+const simpleGrid = useSimpleGridList(
+  // 简化的数据加载函数
+  async (params) => {
+    try {
+      const keyword = searchKeyword.value
+      const modifiedParams = {
+        ...params,
+        query: {
+          ...params.query,
+          username: keyword,
+          email: keyword
+        }
+      }
+      const result = await loadUserData(modifiedParams)
+      console.log('Simple grid load result:', result)
+      return result
+    } catch (error) {
+      console.error('Simple grid load error:', error)
+      throw error
+    }
+  },
+  {
+    defaultPageSize: 10,
+    loadOnMounted: false  // 先改为false，避免初始化时的问题
+  }
+)
+
+// ===== Hook 相关事件处理 =====
+// Hook 排序处理
+const handleHookSortChange = ({ prop, order }) => {
+  hookGrid.sort(prop, order)
+}
+
+// Hook 删除处理
+const handleHookDelete = async (row) => {
+  try {
+    await ElMessageBox.confirm(
+      `确定要删除用户 "${row.username}" 吗？`,
+      '确认删除',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+    
+    ElMessage.success(`Hook: 删除用户 ${row.username} 成功`)
+    // Hook 方式刷新
+    hookGrid.refresh()
+  } catch {
+    // 用户取消删除
+  }
+}
+
+// 批量删除
+const handleBatchDelete = async () => {
+  const selected = hookGrid.state.selection
+  if (selected.length === 0) return
+  
+  try {
+    await ElMessageBox.confirm(
+      `确定要删除选中的 ${selected.length} 个用户吗？`,
+      '确认批量删除',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+    
+    ElMessage.success(`Hook: 批量删除 ${selected.length} 个用户成功`)
+    hookGrid.clearSelection()
+    hookGrid.refresh()
+  } catch {
+    // 用户取消删除
+  }
+}
+
+// 导出数据
+const handleExport = () => {
+  ElMessage.info('Hook: 开始导出数据...')
+  // 这里可以访问当前的查询条件和数据
+  console.log('当前查询条件:', hookGrid.state.query)
+  console.log('当前数据:', hookGrid.state.list)
+}
+
+// 简化Hook搜索
+const handleSimpleSearch = () => {
+  console.log('Simple search triggered with keyword:', searchKeyword.value)
+  simpleGrid.load({}, true)
 }
 
 // 搜索处理

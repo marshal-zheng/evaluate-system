@@ -425,9 +425,25 @@ const loadDataInternal = async (params = {}, options = {}) => {
       updateState('pager', updatedPager)
     }
     
-    // 更新列表数据
+    // 解析列表数据，确保传给表格的一定是数组
+    const resolvedList = Array.isArray(responseData.list)
+      ? responseData.list
+      : Array.isArray(responseData?.data)
+        ? responseData.data
+        : Array.isArray(responseData?.data?.list)
+          ? responseData.data.list
+          : Array.isArray(responseData.items)
+            ? responseData.items
+            : Array.isArray(responseData.records)
+              ? responseData.records
+              : Array.isArray(responseData.rows)
+                ? responseData.rows
+                : []
+
+    // 更新列表及其他可用字段（避免把非数组的 data 挂到状态上）
     updateMultiState({
-      ...omit(responseData, ['query']),
+      ...omit(responseData, ['query', 'data']),
+      list: resolvedList,
       lastLoadTime: Date.now()
     })
   await nextTick()

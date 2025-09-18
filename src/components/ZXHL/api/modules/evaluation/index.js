@@ -19,14 +19,23 @@ export function getEvaluationResultById(id, params = {}) {
 
 // 获取评估列表数据
 export function getEvaluationList(params = {}) {
+  console.log('params22', params)
   return ZXR.get({
     url: '/evaluation/list',
     params
   })
 }
 
+// 获取状态选项数据
+export function getStatusOptions() {
+  return ZXR.get({
+    url: '/evaluation/status/options'
+  })
+}
+
 export const evaluationApi = {
   getEvaluationResultData,
   getEvaluationResultById,
-  getEvaluationList
+  getEvaluationList,
+  getStatusOptions
 }

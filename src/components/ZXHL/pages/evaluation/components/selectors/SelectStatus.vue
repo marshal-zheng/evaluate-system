@@ -52,9 +52,9 @@ watch(innerValue, (v) => {
 
 const fetchOptions = async () => {
   try {
-    const res = await evaluationApi.getStatusOptions()
+    const data = await evaluationApi.getStatusOptions()
     // 期望后端返回 { code, message, data: Array<{ label, value }> }
-    return Array.isArray(res?.data) ? res.data : []
+    return Array.isArray(data) ? data : []
   } catch (e) {
     return []
   }

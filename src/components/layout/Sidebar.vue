@@ -91,12 +91,9 @@ import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import ZxIcon from '../ZXHL/comp/pure/ZxIcon/index.vue'
 import {
-  DataBoard,
-  DataAnalysis,
-  PieChart,
-  EditPen,
-  TrendCharts,
-  Document,
+  Fold,
+  Expand,
+  HomeFilled,
   Grid,
   Setting,
   ScaleToOriginal,
@@ -112,7 +109,8 @@ import {
   Tools,
   User,
   UserFilled,
-  Notebook
+  Notebook,
+  MessageBox
 } from '@element-plus/icons-vue'
 
 // Props

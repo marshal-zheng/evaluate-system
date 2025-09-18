@@ -8,6 +8,7 @@ import axios from 'axios'
 import { AxiosCanceler } from './axiosCancel.js'
 import { handleThirdPartyRequest, handleThirdPartyResponse } from './thirdPartyAdapter.js'
 import { handleGridListRequest, handleGridListResponse, isGridListRequest, isGridListResponse } from './gridListUtils.js'
+import { normalizeParams, serializeResponse } from './util.js'
 
 // 导出axiosTransform相关内容
 export * from './axiosTransform.js'
@@ -48,6 +49,7 @@ export class ZXAxios {
   constructor(options) {
     this.options = options
     this.axiosInstance = axios.create(options)
+    
     this.setupInterceptors()
   }
 
@@ -86,6 +88,13 @@ export class ZXAxios {
         config = requestInterceptors(config, this.options)
       }
 
+      // 处理请求参数标准化 (将嵌套结构转换为扁平结构)
+      if (config.method?.toLowerCase() === 'get' && config.params) {
+        config.params = normalizeParams(config.params)
+      } else if (config.data) {
+        config.data = normalizeParams(config.data)
+      }
+
       // 处理第三方接口请求适配
       config = handleThirdPartyRequest(config)
       
@@ -105,6 +114,9 @@ export class ZXAxios {
       if (responseInterceptors && isFunction(responseInterceptors)) {
         res = responseInterceptors(res)
       }
+
+      // 处理响应数据序列化（标准化分页信息）
+      res.data = serializeResponse(res)
 
       // 处理第三方接口响应适配
       res = handleThirdPartyResponse(res)

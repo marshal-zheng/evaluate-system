@@ -11,14 +11,14 @@ export const componentRoutes = [
     redirect: 'pure-components',
     component: PureRouterView,
     children: [
-      {
-        path: 'pure-components',
-        name: 'PureComponentsDemo',
-        meta: { 
-          title: 'Pure 组件统一注册演示'
-        },
-        component: () => import('@/views/pure-components-demo.vue')
-      },
+      // {
+      //   path: 'pure-components',
+      //   name: 'PureComponentsDemo',
+      //   meta: { 
+      //     title: 'Pure 组件统一注册演示'
+      //   },
+      //   component: () => import('@/views/pure-components-demo.vue')
+      // },
       {
         path: 'zx-drawer',
         name: 'ZxDrawerDemo',
@@ -67,14 +67,14 @@ export const componentRoutes = [
         },
         component: () => import('@/components/ZXHL/comp/pure/ZxGridList/example.vue')
       },
-      {
-        path: 'zx-search',
-        name: 'ZxSearchDemo',
-        meta: { 
-          title: 'ZxSearch 搜索组件'
-        },
-        component: () => import('@/views/search-demo.vue')
-      },
+      // {
+      //   path: 'zx-search',
+      //   name: 'ZxSearchDemo',
+      //   meta: { 
+      //     title: 'ZxSearch 搜索组件'
+      //   },
+      //   component: () => import('@/views/search-demo.vue')
+      // },
       {
         path: 'zx-tag',
         name: 'ZxTagDemo',

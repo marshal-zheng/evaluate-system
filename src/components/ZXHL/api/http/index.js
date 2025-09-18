@@ -354,4 +354,6 @@ function createAxios(opt) {
 
 // 创建默认实例
 const ZXR = createAxios()
+
+// 导出默认实例
 export default ZXR

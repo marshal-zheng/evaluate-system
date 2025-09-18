@@ -19,15 +19,26 @@ const routes = [
         ...route,
         path: `/demo/${route.path}`
       })),
-      {
-        path: '/test/edit-pane',
-        name: 'EditPaneTest',
-        meta: { 
-          title: 'EditPane 测试',
-          showInMenu: false
-        },
-        component: () => import('@/views/panel-edit-test.vue')
-      },
+      
+      // Grid Hook Demo 路由
+      // {
+      //   path: '/demo/grid-hook',
+      //   name: 'GridHookDemo',
+      //   meta: { 
+      //     title: 'Grid Hook 综合演示',
+      //     showInMenu: true
+      //   },
+      //   component: () => import('@/views/grid-hook-demo.vue')
+      // },
+      // {
+      //   path: '/test/edit-pane',
+      //   name: 'EditPaneTest',
+      //   meta: { 
+      //     title: 'EditPane 测试',
+      //     showInMenu: false
+      //   },
+      //   component: () => import('@/views/panel-edit-test.vue')
+      // },
       {
         path: '/test/table-widget',
         name: 'TableWidgetTest',
@@ -37,6 +48,27 @@ const routes = [
         },
         component: () => import('@/views/table-widget-test.vue')
       },
+
+    ]
+  },
+  // 组件演示路由组
+  {
+    path: '/demo',
+    component: Layout,
+    meta: {
+      title: '组件演示',
+      icon: 'Tools'
+    },
+    children: [
+      {
+        path: 'modal',
+        name: 'ModalDemo',
+        meta: { 
+          title: 'useModal Hook 演示',
+          icon: 'MessageBox'
+        },
+        component: () => import('@/views/modal-demo.vue')
+      }
     ]
   },
   // 404 页面路由 - 必须放在最后

@@ -27,8 +27,14 @@ export default [
     url: '/api/evaluation/list',
     method: 'get',
     response: ({ query }) => {
-      const page = parseInt(query.page) || 1
-      const size = parseInt(query.size) || 10
+      // 增加调试信息
+      console.log('Mock API - /api/evaluation/list 接收到的查询参数:', query)
+      
+      // 兼容多种参数名称
+      const page = parseInt(query.page || query.pageNumber || query.current) || 1
+      const size = parseInt(query.size || query.pageSize || query.limit) || 10
+      
+      console.log('Mock API - 解析后的分页参数:', { page, size })
       
       // 模拟评估任务数据
       const mockData = [
@@ -227,18 +233,40 @@ export default [
       const total = 21
       const start = (page - 1) * size
       const end = start + size
-      const list = mockData.slice(start, end)
+      const records = mockData.slice(start, end)
+      const pages = Math.ceil(total / size)
       
-      return {
-        code: 200,
-        message: '获取成功',
+      console.log('Mock API - 分页计算结果:', { 
+        total, 
+        current: page, 
+        size, 
+        pages,
+        start, 
+        end, 
+        recordsLength: records.length,
+        返回的数据条数: records.length 
+      })
+      
+      const result = {
+        success: true,
+        code: "200",
+        msg: "SUCCESS",
         data: {
-          list,
-          total,
-          page,
-          size
+          countId: null,
+          current: page,
+          maxLimit: null,
+          optimizeCountSql: true,
+          orders: [{column: "create_time", asc: false}],
+          pages: pages,
+          records: records,
+          searchCount: true,
+          size: size,
+          total: total
         }
       }
+      
+      console.log('Mock API - 返回的完整数据:', result)
+      return result
     }
   },
 
