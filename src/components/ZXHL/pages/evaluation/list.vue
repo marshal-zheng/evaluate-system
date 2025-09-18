@@ -10,12 +10,32 @@
       :clear-selection-on-load="true"
       class="evaluation-grid"
     >
-      <!-- 这里加上筛选条件和搜索框 -->
+      <!-- 工具栏：左-操作 | 中-筛选 | 右-搜索 -->
+      <template #form="{ query, data, loading }">
+        <div class="zx-grid-form-bar">
+          <div class="zx-grid-form-bar__left">
+            <ZxButton type="primary" @click="handleCreate">新建评估</ZxButton>
+          </div>
+          <div class="zx-grid-form-bar__filters">
+            <SelectStatus v-model="query.status" @change="onFilterChange" style="width: 150px" />
+          </div>
+          <div class="zx-grid-form-bar__right">
+            <ZxSearch
+              v-model="query.keyword"
+              placeholder="搜索评估名称/ID"
+              :loading="loading"
+              search-mode="click"
+              @search="onSearch"
+              @clear="onSearch"
+            />
+          </div>
+        </div>
+      </template>
 
       <!-- 表格内容 -->
       <template #table="{ grid, loading, refresh }">
         <el-table :data="grid.list" style="width: 100%" max-height="calc(100vh - 230px)" sc>
-          <el-table-column prop="id" label="ID" width="80" />
+          <!-- <el-table-column prop="id" label="ID" width="80" /> -->
           <el-table-column prop="name" label="评估名称" min-width="200" />
           <el-table-column prop="type" label="评估类型" width="120" />
           <el-table-column prop="status" label="状态" width="100">
@@ -33,8 +53,8 @@
           <el-table-column label="操作" width="160" class-name="op-col" label-class-name="op-col__header">
             <template #default="{ row }">
               <div class="op-col__wrap">
-                <el-button size="small" link type="primary" @click="viewDetail(row)">查看</el-button>
-                <el-button size="small" link type="primary" @click="editEvaluation(row)">编辑</el-button>
+                <ZxButton link type="primary" @click="viewDetail(row)">查看</ZxButton>
+                <ZxButton link type="primary" @click="editEvaluation(row)">编辑</ZxButton>
               </div>
             </template>
           </el-table-column>
@@ -49,6 +69,8 @@ import { ref } from 'vue'
 import { Loading } from '@element-plus/icons-vue'
 import { evaluationApi } from '@/components/ZXHL/api/modules/evaluation/index.js'
 import ZxGridList from '@/components/ZXHL/comp/pure/ZxGridList/index.vue'
+import SelectStatus from './components/selectors/SelectStatus.vue'
+import { ZxSearch, ZxButton } from '@/components/ZXHL/comp/pure/index.js'
 
 // 组件引用
 const gridRef = ref(null)
@@ -93,6 +115,21 @@ const viewDetail = (row) => {
 // 编辑评估
 const editEvaluation = (row) => {
   console.log('编辑评估:', row.name)
+}
+
+// actions in toolbar
+const handleCreate = () => {
+  console.log('新建评估')
+}
+
+const onFilterChange = () => {
+  gridRef.value?.updateState('pager.page', 1)
+  gridRef.value?.refresh()
+}
+
+const onSearch = () => {
+  gridRef.value?.updateState('pager.page', 1)
+  gridRef.value?.refresh()
 }
 </script>
 

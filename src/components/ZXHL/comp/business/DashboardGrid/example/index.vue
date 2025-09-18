@@ -16,13 +16,13 @@
       
       <!-- 评估结果API测试按钮 -->
       <div class="api-test-buttons">
-        <el-button @click="fetchEvaluationResult()" type="success" :loading="loading">
+        <el-button @click="fetchEvaluationResult('1')" type="success" :loading="loading">
           获取基础评估结果
         </el-button>
-        <el-button @click="fetchDynamicEvaluationResult('combat')" type="info" :loading="loading">
+        <el-button @click="fetchDynamicEvaluationResult('combat', '2')" type="info" :loading="loading">
           获取作战场景结果
         </el-button>
-        <el-button @click="fetchDynamicEvaluationResult('defense')" type="warning" :loading="loading">
+        <el-button @click="fetchDynamicEvaluationResult('defense', '3')" type="warning" :loading="loading">
           获取防御场景结果
         </el-button>
         <el-button 
@@ -80,7 +80,7 @@
 
 <script>
 import { ref, reactive, onMounted } from 'vue'
-import { getEvaluationResultData, getDynamicEvaluationResult } from '@/components/ZXHL/api/modules/evaluation/index.js'
+import { getEvaluationResultById } from '@/components/ZXHL/api/modules/evaluation/index.js'
 import DashboardGrid from '../index.vue'
 import LibraryPanels from '../LibraryPanels/index.vue'
 import EditPane from '../EditPane/index.vue'
@@ -232,38 +232,15 @@ export default {
     }
 
     // 获取评估结果数据
-    const fetchEvaluationResult = async (scenario = 'default') => {
-      loading.value = true
-      error.value = null
-      
-      try {
-        const data = await getEvaluationResultData({ scenario })
-        console.log('response', transformToPieChart(data))
-        evaluationData.value = data
-        console.log('评估结果数据:', data)
-      } catch (err) {
-        error.value = err.message || '网络请求失败'
-        console.error('获取评估结果失败:', err)
-      } finally {
-        loading.value = false
-      }
+    const fetchEvaluationResult = async (id = '1', scenario = 'default') => {
+      const data = await getEvaluationResultById(id, { scenario })
+      evaluationData.value = data
     }
 
     // 获取动态评估结果数据
-    const fetchDynamicEvaluationResult = async (scenario = 'default') => {
-      loading.value = true
-      error.value = null
-      
-      try {
-        const data = await getDynamicEvaluationResult({ scenario })
+    const fetchDynamicEvaluationResult = async (scenario = 'default', id = '1') => {
+        const data = await getEvaluationResultById(id, { scenario })
         evaluationData.value = data
-        console.log('动态评估结果数据:', data)
-      } catch (err) {
-        error.value = err.message || '网络请求失败'
-        console.error('获取动态评估结果失败:', err)
-      } finally {
-        loading.value = false
-      }
     }
 
     // 更新所有面板的数据
@@ -293,7 +270,7 @@ export default {
 
     // 组件挂载时加载数据
     onMounted(() => {
-      fetchEvaluationResult()
+      fetchEvaluationResult('1')
     })
 
     return {

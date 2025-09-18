@@ -59,3 +59,62 @@
 .el-pagination {
   padding: 12px 0;
 }
+
+/* 方案2：ZxGridList 表单工具栏三段式布局规范
+   使用方式：在 ZxGridList 的 form 插槽里包裹 .zx-grid-form-bar
+   内含三块：
+   - .zx-grid-form-bar__left：操作按钮
+   - .zx-grid-form-bar__filters：筛选项（自适应伸展）
+   - .zx-grid-form-bar__right：搜索框（右对齐，默认最小宽260px）
+*/
+.zx-grid-list__toolbar {
+  padding: 10px 0;
+
+  .zx-grid-form-bar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--zx-form-gap, 12px);
+    row-gap: var(--zx-form-row-gap, 10px);
+
+    &__left {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--zx-form-gap, 12px);
+      flex: 0 0 auto;
+    }
+
+    &__filters {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--zx-form-gap, 12px);
+      flex: 1 1 auto;
+      min-width: 200px;
+
+      > * {
+        flex: 0 0 auto;
+      }
+    }
+
+    &__right {
+      display: inline-flex;
+      align-items: center;
+      margin-left: auto;
+      gap: var(--zx-form-gap, 12px);
+      flex: 0 0 var(--zx-form-min-right, 260px);
+
+      .el-input,
+      .el-select,
+      .el-autocomplete {
+        width: 100%;
+      }
+    }
+  }
+
+  @media (max-width: 1024px) {
+    .zx-grid-form-bar__right {
+      flex: 1 0 100%;
+      justify-content: flex-end;
+    }
+  }
+}

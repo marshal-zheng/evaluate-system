@@ -1,8 +1,8 @@
 <template>
   <div class="zx-grid-list-wrapper">
     <div class="zx-grid-list" :class="{ 'show-table-border': showTableBorder }">
-    <!-- 查询表单区域 -->
-    <div v-if="$slots.form" class="zx-grid-list__toolbar">
+    <!-- 查询表单区域（始终渲染容器，避免插槽检测异常导致不显示） -->
+    <div class="zx-grid-list__toolbar">
       <slot name="form" :query="gridState.query" :data="gridState" :loading="isLoading" />
     </div>
     
