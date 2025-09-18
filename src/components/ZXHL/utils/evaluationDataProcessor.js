@@ -149,7 +149,7 @@ export function transformToLineChart(evaluationData, baseOptions = {}) {
     name: titleList[index] || `系列${index + 1}`,
     type: 'line',
     data: parseNumberArray(dataArray),
-    smooth: true,
+    smooth: false,  // 折线图不使用平滑
     ...baseOptions.series?.[index]
   }))
 
@@ -190,21 +190,52 @@ export function transformToLineChart(evaluationData, baseOptions = {}) {
  * @returns {Object} ECharts曲线图配置
  */
 export function transformToCurveChart(evaluationData, baseOptions = {}) {
-  const lineConfig = transformToLineChart(evaluationData, baseOptions)
+  const { zhpgObjectResultList, detailNames, titleList } = evaluationData
   
-  // 确保所有系列都是平滑的
-  if (lineConfig.series) {
-    lineConfig.series = lineConfig.series.map(series => ({
-      ...series,
-      smooth: true,
-      symbolSize: 6,
-      lineStyle: {
-        width: 3
-      }
-    }))
+  if (!zhpgObjectResultList || !detailNames || !titleList) {
+    return baseOptions
   }
 
-  return lineConfig
+  const series = zhpgObjectResultList.map((dataArray, index) => ({
+    name: titleList[index] || `系列${index + 1}`,
+    type: 'line',
+    data: parseNumberArray(dataArray),
+    smooth: true,  // 曲线图使用贝塞尔平滑曲线
+    symbolSize: 6,
+    lineStyle: {
+      width: 3
+    },
+    ...baseOptions.series?.[index]
+  }))
+
+  return {
+    ...baseOptions,
+    xAxis: {
+      type: 'category',
+      data: detailNames,
+      axisLabel: {
+        rotate: 45,
+        interval: 0
+      },
+      ...baseOptions.xAxis
+    },
+    yAxis: {
+      type: 'value',
+      name: '评估值',
+      min: 0,
+      max: 1,
+      ...baseOptions.yAxis
+    },
+    series,
+    legend: {
+      data: titleList,
+      ...baseOptions.legend
+    },
+    tooltip: {
+      trigger: 'axis',
+      ...baseOptions.tooltip
+    }
+  }
 }
 
 /**

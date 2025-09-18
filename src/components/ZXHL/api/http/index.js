@@ -164,20 +164,27 @@ transform.transformRequestHook = (res, options) => {
     throw new Error('请求出错，请稍候重试')
   }
   
-  // 这里 code，result，message为 后台统一的字段，需要在 types.ts内修改为项目自己的接口返回格式
-  const { code, result, message, success } = data
-
-  // 这里逻辑可以根据项目进行修改
-  const hasSuccess = data && Reflect.has(data, 'code') && (code === 200 || code === 0)
-  if (hasSuccess) {
-    let successMsg = message
-
-    if (success && options.successMessageMode === 'modal') {
-      ElMessageBox.alert(successMsg, '成功', { type: 'success' })
-    } else if (success && options.successMessageMode === 'message') {
-      ElMessage.success(successMsg)
+  // 优先兼容第三方常见返回：{ success, data, msg/message }
+  if (Reflect.has(data, 'success')) {
+    const ok = data.success
+    if (ok) {
+      // 成功直接返回内部数据
+      return data.data !== undefined ? data.data : (data.result !== undefined ? data.result : data)
     }
-    return result
+    const errMsg = data.msg || data.message || '请求出错，请稍候重试'
+    if (options.errorMessageMode === 'modal') {
+      ElMessageBox.alert(errMsg, '错误', { type: 'error' })
+    } else if (options.errorMessageMode === 'message') {
+      ElMessage.error(errMsg)
+    }
+    throw new Error(errMsg)
+  }
+
+  // 其次兼容 { code, result, message } 风格
+  const { code, result, message } = data
+  const hasCodeSuccess = data && Reflect.has(data, 'code') && (code === 200 || code === 0)
+  if (hasCodeSuccess) {
+    return result !== undefined ? result : data
   }
 
   // 在此处根据自己项目的实际情况对不同的code执行不同的操作
@@ -226,6 +233,11 @@ transform.transformRequestHook = (res, options) => {
       ElMessage.error(timeoutMsg)
     }
     throw new Error(timeoutMsg || '请求出错，请稍候重试')
+  }
+
+  // 未匹配到已知包裹结构，直接返回数据本体
+  if (!Reflect.has(data, 'code') && !Reflect.has(data, 'success')) {
+    return data
   }
 
   throw new Error(message || '请求出错，请稍候重试')
@@ -313,7 +325,8 @@ function createAxios(opt) {
           // 是否返回原生响应头 比如：需要获取响应头时使用该属性
           isReturnNativeResponse: false,
           // 需要对返回数据进行处理
-          isTransformResponse: false,
+          // 开启后 API 返回的结果将是后端 data/result 的纯数据，不包含 success/code 包裹
+          isTransformResponse: true,
           // post请求的时候添加参数到url
           joinParamsToUrl: false,
           // 格式化提交参数时间

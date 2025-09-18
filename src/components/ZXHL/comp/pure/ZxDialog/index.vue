@@ -86,7 +86,7 @@
               <span style="display: flex; align-items: center;">
                 <span style="margin-right: 0.25rem;">{{ switchProps?.switchName }}</span>
                 <span style="margin-top: 2px;">
-                  <ZxIcon name="question-circle" style="height: 16px; width: 16px;" class="text-\[rgb\(var\(--el-color-primary\)\)\]" />
+                  <ZxIcon icon="question-circle" style="height: 16px; width: 16px;" class="text-\[rgb\(var\(--el-color-primary\)\)\]" />
                 </span>
               </span>
             </el-tooltip>
@@ -126,7 +126,7 @@
 </template>
 
 <script setup>
-import { ref, watch, nextTick } from 'vue'
+import { ref, watch, nextTick, computed } from 'vue'
 import ZxIcon from '@/components/ZXHL/comp/pure/ZxIcon'
 
 // 定义属性

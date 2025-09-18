@@ -221,14 +221,6 @@ export const componentRoutes = [
         component: () => import('@/components/ZXHL/comp/business/DashboardGrid/example/index.vue')
       },
       {
-        path: 'panel-header',
-        name: 'PanelHeaderDemo',
-        meta: { 
-          title: 'PanelHeader 面板头部组件'
-        },
-        component: () => import('@/components/ZXHL/comp/business/DashboardGrid/PanelComponent/PanelHeader/example.vue')
-      },
-      {
         path: 'zx-confirm-input',
         name: 'ZxConfirmInputDemo',
         meta: { 

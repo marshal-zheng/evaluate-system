@@ -6,7 +6,7 @@ import { cloneDeep } from 'lodash-es'
 import axios from 'axios'
 
 import { AxiosCanceler } from './axiosCancel.js'
-import { handleV2PerformanceRequest, handleV2PerformanceResponse } from './v2ApiUtils.js'
+import { handleThirdPartyRequest, handleThirdPartyResponse } from './thirdPartyAdapter.js'
 import { handleGridListRequest, handleGridListResponse, isGridListRequest, isGridListResponse } from './gridListUtils.js'
 
 // 导出axiosTransform相关内容
@@ -86,8 +86,8 @@ export class ZXAxios {
         config = requestInterceptors(config, this.options)
       }
 
-      // 处理 v2/performance 相关请求
-      config = handleV2PerformanceRequest(config)
+      // 处理第三方接口请求适配
+      config = handleThirdPartyRequest(config)
       
       // 处理 ZxGridList 相关请求
       if (isGridListRequest(config)) {
@@ -106,8 +106,8 @@ export class ZXAxios {
         res = responseInterceptors(res)
       }
 
-      // 处理 v2/performance 相关响应
-      res = handleV2PerformanceResponse(res)
+      // 处理第三方接口响应适配
+      res = handleThirdPartyResponse(res)
       
       // 处理 ZxGridList 相关响应
       if (isGridListResponse(res)) {

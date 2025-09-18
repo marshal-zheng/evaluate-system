@@ -14,7 +14,7 @@
       v-else
       :is="chartComponent"
       ref="chartRef"
-      :options="processedOptions"
+      :options="styledOptions"
       class="chart-plugin-wrapper zx-chart-rounded"
     />
   </div>
@@ -24,6 +24,7 @@
 import { ref, computed, watch, onMounted, onUnmounted, defineAsyncComponent } from 'vue'
 import { transformByChartType } from '@/components/ZXHL/utils/evaluationDataProcessor.js'
 import ZxEmpty from '@/components/ZXHL/comp/pure/ZxEmpty/index.vue'
+import { applyGrafanaStyleToOption } from '../config/echarts.js'
 
 // 动态导入图表插件组件
 const chartPlugins = {
@@ -68,7 +69,7 @@ const evaluationData = computed(() => {
   }
 })
 
-// 计算属性：处理后的 options
+// 计算属性：处理后的 options（数据转换）
 const processedOptions = computed(() => {
   // 如果有 evaluationData，使用数据处理器处理
   if (evaluationData.value && Object.keys(evaluationData.value).length > 0) {
@@ -87,7 +88,7 @@ const processedOptions = computed(() => {
     }
 
     
-    const transformResult = transformByChartType(chartType, evaluationData.value, baseOption)
+  const transformResult = transformByChartType(chartType, evaluationData.value, baseOption)
     
     // 如果是饼图，transformToPieChart 返回数组，我们取第一个
     // if (chartType === 'pie' && Array.isArray(transformResult)) {
@@ -112,6 +113,12 @@ const processedOptions = computed(() => {
   }
   
   return result
+})
+
+// 计算属性：应用 Grafana 风格样式（不改变调色板）
+const styledOptions = computed(() => {
+  const chartType = props.panel?.type
+  return applyGrafanaStyleToOption(processedOptions.value, { type: chartType })
 })
 
 // 计算属性：动态选择图表组件

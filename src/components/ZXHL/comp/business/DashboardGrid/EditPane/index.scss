@@ -4,7 +4,7 @@
   .panel-edit-content {
     padding: 0 2px; // 为聚焦态边框预留空间
     height: 100%;
-    overflow: hidden;
+    overflow-x: hidden;
   }
 
   // 表单容器
@@ -36,6 +36,7 @@
   // 表单区域分组
   .form-section {
     margin-bottom: 32px;
+    overflow-x: hidden;
     
     &:last-child {
       margin-bottom: 16px;
@@ -101,6 +102,8 @@
       }
     }
   }
+
+
 
   // 响应式设计
   @media (max-width: 768px) {

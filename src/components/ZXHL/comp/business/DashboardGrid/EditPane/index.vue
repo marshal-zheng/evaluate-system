@@ -32,7 +32,7 @@
       <el-form
         ref="formRef"
         :model="formData"
-        :rules="formRules"
+        :rules="rules"
         label-position="top"
         label-width="auto"
         size="default"
@@ -79,79 +79,11 @@
           </el-row>
         </div>
 
-        <!-- 显示设置区域 -->
-        <div class="form-section">
-          <div class="section-header">
-            <el-icon class="section-icon"><View /></el-icon>
-            <span class="section-title">显示设置</span>
-          </div>
 
-          <el-row :gutter="16">
-            <el-col :span="24">
-              <el-form-item label="背景透明" prop="transparentBackground">
-                <div class="switch-item">
-                  <el-switch
-                    v-model="formData.transparentBackground"
-                    :disabled="loading"
-                    active-text="开启"
-                    inactive-text="关闭"
-                    inline-prompt
-                  />
-                  <span class="switch-description">
-                    开启后面板背景将变为透明，适用于叠加显示场景
-                  </span>
-                </div>
-              </el-form-item>
-            </el-col>
-          </el-row>
 
-        </div>
 
-        <!-- 高级选项 -->
-        <ZxExpandToggle 
-          v-model="showAdvancedOptions"
-          expanded-text="收起"
-          collapsed-text="展开"
-          text-suffix="高级选项"
-          trigger-position="center"
-        >
-          <template #content>
-            <div class="form-section">
-              <div class="section-header">
-                <el-icon class="section-icon"><Setting /></el-icon>
-                <span class="section-title">高级选项</span>
-              </div>
-              <el-row :gutter="16">
-                <el-col :span="12">
-                  <el-form-item label="面板宽度" prop="width">
-                    <el-input-number
-                      v-model="formData.width"
-                      :min="200"
-                      :max="1200"
-                      :step="10"
-                      controls-position="right"
-                      :disabled="loading"
-                      style="width: 100%"
-                    />
-                  </el-form-item>
-                </el-col>
-                <el-col :span="12">
-                  <el-form-item label="面板高度" prop="height">
-                    <el-input-number
-                      v-model="formData.height"
-                      :min="150"
-                      :max="800"
-                      :step="10"
-                      controls-position="right"
-                      :disabled="loading"
-                      style="width: 100%"
-                    />
-                  </el-form-item>
-                </el-col>
-              </el-row>
-            </div>
-          </template>
-        </ZxExpandToggle>
+
+
       </el-form>
     </div>
   </ZxDrawer>
@@ -162,13 +94,12 @@ import { ref, computed, watch, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
 import {
   Setting,
-  View,
   RefreshRight,
   ArrowDown,
   ArrowUp
 } from '@element-plus/icons-vue'
 import ZxDrawer from '@/components/ZXHL/comp/pure/ZxDrawer'
-import ZxExpandToggle from '@/components/ZXHL/comp/pure/ZxExpandToggle'
+
 
 // Props 定义
 const props = defineProps({
@@ -206,31 +137,28 @@ const emit = defineEmits([
 // 响应式数据
 const formRef = ref(null)
 const visible = ref(props.modelValue)
-const showAdvancedOptions = ref(false)
 
 // 表单数据
 const formData = ref({
   title: '',
   description: '',
-  transparentBackground: false,
   width: 400,
   height: 300
 })
 
 // 表单验证规则
-const formRules = {
+const rules = {
   title: [
     { required: true, message: '请输入面板标题', trigger: 'blur' },
-    { min: 1, max: 50, message: '标题长度应在1-50个字符之间', trigger: 'blur' }
-  ],
-  description: [
-    { max: 200, message: '描述长度不能超过200个字符', trigger: 'blur' }
+    { min: 1, max: 50, message: '标题长度在 1 到 50 个字符', trigger: 'blur' }
   ],
   width: [
-    { type: 'number', min: 200, max: 1200, message: '宽度应在200-1200px之间', trigger: 'change' }
+    { required: true, message: '请输入宽度', trigger: 'blur' },
+    { type: 'number', min: 100, max: 2000, message: '宽度范围 100-2000px', trigger: 'blur' }
   ],
   height: [
-    { type: 'number', min: 150, max: 800, message: '高度应在150-800px之间', trigger: 'change' }
+    { required: true, message: '请输入高度', trigger: 'blur' },
+    { type: 'number', min: 100, max: 1500, message: '高度范围 100-1500px', trigger: 'blur' }
   ]
 }
 
@@ -238,6 +166,8 @@ const formRules = {
 const drawerTitle = computed(() => {
   return props.mode === 'create' ? '创建面板' : '编辑面板'
 })
+
+
 
 // 监听器
 watch(
@@ -293,8 +223,6 @@ const initFormData = () => {
     width: data.width || 400,
     height: data.height || 300
   }
-  // 打开时默认收起高级选项，避免上一次状态影响当前校验
-  showAdvancedOptions.value = false
   
   // 重置表单验证状态
   nextTick(() => {

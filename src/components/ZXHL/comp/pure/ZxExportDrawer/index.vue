@@ -72,7 +72,7 @@
               size="small"
               @click="removeField(index)"
             >
-              <ZxIcon name="Close" />
+              <ZxIcon icon="Close" />
             </el-button>
           </div>
         </div>

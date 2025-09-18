@@ -237,16 +237,10 @@ export default {
       error.value = null
       
       try {
-        const response = await getEvaluationResultData({ scenario })
-
-        console.log('response', transformToPieChart(response.data))
-        
-        if (response.success) {
-          evaluationData.value = response.data
-          console.log('评估结果数据:', response.data)
-        } else {
-          throw new Error(response.msg || '获取数据失败')
-        }
+        const data = await getEvaluationResultData({ scenario })
+        console.log('response', transformToPieChart(data))
+        evaluationData.value = data
+        console.log('评估结果数据:', data)
       } catch (err) {
         error.value = err.message || '网络请求失败'
         console.error('获取评估结果失败:', err)
@@ -261,14 +255,9 @@ export default {
       error.value = null
       
       try {
-        const response = await getDynamicEvaluationResult({ scenario })
-        
-        if (response.success) {
-          evaluationData.value = response.data
-          console.log('动态评估结果数据:', response.data)
-        } else {
-          throw new Error(response.msg || '获取数据失败')
-        }
+        const data = await getDynamicEvaluationResult({ scenario })
+        evaluationData.value = data
+        console.log('动态评估结果数据:', data)
       } catch (err) {
         error.value = err.message || '网络请求失败'
         console.error('获取动态评估结果失败:', err)

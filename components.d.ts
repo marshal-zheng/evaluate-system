@@ -108,6 +108,7 @@ declare module 'vue' {
     RouterView: typeof import('vue-router')['RouterView']
     Scatterchart: typeof import('./src/components/ZXHL/comp/business/Widget/plugins/scatterchart/index.vue')['default']
     ScatterChart: typeof import('./src/components/ZXHL/comp/business/Widget/plugins/ScatterChart.vue')['default']
+    SelectStatus: typeof import('./src/components/ZXHL/pages/evaluation/components/selectors/SelectStatus.vue')['default']
     Sidebar: typeof import('./src/components/layout/Sidebar.vue')['default']
     TableWidget: typeof import('./src/components/ZXHL/comp/business/Widget/components/TableWidget.vue')['default']
     TableWidgetExample: typeof import('./src/components/ZXHL/comp/business/Widget/components/TableWidgetExample.vue')['default']
