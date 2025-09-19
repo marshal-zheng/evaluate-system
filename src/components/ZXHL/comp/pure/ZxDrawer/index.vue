@@ -1,5 +1,6 @@
 <template>
   <el-drawer
+    ref="drawerRef"
     v-model="visible"
     :size="computedDrawerSize"
     :direction="direction"
@@ -102,22 +103,25 @@
         <div class="zx-drawer-footer-container">
           <slot name="footerLeft"></slot>
           <div class="zx-drawer-footer-actions">
-            <ZxButton :disabled="okLoading" @click="handleCancel">
+            <ZxButton
+              :disabled="okLoading || confirmLoading"
+              @click="handleCancel"
+            >
               {{ cancelText || '取消' }}
             </ZxButton>
             <ZxButton
               v-if="showContinue"
               type="default"
-              :loading="okLoading"
-              :disabled="okDisabled"
+              :loading="okLoading || confirmLoading"
+              :disabled="okDisabled || confirmLoading"
               @click="handleContinue"
             >
               {{ saveContinueText || '保存并继续' }}
             </ZxButton>
             <ZxButton
               type="primary"
-              :disabled="okDisabled"
-              :loading="okLoading"
+              :disabled="okDisabled || confirmLoading"
+              :loading="okLoading || confirmLoading"
               @click="handleOk"
             >
               {{ okText || '确定' }}
@@ -257,7 +261,35 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-
+  confirm: {
+    type: Function,
+    default: null
+  },
+  // 表单增强配置
+  formRef: {
+    type: Object,
+    default: null
+  },
+  formModel: {
+    type: Object,
+    default: null
+  },
+  autoResetForm: {
+    type: Boolean,
+    default: true
+  },
+  preValidate: {
+    type: Boolean,
+    default: true
+  },
+  autoScrollToError: {
+    type: Boolean,
+    default: true
+  },
+  scrollErrorOffset: {
+    type: Number,
+    default: 24
+  },
   handleBeforeCancel: {
     type: Function,
     default: null
@@ -268,6 +300,7 @@ const props = defineProps({
 const emit = defineEmits([
   'update:modelValue',
   'confirm',
+  'confirm-error',
   'cancel',
   'continue',
   'close',
@@ -276,9 +309,100 @@ const emit = defineEmits([
 
 // 响应式数据
 const visible = ref(props.modelValue)
+const drawerRef = ref(null)
 const resizing = ref(false)
 const drawerWidth = ref(props.width)
 const isToggling = ref(false) // 防止快速切换时的状态混乱
+const confirmLoading = ref(false)
+
+// 表单快照
+const initialFormSnapshot = ref(null)
+
+const deepClone = (obj) => {
+  try {
+    return JSON.parse(JSON.stringify(obj))
+  } catch (_) {
+    return null
+  }
+}
+
+const snapshotFormModel = () => {
+  if (props.formModel) {
+    initialFormSnapshot.value = deepClone(props.formModel)
+  }
+  if (props.formRef?.clearValidate) {
+    nextTick(() => props.formRef.clearValidate())
+  }
+}
+
+const resetForm = () => {
+  if (!props.autoResetForm) return
+  if (props.formRef?.resetFields) {
+    props.formRef.resetFields()
+  } else if (props.formModel && initialFormSnapshot.value) {
+    Object.keys(props.formModel).forEach((key) => {
+      if (!(key in initialFormSnapshot.value)) {
+        delete props.formModel[key]
+      }
+    })
+    Object.entries(initialFormSnapshot.value).forEach(([key, value]) => {
+      props.formModel[key] = value
+    })
+  }
+  props.formRef?.clearValidate && props.formRef.clearValidate()
+}
+
+const resolveDrawerRootEl = () => {
+  const instance = drawerRef.value
+  if (!instance) return null
+
+  const candidates = [
+    instance.$el,
+    instance.drawerRef,
+    instance.$refs?.drawerRef,
+    instance.$refs?.contentRef
+  ]
+
+  for (const candidate of candidates) {
+    if (!candidate) continue
+    if (candidate instanceof HTMLElement) return candidate
+    if (candidate.$el instanceof HTMLElement) return candidate.$el
+  }
+  return null
+}
+
+const scrollToFirstError = () => {
+  if (!props.autoScrollToError || typeof window === 'undefined') return
+  nextTick(() => {
+    const rootEl = resolveDrawerRootEl()
+    if (!rootEl || typeof rootEl.querySelector !== 'function') return
+
+    const errorItem = rootEl.querySelector('.el-form-item.is-error') || rootEl.querySelector('.el-form-item__error')?.closest('.el-form-item')
+    if (!errorItem) return
+
+    let scrollParent = errorItem.parentElement
+    const isScrollable = (el) => {
+      if (!el) return false
+      const style = window.getComputedStyle(el)
+      return /(auto|scroll)/.test(style.overflowY)
+    }
+
+    while (scrollParent && scrollParent !== rootEl && !isScrollable(scrollParent)) {
+      scrollParent = scrollParent.parentElement
+    }
+
+    if (!scrollParent || scrollParent === document.body || !isScrollable(scrollParent)) {
+      const body = rootEl.querySelector('.el-drawer__body')
+      scrollParent = body || rootEl
+    }
+
+    const parentRect = scrollParent.getBoundingClientRect()
+    const itemRect = errorItem.getBoundingClientRect()
+    const offset = props.scrollErrorOffset || 0
+    const targetTop = scrollParent.scrollTop + (itemRect.top - parentRect.top) - offset
+    scrollParent.scrollTo({ top: targetTop < 0 ? 0 : targetTop, behavior: 'smooth' })
+  })
+}
 
 // 计算抽屉尺寸，确保稳定性
 // 兼容数字与数字字符串（如 '600' => '600px'），避免 size 设置不生效导致只有遮罩没有抽屉内容
@@ -313,8 +437,15 @@ watch(
 // 监听 visible 变化
 watch(
   () => visible.value,
-  (val) => {
+  (val, oldVal) => {
     emit('update:modelValue', val)
+    if (val) {
+      snapshotFormModel()
+    }
+    if (!val && oldVal) {
+      nextTick(() => resetForm())
+      confirmLoading.value = false
+    }
   }
 )
 
@@ -323,8 +454,48 @@ const handleContinue = () => {
   emit('continue')
 }
 
-const handleOk = () => {
-  emit('confirm')
+const handleOk = async () => {
+  if (confirmLoading.value) {
+    return
+  }
+
+  if (props.preValidate && props.formRef?.validate) {
+    let valid = true
+    try {
+      await props.formRef.validate()
+    } catch (_) {
+      valid = false
+    }
+    if (!valid) {
+      scrollToFirstError()
+      return
+    }
+  }
+
+  if (!props.confirm) {
+    emit('confirm')
+    visible.value = false
+    return
+  }
+
+  confirmLoading.value = true
+  let confirmResult
+  let confirmError
+  try {
+    confirmResult = await props.confirm()
+    if (confirmResult !== false) {
+      visible.value = false
+    }
+  } catch (error) {
+    confirmError = error
+    console.error('[ZxDrawer] confirm handler threw error:', error)
+  } finally {
+    confirmLoading.value = false
+    emit('confirm', confirmResult)
+    if (confirmError) {
+      emit('confirm-error', confirmError)
+    }
+  }
 }
 
 const handleCancel = () => {
@@ -374,15 +545,56 @@ const handleFullScreenToggle = async (event) => {
 }
 
 const handleBeforeClose = (done) => {
-  if (props.handleBeforeCancel) {
-    const result = props.handleBeforeCancel()
-    if (result) {
-      done()
-    }
-  } else {
+  if (!props.handleBeforeCancel) {
+    done()
+    return
+  }
+
+  let result
+  try {
+    result = props.handleBeforeCancel()
+  } catch (error) {
+    console.error('[ZxDrawer] handleBeforeCancel error:', error)
+    result = false
+  }
+
+  if (result instanceof Promise) {
+    result
+      .then((shouldClose) => {
+        if (shouldClose !== false) {
+          done()
+        }
+      })
+      .catch((error) => {
+        console.error('[ZxDrawer] handleBeforeCancel promise rejected:', error)
+      })
+  } else if (result !== false) {
     done()
   }
 }
+
+watch(
+  () => props.formModel,
+  (model) => {
+    if (!model) {
+      initialFormSnapshot.value = null
+      return
+    }
+    if (!visible.value) {
+      initialFormSnapshot.value = deepClone(model)
+    }
+  },
+  { deep: true }
+)
+
+watch(
+  () => props.formRef,
+  (instance) => {
+    if (instance && visible.value) {
+      nextTick(() => instance.clearValidate && instance.clearValidate())
+    }
+  }
+)
 
 // 拖拽调整宽度功能
 const startResize = (event) => {

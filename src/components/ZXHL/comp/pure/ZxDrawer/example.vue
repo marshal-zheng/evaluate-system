@@ -25,6 +25,9 @@
         <el-button type="primary" plain @click="openHeaderRightDrawer">
           自定义头部操作
         </el-button>
+        <el-button type="primary" @click="openValidationDrawer">
+          表单校验抽屉
+        </el-button>
       </el-space>
     </div>
 
@@ -57,11 +60,74 @@
       :disabled-width-drag="currentDrawer.disabledWidthDrag"
       :descriptions="currentDrawer.descriptions"
       :mask="currentDrawer.mask"
-      @confirm="currentDrawer.onConfirm"
+      :show-full-screen="currentDrawer.showFullScreen"
+      :confirm="currentDrawer.confirm"
+      :form-ref="currentDrawer.formRef"
+      :form-model="currentDrawer.formModel"
+      :auto-reset-form="currentDrawer.autoResetForm"
+      :pre-validate="currentDrawer.preValidate"
+      :auto-scroll-to-error="currentDrawer.autoScrollToError"
+      :scroll-error-offset="currentDrawer.scrollErrorOffset"
+      @confirm="(payload) => currentDrawer.onConfirm?.(payload)"
       @cancel="handleDrawerCancel"
     >
       <template v-if="currentDrawer.content" v-html="currentDrawer.content"></template>
       <component v-else-if="currentDrawer.component" :is="currentDrawer.component" />
+
+      <template v-else-if="currentDrawer.type === 'form-validate'">
+        <div class="validation-form-wrapper">
+          <el-form
+            ref="validationFormRef"
+            :model="validationForm"
+            :rules="validationRules"
+            label-width="120px"
+            class="validation-form"
+          >
+            <el-form-item label="项目名称" prop="name" required>
+              <el-input v-model="validationForm.name" placeholder="请输入项目名称" />
+            </el-form-item>
+            <el-form-item label="项目负责人" prop="owner" required>
+              <el-input v-model="validationForm.owner" placeholder="请输入负责人" />
+            </el-form-item>
+            <el-form-item label="联系邮箱" prop="email" required>
+              <el-input v-model="validationForm.email" placeholder="请输入联系邮箱" />
+            </el-form-item>
+            <el-form-item label="所属部门" prop="department" required>
+              <el-input v-model="validationForm.department" placeholder="请输入所属部门" />
+            </el-form-item>
+            <el-form-item label="项目目标" prop="goal" required>
+              <el-input
+                v-model="validationForm.goal"
+                type="textarea"
+                :rows="3"
+                placeholder="请输入项目目标"
+              />
+            </el-form-item>
+            <el-form-item label="风险评估" prop="risk" required>
+              <el-input
+                v-model="validationForm.risk"
+                type="textarea"
+                :rows="3"
+                placeholder="请列出主要风险"
+              />
+            </el-form-item>
+            <el-form-item label="资源需求" prop="resource" required>
+              <el-input
+                v-model="validationForm.resource"
+                placeholder="请描述关键资源需求"
+              />
+            </el-form-item>
+            <el-form-item label="备注" prop="remark">
+              <el-input
+                v-model="validationForm.remark"
+                type="textarea"
+                :rows="4"
+                placeholder="选填：补充其他信息"
+              />
+            </el-form-item>
+          </el-form>
+        </div>
+      </template>
       
       <template v-if="currentDrawer.hasDescSlot" #descValue="{ item }">
         <span v-if="item.label === '状态'">
@@ -113,6 +179,33 @@ const form = reactive({
   email: '',
   description: ''
 })
+
+// 校验示例表单
+const validationFormRef = ref()
+const validationForm = reactive({
+  name: '',
+  owner: '',
+  email: '',
+  department: '',
+  goal: '',
+  risk: '',
+  resource: '',
+  remark: ''
+})
+
+const validationRules = {
+  name: [{ required: true, message: '请输入项目名称', trigger: 'blur' }],
+  owner: [{ required: true, message: '请输入负责人', trigger: 'blur' }],
+  email: [
+    { required: true, message: '请输入联系邮箱', trigger: 'blur' },
+    { type: 'email', message: '请输入正确的邮箱地址', trigger: ['blur', 'change'] }
+  ],
+  department: [{ required: true, message: '请输入所属部门', trigger: 'blur' }],
+  goal: [{ required: true, message: '请填写项目目标', trigger: 'blur' }],
+  risk: [{ required: true, message: '请填写风险评估', trigger: 'blur' }],
+  resource: [{ required: true, message: '请填写资源需求', trigger: 'blur' }],
+  remark: [{ max: 200, message: '备注不能超过 200 字', trigger: 'blur' }]
+}
 
 // 表格数据
 const tableData = [
@@ -287,6 +380,7 @@ const createDrawerConfig = (type) => {
       disabledWidthDrag: true,
       mask: true,
       component: createBasicContent(),
+      autoResetForm: true,
       onConfirm: () => {
         ElMessage.success('确认操作成功！')
         handleDrawerCancel()
@@ -299,6 +393,7 @@ const createDrawerConfig = (type) => {
       disabledWidthDrag: true,
       mask: true,
       component: createFullScreenContent(),
+      autoResetForm: true,
       onConfirm: () => {
         ElMessage.success('确认操作成功！')
         handleDrawerCancel()
@@ -311,6 +406,7 @@ const createDrawerConfig = (type) => {
       disabledWidthDrag: false,
       mask: true,
       component: createResizableContent(),
+      autoResetForm: true,
       onConfirm: () => {
         ElMessage.success('确认操作成功！')
         handleDrawerCancel()
@@ -324,6 +420,7 @@ const createDrawerConfig = (type) => {
       mask: true,
       descriptions: descriptions,
       hasDescSlot: true,
+      autoResetForm: true,
       onConfirm: () => {
         ElMessage.success('确认操作成功！')
         handleDrawerCancel()
@@ -336,6 +433,7 @@ const createDrawerConfig = (type) => {
       disabledWidthDrag: true,
       mask: false,
       component: createNoMaskContent(),
+      autoResetForm: true,
       onConfirm: () => {
         ElMessage.success('确认操作成功！')
         handleDrawerCancel()
@@ -349,8 +447,31 @@ const createDrawerConfig = (type) => {
       mask: true,
       showHeaderRight: true,
       component: createHeaderRightContent(),
+      autoResetForm: true,
       onConfirm: () => {
         ElMessage.success('确认操作成功！')
+        handleDrawerCancel()
+      }
+    },
+    validateForm: {
+      title: '表单校验抽屉',
+      width: 540,
+      showFullScreen: false,
+      disabledWidthDrag: true,
+      mask: true,
+      type: 'form-validate',
+      formRef: validationFormRef,
+      formModel: validationForm,
+      preValidate: true,
+      autoScrollToError: true,
+      autoResetForm: true,
+      confirm: async () => {
+        // 模拟异步提交
+        await new Promise((resolve) => setTimeout(resolve, 600))
+        return { ...validationForm }
+      },
+      onConfirm: (payload) => {
+        ElMessage.success(`提交成功：${payload?.name || '未命名项目'}`)
         handleDrawerCancel()
       }
     }
@@ -387,6 +508,20 @@ const openNoMaskDrawer = () => {
 
 const openHeaderRightDrawer = () => {
   showDrawer('headerRight')
+}
+
+const openValidationDrawer = () => {
+  Object.assign(validationForm, {
+    name: '',
+    owner: '',
+    email: '',
+    department: '',
+    goal: '',
+    risk: '',
+    resource: '',
+    remark: ''
+  })
+  showDrawer('validateForm')
 }
 
 // 头部操作按钮事件处理
@@ -468,6 +603,18 @@ const handleDrawerCancel = () => {
     color: var(--el-text-color-regular);
     line-height: 1.6;
     margin-bottom: 16px;
+  }
+}
+
+.validation-form-wrapper {
+  max-height: 360px;
+  overflow-y: auto;
+  padding-right: 12px;
+}
+
+.validation-form {
+  .el-form-item {
+    margin-bottom: 18px;
   }
 }
 
