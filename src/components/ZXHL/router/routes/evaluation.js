@@ -32,7 +32,7 @@ export const evaluationRoutes = [
         path: 'template/list',
         name: 'TemplateList',
         meta: { title: '模版管理' },
-        component: () => import('@/components/ZXHL/pages/evaluation/templateManagement/Detail.vue')
+        component: () => import('@/components/ZXHL/pages/evaluation/templateManagement/List.vue')
       },
       {
         path: 'template/detail/:id',

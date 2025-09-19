@@ -26,6 +26,19 @@
           应用Mock数据
         </ZxButton>
         <ZxButton 
+          @click="applyRealLayoutData" 
+          type="warning"
+          :tooltip="{ 
+            type: 'popover',
+            title: '布局回显',
+            content: '加载并应用保存的真实布局数据，恢复之前的面板配置',
+            placement: 'left',
+          }"
+        >
+          <el-icon><DataAnalysis /></el-icon>
+          应用真实布局数据
+        </ZxButton>
+        <ZxButton 
           @click="handleSaveData" 
           type="success"
           :tooltip="{ 
@@ -96,6 +109,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { ArrowLeft, DataAnalysis } from '@element-plus/icons-vue'
 import { templateApi } from '../../../api/modules/evaluation/template.js'
 import mockData from './mock.js'
+import savedLayoutData from './saveData.js'
 import DashboardGrid from '../../../comp/business/DashboardGrid/index.vue'
 import LibraryPanels from '../../../comp/business/DashboardGrid/LibraryPanels/index.vue'
 import EditPane from '../../../comp/business/DashboardGrid/EditPane/index.vue'
@@ -183,6 +197,34 @@ export default {
       console.log('Applied mock data:', mockData)
     }
     
+   const applyRealLayoutData = () => {
+      if (!savedLayoutData || !savedLayoutData.panels) {
+        ElMessage.warning('没有找到保存的布局数据')
+        return
+      }
+      
+      try {
+        // 清空当前面板
+        panels.value = []
+        
+        // 应用保存的面板数据
+        panels.value = [...savedLayoutData.panels]
+        
+        // 如果有评估数据，也一并应用
+        if (savedLayoutData.evaluationData) {
+          evaluationData.value = savedLayoutData.evaluationData
+          // 更新所有面板的数据
+          updateAllPanelsData()
+        }
+        
+        ElMessage.success(`已成功加载 ${savedLayoutData.panels.length} 个面板的布局数据`)
+        console.log('Applied saved layout data:', savedLayoutData)
+      } catch (error) {
+        console.error('应用布局数据失败:', error)
+        ElMessage.error('应用布局数据失败，请检查数据格式')
+      }
+    }
+    
     // 更新所有面板的数据
     const updateAllPanelsData = () => {
       if (!evaluationData.value) {
@@ -208,15 +250,17 @@ export default {
 
     // 保存最终数据
     const handleSaveData = async () => {
-      // 收集所有面板数据
+      // 参考 example 中的导出布局逻辑，收集完整的面板数据
       const dashboardData = {
         // templateId: currentTemplateId.value,
         // templateInfo: templateDetail.value,
         panels: panels.value.map(panel => ({
           id: panel.id,
+          type: panel.type,
+          widget: panel.widget, // 保存 widget 信息
           title: panel.title || '',
           description: panel.description || '',
-          type: panel.type,
+          color: panel.color, // 保存颜色信息
           gridPos: panel.gridPos || {},
           transparentBackground: panel.transparentBackground || false,
           metadata: panel.metadata || {},
@@ -228,10 +272,11 @@ export default {
           totalPanels: panels.value.length,
           lastModified: new Date().toISOString()
         },
-        evaluationData: evaluationData.value
+        // evaluationData: evaluationData.value
       }
 
       console.log('保存的仪表盘数据:', dashboardData)
+      ElMessage.success(`已保存 ${panels.value.length} 个面板的完整布局数据`)
     }
     
     const handleEditSuccess = () => {
@@ -335,6 +380,7 @@ export default {
       dialogVisible,
       handleBack,
       applyMockData,
+      applyRealLayoutData,
       updateAllPanelsData,
       handleSaveData,
       handleEditSuccess,
