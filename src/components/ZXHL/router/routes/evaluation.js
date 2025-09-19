@@ -1,30 +1,49 @@
 import PureRouterView from '@/components/ZXHL/comp/pure/ZxPureRouterView/index.vue'
+
+// 评估任务管理一级菜单，任务管理 / 模版管理作为二级菜单项
 export const evaluationRoutes = [
   {
-    path: 'evaluate',
-    name: 'EvaluationOverview',
-    meta: { 
+    path: '',
+    name: 'EvaluationManagement',
+    meta: {
       title: '评估任务管理',
       icon: 'EditPen'
     },
-    redirect: 'list',
+    redirect: '/evaluation/evaluate/list',
     component: PureRouterView,
-    children: [{
-      path: 'list',
-      name: 'EvaluationList',
-      meta: { 
-        title: '任务管理',
+    children: [
+      {
+        path: 'evaluate/list',
+        name: 'EvaluationList',
+        meta: { title: '任务管理' },
+        component: () => import('@/components/ZXHL/pages/evaluation/taskManagement/list.vue')
       },
-      component: () => import('@/components/ZXHL/pages/evaluation/list.vue')
-    }, {
-      path: 'detail/:id',
-      name: 'EvaluationDetail',
-      meta: {
-        routeKey: 'evaluationDetail',
-        title: '评估详情',
-        showInMenu: false
+      {
+        path: 'evaluate/detail/:id',
+        name: 'EvaluationDetail',
+        meta: {
+          routeKey: 'evaluationDetail',
+          title: '评估详情',
+          showInMenu: false
+        },
+        component: () => import('@/components/ZXHL/pages/evaluation/taskManagement/detail.vue')
       },
-      component: () => import('@/components/ZXHL/pages/evaluation/detail.vue')
-    }]
+      {
+        path: 'template/list',
+        name: 'TemplateList',
+        meta: { title: '模版管理' },
+        component: () => import('@/components/ZXHL/pages/evaluation/templateManagement/Detail.vue')
+      },
+      {
+        path: 'template/detail/:id',
+        name: 'TemplateDetail',
+        meta: {
+          routeKey: 'templateDetail',
+          title: '模版详情',
+          showInMenu: false
+        },
+        component: () => import('@/components/ZXHL/pages/evaluation/templateManagement/Detail.vue')
+      }
+    ]
   }
 ]

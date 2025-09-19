@@ -76,6 +76,7 @@
 <script setup>
 import { ref, reactive, watch, computed, nextTick } from 'vue'
 import { Warning } from '@element-plus/icons-vue'
+import { useZxConfirmInput } from './hook.js'
 
 // Props 对齐 GitLab 风格
 const props = defineProps({
@@ -122,168 +123,42 @@ const props = defineProps({
     type: String, 
     default: 'danger', 
     validator: v => ['danger', 'warning', 'info'].includes(v)
-  }
+  },
+  /** 是否显示内部错误消息（ElMessage），为 false 时仅抛出 error 事件 */
+  showErrorMessage: { type: Boolean, default: false }
 })
 
 const emit = defineEmits(['update:modelValue', 'confirm', 'cancel', 'open', 'close', 'error'])
 
-const visible = ref(props.modelValue)
-watch(() => props.modelValue, v => (visible.value = v))
-watch(() => visible.value, v => emit('update:modelValue', v))
-
-const formRef = ref(null)
-const form = reactive({ value: '' })
-
-// 内部 loading 状态管理
-const internalLoading = ref(false)
-const isLoading = computed(() => props.okLoading || internalLoading.value)
-
-const normalizedPattern = computed(() => {
-  if (!props.pattern) return null
-  if (props.pattern instanceof RegExp) return props.pattern
-  try {
-    return new RegExp(props.pattern)
-  } catch (e) {
-    return null
-  }
-})
-
-const keywordForCompare = computed(() => (props.caseSensitive ? props.keyword : props.keyword.toLowerCase()))
-const inputForCompare = computed(() => (props.caseSensitive ? form.value : form.value.toLowerCase()))
-
-const isMatch = async () => {
-  if (!props.requireKeyword) return true
-
-  // 自定义校验优先
-  if (props.validator) {
-    const res = await props.validator(form.value)
-    if (res === true) return true
-    if (typeof res === 'string') return false // 字符串表示报错信息
-    return res === false ? false : true
-  }
-
-  // 正则校验
-  if (normalizedPattern.value) {
-    return normalizedPattern.value.test(form.value)
-  }
-
-  // 关键字精确匹配；若未提供关键字则要求非空
-  if (!props.keyword) return form.value.trim().length > 0
-  return inputForCompare.value === keywordForCompare.value
-}
-
-const rules = {
-  value: [
-    {
-      validator: async (_rule, _val, callback) => {
-        if (!props.requireKeyword) return callback()
-        const passed = await isMatch()
-        if (passed) callback()
-        else callback(new Error(errorTextComputed.value))
-      },
-      trigger: 'change'
-    }
-  ]
-}
-
-const errorTextComputed = computed(() => {
-  if (normalizedPattern.value) return '输入不符合要求的格式'
-  if (props.keyword) return '输入内容与要求不一致'
-  return '请输入内容'
-})
-
-const localValid = ref(!props.requireKeyword)
-
-// 修复按钮禁用逻辑：当输入正确时，按钮应该可用（显示 danger 色）
-const confirmDisabled = computed(() => {
-  if (!props.disabledWhenMismatch) return false
-  return !localValid.value
-})
-
-watch(
-  () => form.value,
-  async () => {
-    if (!props.requireKeyword) {
-      localValid.value = true
-      return
-    }
-    localValid.value = await isMatch()
-  },
-  { immediate: true }
-)
-
-watch(
-  () => visible.value,
-  (v) => {
-    if (v) {
-      // 打开时重置并自动聚焦
-      form.value = ''
-      // 清除表单校验状态
-      nextTick(() => {
-        formRef.value?.clearValidate?.()
-        if (props.autofocus) {
-          const el = document.querySelector('.zx-confirm-input input')
-          el && el.focus()
-        }
-      })
-    }
-  }
-)
-
-const handleEnterKey = (event) => {
-  // 阻止事件冒泡，防止 Dialog 接收到 Enter 键事件
-  event.preventDefault()
-  event.stopPropagation()
+// 使用 Hook 来管理所有逻辑
+const {
+  // 引用
+  formRef,
   
-  // 调用确认逻辑，这样会触发校验
-  tryConfirm()
-}
-
-const tryConfirm = async () => {
-  if (props.disabledWhenMismatch && !(await isMatch())) {
-    // 触发校验提示
-    formRef.value && formRef.value.validate?.()
-    return
-  }
-
-  const payload = { value: form.value }
-
-  // 如果提供了 confirmAction，则执行异步操作
-  if (props.confirmAction && typeof props.confirmAction === 'function') {
-    try {
-      internalLoading.value = true
-      await props.confirmAction(payload)
-      
-      // 成功后关闭对话框
-      visible.value = false
-      emit('confirm', payload)
-    } catch (error) {
-      console.error('确认操作失败:', error)
-      // 可以在这里处理错误，比如显示错误消息
-      // 不关闭对话框，让用户可以重试
-      emit('error', { error, payload })
-    } finally {
-      internalLoading.value = false
-    }
-  } else {
-    // 没有提供 confirmAction，直接触发 confirm 事件
-    emit('confirm', payload)
-  }
-}
-
-const handleCancel = () => {
-  visible.value = false
-  emit('cancel')
-}
-
-const handleClose = () => {
-  // 关闭时清除校验状态和输入值
-  form.value = ''
-  formRef.value?.clearValidate?.()
-  visible.value = false
-  emit('close')
-}
-const handleOpen = () => emit('open')
+  // 表单相关
+  form,
+  rules,
+  localValid,
+  isMatch,
+  errorText,
+  normalizedPattern,
+  
+  // 对话框状态
+  visible,
+  handleOpen,
+  handleClose,
+  handleCancel,
+  
+  // 确认操作
+  internalLoading,
+  isLoading,
+  confirmDisabled,
+  tryConfirm,
+  
+  // 键盘事件
+  handleEnterKey,
+  handleEscapeKey
+} = useZxConfirmInput(props, emit)
 </script>
 
 <style lang="scss">

@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full">
+  <div class="zx-select-wrapper">
     <el-tooltip
       :content="selectFullTooltip"
       :disabled="disabledTooltip"
@@ -9,7 +9,7 @@
       <el-select
         ref="selectRef"
         v-model="innerValue"
-        class="zx-select w-full"
+        class="zx-select"
         :placeholder="placeholder"
         :clearable="allowClear"
         :filterable="allowSearch"

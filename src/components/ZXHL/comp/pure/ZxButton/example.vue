@@ -11,7 +11,7 @@
       <div class="demo-content">
         <div class="button-row">
           <ZxButton>默认按钮</ZxButton>
-          <ZxButton type="primary">主要按钮</ZxButton>
+          <ZxButton type="primary" @click="() => console.log(22222)">主要按钮3333</ZxButton>
           <ZxButton type="success">成功按钮</ZxButton>
           <ZxButton type="info">信息按钮</ZxButton>
           <ZxButton type="warning">警告按钮</ZxButton>

@@ -33,9 +33,18 @@ export function getStatusOptions() {
   })
 }
 
+// 删除评估任务
+export function deleteEvaluation(id) {
+  return ZXR.delete({
+    url: '/evaluation/deletedddd',
+    params: { id }
+  })
+}
+
 export const evaluationApi = {
   getEvaluationResultData,
   getEvaluationResultById,
   getEvaluationList,
-  getStatusOptions
+  getStatusOptions,
+  deleteEvaluation
 }

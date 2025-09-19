@@ -69,6 +69,11 @@
 */
 .zx-grid-list__toolbar {
   padding: 10px 0;
+  .zx-grid-form-bar__filters {
+    .zx-select-wrapper {
+      margin-left: 0 !important;
+    }
+  }
 
   .zx-grid-form-bar {
     display: flex;
@@ -115,6 +120,71 @@
     .zx-grid-form-bar__right {
       flex: 1 0 100%;
       justify-content: flex-end;
+    }
+  }
+}
+
+// 对话框表单样式
+.zx-dialog-modal {
+  .form-container.el-form {
+    .form-section {
+      margin-bottom: 32px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--el-border-color-lighter);
+    }
+
+    .form-section:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+
+    .section-title {
+      margin: 0 0 20px 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--el-text-color-primary);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    // .required-mark {
+    //   color: var(--el-color-danger);
+    //   font-size: 14px;
+    // }
+
+    .form-input {
+      width: 100%;
+    }
+
+    .el-form-item {
+      margin-bottom: 20px;
+    }
+
+    .el-form-item__label {
+      font-weight: 500;
+      color: var(--el-text-color-regular);
+    }
+
+    .el-input,
+    .el-select,
+    .el-textarea {
+      width: 100%;
+    }
+
+    .el-input__inner,
+    .el-select__wrapper,
+    .el-textarea__inner {
+      height: 40px;
+      line-height: 40px;
+    }
+
+    .el-textarea__inner {
+      height: auto;
+      min-height: 80px;
+      line-height: 1.5;
+      padding: 12px 15px;
     }
   }
 }

@@ -1,4 +1,7 @@
-import { ref, computed } from 'vue'
+import { ref, computed, unref, type Ref } from 'vue'
+import type { FormInstance } from 'element-plus'
+
+type MaybeRef<T> = T | Ref<T>
 
 export interface DialogOptions {
   // 基础配置
@@ -28,14 +31,26 @@ export interface DialogOptions {
   dialogSize?: 'small' | 'large'
   noContentPadding?: boolean
   customClass?: string | string[] | object
+  headerPadding?: string
+  bodyPadding?: string
+  footerPadding?: string
   
   // 回调函数
-  onConfirm?: (switchValue?: boolean) => Promise<void> | void
+  onConfirm?: (switchValue?: boolean, result?: unknown) => Promise<unknown> | unknown
+  onConfirmError?: (error: unknown) => void
   onCancel?: () => void
   onContinue?: () => void
   onOpen?: () => void
   onClose?: () => void
   onBeforeClose?: () => boolean | Promise<boolean>
+
+  // 表单增强
+  formRef?: MaybeRef<FormInstance | null>
+  formModel?: MaybeRef<Record<string, unknown> | null>
+  autoResetForm?: boolean
+  preValidate?: boolean
+  autoScrollToError?: boolean
+  scrollErrorOffset?: number
 }
 
 export interface DialogState {
@@ -69,31 +84,43 @@ export default function useDialog(options: DialogOptions = {}) {
     dialogSize: options.dialogSize || 'small',
     noContentPadding: options.noContentPadding || false,
     customClass: options.customClass || '',
+    headerPadding: options.headerPadding,
+    bodyPadding: options.bodyPadding,
+    footerPadding: options.footerPadding,
     switchProps: options.switchProps && options.switchProps.showSwitch ? {
       ...options.switchProps,
       enable: switchValue.value
-    } : undefined
+    } : undefined,
+    formRef: options.formRef !== undefined ? unref(options.formRef) : undefined,
+    formModel: options.formModel !== undefined ? unref(options.formModel) : undefined,
+    autoResetForm: options.autoResetForm ?? true,
+    preValidate: options.preValidate ?? true,
+    autoScrollToError: options.autoScrollToError ?? true,
+    scrollErrorOffset: options.scrollErrorOffset
   }))
-  
+
   // 对话框事件处理
   const dialogEvents = computed(() => ({
     'update:modelValue': (val: boolean) => {
       visible.value = val
     },
-    confirm: async () => {
-      if (options.onConfirm) {
-        loading.value = true
-        try {
-          await options.onConfirm(switchValue.value)
-          visible.value = false
-        } catch (error) {
-          console.error('Dialog confirm error:', error)
-          // 不关闭对话框，让用户处理错误
-        } finally {
-          loading.value = false
-        }
-      } else {
+    confirm: async (result?: unknown) => {
+      if (!options.onConfirm) {
         visible.value = false
+        return
+      }
+      loading.value = true
+      try {
+        const actionResult = await options.onConfirm(switchValue.value, result)
+        if (actionResult !== false) {
+          visible.value = false
+        }
+      } catch (error) {
+        console.error('Dialog confirm error:', error)
+        options.onConfirmError?.(error)
+        // 不关闭对话框，让用户处理错误
+      } finally {
+        loading.value = false
       }
     },
     cancel: () => {
@@ -116,6 +143,9 @@ export default function useDialog(options: DialogOptions = {}) {
       if (options.onClose) {
         options.onClose()
       }
+    },
+    'confirm-error': (error: unknown) => {
+      options.onConfirmError?.(error)
     }
   }))
   

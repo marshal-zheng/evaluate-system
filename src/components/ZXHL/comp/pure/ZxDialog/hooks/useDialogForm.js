@@ -30,7 +30,13 @@ export default function useDialogForm(options = {}) {
     ...dialogState.baseProps.value,
     showReset: options.showReset || false,
     submitText: options.submitText || '提交',
-    resetText: options.resetText || '重置'
+    resetText: options.resetText || '重置',
+    formRef: formRef.value,
+    formModel: formData,
+    autoResetForm: options.autoResetForm !== false,
+    preValidate: options.preValidate !== false,
+    autoScrollToError: options.autoScrollToError !== false,
+    scrollErrorOffset: options.scrollErrorOffset || 24
   }))
   
   // 表单事件
@@ -41,9 +47,10 @@ export default function useDialogForm(options = {}) {
         if (options.onSubmit) {
           dialogState.setLoading(true)
           try {
-            await options.onSubmit(formData)
-            dialogState.close()
-            resetForm()
+            const submitResult = await options.onSubmit(formData)
+            if (submitResult !== false) {
+              dialogState.close()
+            }
           } catch (error) {
             console.error('Form submit error:', error)
           } finally {

@@ -12,6 +12,9 @@ import { ref, computed } from 'vue'
  * @param {boolean} [options.maskClosable] - 点击遮罩是否关闭
  * @param {string|Array|Object} [options.customClass] - 自定义类名
  * @param {boolean} [options.noContentPadding] - 是否去除内容区域padding
+ * @param {string} [options.headerPadding] - 头部 padding
+ * @param {string} [options.bodyPadding] - 内容 padding
+ * @param {string} [options.footerPadding] - 底部 padding
  */
 export default function useDialogState(options = {}) {
   // 基础状态
@@ -30,7 +33,10 @@ export default function useDialogState(options = {}) {
     customClass: options.customClass || '',
     noContentPadding: options.noContentPadding || false,
     okLoading: loading.value,
-    okDisabled: disabled.value
+    okDisabled: disabled.value,
+    headerPadding: options.headerPadding,
+    bodyPadding: options.bodyPadding,
+    footerPadding: options.footerPadding
   }))
   
   // 基础事件

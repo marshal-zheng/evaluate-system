@@ -7,3 +7,5 @@ Component.install = function(app) {
 export default Component
 
 
+
+

@@ -217,6 +217,7 @@ await resetSystem()
 - maxlength: Number = 0 - 最大长度；0 表示不限制
 - inputProps: Object - 透传给输入框的属性
 - rounded: Boolean = false - 按钮是否使用圆角样式
+- showErrorMessage: Boolean = true - confirmAction 失败时是否自动用 ElMessage 弹出错误；设为 false 时只触发 error 事件，交由外部自定义提示
 
 ## 事件
 - update:modelValue(visible) - 显隐状态变化
@@ -259,3 +260,15 @@ await resetSystem()
 - 将 disabledWhenMismatch 设为 false 可允许不通过校验也能点击确认
 - 默认关闭点击遮罩关闭功能，避免误操作
 - 建议在危险操作场景使用，提升操作安全性
+- 如果需要统一由外部捕获并展示错误（例如全局通知系统），将 `showErrorMessage` 设为 `false`，并监听 `error` 事件或 `service` 调用返回的 Promise 进行自定义处理。
+
+### 仅自定义错误处理示例
+```vue
+<ZxConfirmInput
+  v-model="visible"
+  keyword="DELETE"
+  :confirm-action="delApi"
+  :show-error-message="false"
+  @error="({ error }) => addCustomLog(error.message)"
+/>
+```

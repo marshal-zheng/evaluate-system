@@ -4,7 +4,6 @@
     <ZxEmpty
       v-if="isEmpty"
       :text="emptyConfig.noDataText"
-      :image="emptyConfig.emptyImage"
       :image-size="emptyConfig.emptyImageSize"
       class="chart-empty-state"
     />
@@ -55,7 +54,6 @@ const chartRef = ref(null)
 // 空状态配置（组件内部定义）
 const emptyConfig = {
   noDataText: '暂无数据',
-  emptyImage: 'no-data', // 可以是 'no-data', 'no-network', 'no-permission' 等
   emptyImageSize: 120
 }
 

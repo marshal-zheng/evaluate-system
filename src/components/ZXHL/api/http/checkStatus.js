@@ -16,7 +16,8 @@ export default function checkStatus(
   status,
   msg,
   code,
-  errorMessageMode = 'message'
+  errorMessageMode = 'message',
+  showErrorMessage = true
 ) {
   const router = useRouter()
   let errMessage = ''
@@ -69,7 +70,7 @@ export default function checkStatus(
       errMessage = msg || `连接错误 ${status}`
   }
 
-  if (errMessage) {
+  if (errMessage && showErrorMessage) {
     if (errorMessageMode === 'modal') {
       ElMessageBox.alert(errMessage, '错误', {
         type: 'error'

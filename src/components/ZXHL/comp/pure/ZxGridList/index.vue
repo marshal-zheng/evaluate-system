@@ -3,9 +3,16 @@
     <div class="zx-grid-list" :class="{ 'show-table-border': showTableBorder }">
     <!-- 查询表单区域（始终渲染容器，避免插槽检测异常导致不显示） -->
     <div class="zx-grid-list__toolbar">
-      <slot name="form" :query="gridState.query" :data="gridState" :loading="isLoading" />
+      <slot 
+        name="form" 
+        :query="gridState.query" 
+        :data="gridState" 
+        :loading="isLoading"
+        :refresh="handleRefresh"
+        :updateState="updateState"
+        :updateMultiState="updateMultiState"
+      />
     </div>
-    
     <!-- 表格区域 - 固定高度容器 -->
     <div ref="gridEl" class="zx-grid-list__grid" v-loading="isLoading && !isSilentLoading">
       <!-- 表格内容：始终渲染，确保空数据时也保留表头 -->
@@ -37,12 +44,14 @@
               <el-button 
                 v-if="gridState.error" 
                 type="primary" 
+                :loading="isLoading"
                 @click="handleRefresh"
               >
                 重新加载
               </el-button>
               <el-button 
                 v-else-if="showRefreshButton" 
+                :loading="isLoading"
                 @click="handleRefresh"
               >
                 刷新数据
@@ -68,7 +77,7 @@
           :current-page="currentPage"
           :small="small"
           :background="paginationBackground"
-          :disabled="!hasPagination"
+          :disabled="!hasPagination || isLoading"
           @size-change="handleSizeChange"
           @current-change="handlePageChange"
         />
@@ -187,7 +196,7 @@ const props = defineProps({
   // 自动刷新配置
   autoRefresh: {
     type: [Boolean, Object],
-    default: true
+    default: false
   },
   // 加载时是否清除表格选择
   clearSelectionOnLoad: {
@@ -636,12 +645,16 @@ const setupUrlStateSync = () => {
 // 自动刷新功能
 const setupAutoRefresh = () => {
   console.log('props.autoRefresh', props.autoRefresh)
-  const refreshConfig = typeof props.autoRefresh === 'boolean' 
-    ? { enabled: props.autoRefresh, interval: 1000 }
-    : { enabled: false, interval: 1000, ...props.autoRefresh }
-    
-  if (!refreshConfig.enabled) return
-  
+  // When an object is passed, default enabled to true unless explicitly set to false
+  const refreshConfig = typeof props.autoRefresh === 'boolean'
+    ? { enabled: props.autoRefresh, interval: 5000 }
+    : { enabled: props.autoRefresh?.enabled ?? true, interval: 1000, ...props.autoRefresh }
+
+  if (!refreshConfig.enabled) {
+    autoRefreshTimer.value = null
+    return
+  }
+
   const { pause, resume } = useIntervalFn(() => {
     if (!gridState.loading && gridState.lastLoadTime) {
       const timeSinceLastLoad = Date.now() - gridState.lastLoadTime
@@ -650,8 +663,10 @@ const setupAutoRefresh = () => {
       }
     }
   }, refreshConfig.interval)
-  
+
   autoRefreshTimer.value = { pause, resume }
+  // Start the interval immediately after setup
+  resume()
 }
 
 // 生命周期
@@ -723,12 +738,14 @@ const renderTableEmpty = () => {
     imageSize: props.emptyImageSize
   }, {
     image: props.emptyImage && instance?.slots.emptyImage ? () => instance.slots.emptyImage() : undefined,
-    default: (showRefreshButton.value || gridState.error) ? () => [
+    default: (props.showRefreshButton || gridState.error) ? () => [
       gridState.error ? h('el-button', {
         type: 'primary',
+        loading: isLoading.value,
         onClick: handleRefresh
       }, '重新加载') : null,
-      !gridState.error && showRefreshButton.value ? h('el-button', {
+      !gridState.error && props.showRefreshButton ? h('el-button', {
+        loading: isLoading.value,
         onClick: handleRefresh
       }, '刷新数据') : null
     ].filter(Boolean) : undefined

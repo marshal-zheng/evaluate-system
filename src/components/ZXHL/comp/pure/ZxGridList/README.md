@@ -162,7 +162,7 @@ const handleDelete = (row) => {
 | loadOnMounted | 组件挂载时是否自动加载 | Boolean | `true` |
 | queryTransform | 查询参数转换函数 | Function | `(query) => query` |
 | paramsTransform | 参数预处理函数 | Function | `(params) => params` |
-| autoRefresh | 自动刷新配置 | Boolean/Object | `false` |
+| autoRefresh | 自动刷新配置 | Boolean/Object | `true` |
 | clearSelectionOnLoad | 加载时是否清除表格选择 | Boolean | `true` |
 | syncUrlState | 是否同步 URL 状态 | Boolean | `false` |
 | urlStateKey | URL 状态键名 | String | `'_state'` |
@@ -238,6 +238,36 @@ gridRef.value.clearTableSelection()
   <!-- 插槽内容 -->
 </ZxGridList>
 ```
+
+自动刷新支持两种用法：
+
+- 布尔值
+  - `:auto-refresh="true"` 开启自动刷新，默认间隔 1000ms
+  - `:auto-refresh="false"` 关闭自动刷新
+
+- 对象配置
+  - `interval`: 刷新间隔（毫秒），默认 `1000`
+  - `enabled`: 是否启用；对象形式下未显式传入时默认 `true`
+
+示例：
+
+```vue
+<!-- 开启自动刷新，使用默认 1000ms -->
+<ZxGridList :load-data="loadData" :auto-refresh="true" />
+
+<!-- 对象形式（推荐）：未写 enabled 时默认启用 -->
+<ZxGridList :load-data="loadData" :auto-refresh="{ interval: 5000 }" />
+
+<!-- 显式关闭 -->
+<ZxGridList :load-data="loadData" :auto-refresh="{ enabled: false }" />
+```
+
+行为说明：
+
+- 组件挂载并首次成功加载数据后开始进入定时刷新；随后每到间隔时机触发一次静默刷新（不展示 loading 态）。
+- 若正在加载中则会跳过本次间隔，等待下一次。
+- 页面失活时会自动暂停，返回激活时自动恢复。
+- 若需要尽快进入自动刷新循环，保持 `loadOnMounted` 为 `true`（默认），以便尽早设置首次 `lastLoadTime`。
 
 ### URL 状态同步
 

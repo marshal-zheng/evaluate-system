@@ -1,23 +1,22 @@
 <template>
   <div class="evaluation-overview">
     <ZxGridList
-      ref="gridRef"
       :load-data="loadEvaluationData"
       :show-pagination="true"
       :page-sizes="[10, 20, 50, 100]"
       :default-page-size="10"
-      :load-on-mounted="false"
+      :load-on-mounted="true"
       :clear-selection-on-load="true"
       class="evaluation-grid"
     >
       <!-- 工具栏：左-操作 | 中-筛选 | 右-搜索 -->
-      <template #form="{ query, data, loading }">
+      <template #form="{ query, data, loading, refresh, updateState }">
         <div class="zx-grid-form-bar">
           <div class="zx-grid-form-bar__left">
             <ZxButton type="primary" @click="handleCreate">新建评估</ZxButton>
           </div>
           <div class="zx-grid-form-bar__filters">
-            <SelectStatus v-model="query.status" @change="onFilterChange" style="width: 150px" />
+            <SelectStatus v-model="query.status" @change="(v) => onFilterChange(v, { refresh, updateState })" style="width: 150px" />
           </div>
           <div class="zx-grid-form-bar__right">
             <ZxSearch
@@ -25,8 +24,8 @@
               placeholder="搜索评估名称/ID"
               :loading="loading"
               search-mode="click"
-              @search="onSearch"
-              @clear="onSearch"
+              @search="() => onSearch({ refresh, updateState })"
+              @clear="() => onSearch({ refresh, updateState })"
             />
           </div>
         </div>
@@ -50,12 +49,13 @@
           </el-table-column>
           <el-table-column prop="score" label="评分" width="100" />
           <el-table-column prop="createTime" label="创建时间" width="180" />
-          <el-table-column label="操作" width="160" class-name="op-col" label-class-name="op-col__header">
+          <el-table-column label="操作" width="180" class-name="op-col" label-class-name="op-col__header">
             <template #default="{ row }">
               <div class="op-col__wrap">
                 <ZxButton link type="primary" @click="viewDetail(row)">查看</ZxButton>
-                <ZxButton link type="primary" @click="editEvaluation(row)">编辑</ZxButton>
-                <ZxButton link type="danger">删除</ZxButton>
+                <!-- 另存为模版 -->
+                <ZxButton link type="primary" @click="handleSaveAsTemplate(row)">另存为模版</ZxButton>
+                <ZxButton link type="danger" @click="handleDelete(row, refresh)">删除</ZxButton>
               </div>
             </template>
           </el-table-column>
@@ -66,22 +66,13 @@
 </template>
 
 <script setup>
-import { ref, nextTick, onMounted } from 'vue'
+import { nextTick, getCurrentInstance } from 'vue'
 import { Loading } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
 import { evaluationApi } from '@/components/ZXHL/api/modules/evaluation/index.js'
 import ZxGridList from '@/components/ZXHL/comp/pure/ZxGridList/index.vue'
-import SelectStatus from './components/selectors/SelectStatus.vue'
+import { SelectStatus } from './components/selector'
 import { ZxSearch, ZxButton } from '@/components/ZXHL/comp/pure/index.js'
-
-// 组件引用
-const gridRef = ref(null)
-
-// 组件挂载后手动加载数据
-onMounted(() => {
-  nextTick(() => {
-    gridRef.value?.refresh()
-  })
-})
 
 // 数据加载函数 - 适配 ZxGridList  
 const loadEvaluationData = async (params) => {
@@ -90,14 +81,6 @@ const loadEvaluationData = async (params) => {
   
   try {
     const data = await evaluationApi.getEvaluationList(params)
-    console.log('API 响应数据:', data)
-    console.log('数据类型:', typeof data)
-    console.log('数据结构:', {
-      hasData: !!data,
-      hasDataProp: !!data?.data,
-      hasList: !!data?.list || !!data?.data?.list,
-      hasPager: !!data?.pager || !!data?.data?.pager
-    })
     return data
   } catch (error) {
     console.error('loadEvaluationData 请求失败:', error)
@@ -132,34 +115,46 @@ const viewDetail = (row) => {
   console.log('查看评估详情:', row.name)
 }
 
-// 编辑评估
-const editEvaluation = (row) => {
-  console.log('编辑评估:', row.name)
-}
-
 // actions in toolbar
 const handleCreate = () => {
   console.log('新建评估')
 }
 
-const onFilterChange = (value) => {
+const onFilterChange = (value, { refresh, updateState }) => {
   console.log('=== onFilterChange 触发 ===')
   console.log('选择的状态值:', value)
-  console.log('当前 query 状态:', gridRef.value?.gridState?.query)
-  
-  // 先更新页码，再刷新
-  gridRef.value?.updateState('pager.page', 1)
+  // 页码重置到第一页
+  updateState('pager.page', 1)
   
   // 使用 nextTick 确保状态更新后再刷新
   nextTick(() => {
-    console.log('准备刷新，当前 query:', gridRef.value?.gridState?.query)
-    gridRef.value?.refresh()
+    refresh()
   })
 }
 
-const onSearch = () => {
-  gridRef.value?.updateState('pager.page', 1)
-  gridRef.value?.refresh()
+const onSearch = ({ refresh, updateState }) => {
+  updateState('pager.page', 1)
+  refresh()
+}
+
+// 获取 ZxConfirmInput 服务
+const { proxy } = getCurrentInstance()
+
+// 删除评估任务
+const handleDelete = async (row, refresh) => {
+  await proxy.$confirmInput.danger({
+    targetName: row.name,
+    targetType: '评估任务',
+    keyword: row.name,
+    dangerMessage: `您即将删除评估任务"${row.name}"`,
+    description: '此操作不可恢复，请输入评估任务名称以确认删除。',
+    confirmAction: async () => {
+      // 调用删除API
+      return evaluationApi.deleteEvaluation(row.id).then(() => {
+        refresh()
+      })
+    }
+  })
 }
 </script>
 

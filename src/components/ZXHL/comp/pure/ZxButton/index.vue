@@ -31,6 +31,7 @@ import TooltipOrPopover from '../ZxTooltipOrPopover/index.vue'
 
 export default defineComponent({
   name: 'ZxButton',
+  inheritAttrs: false,
   // ZxButton 基于 Element Plus 的 el-button，默认跟随系统主题
   // 支持通过 CSS 变量自定义样式：
   // --zx-button-border-radius: 自定义圆角
@@ -68,6 +69,8 @@ export default defineComponent({
     const loading = ref(props.modelValue)
 
     const executeClick = async () => {
+      // Prevent re-entrance while already executing (avoids double triggers)
+      if (enableLoading.value && loading.value) return
       loading.value = true
       emit('update:modelValue', true)
       emit('startLoading')
@@ -86,12 +89,28 @@ export default defineComponent({
       }
     }
 
-    let debouncedClick = debounce(executeClick, debounceDuration.value)
-    let throttledClick = throttle(debouncedClick, throttleDuration.value)
+    // Build a single runner: prefer debounce, else throttle, else direct
+    let runner = executeClick
+
+    const rebuildRunner = () => {
+      // Cancel existing scheduled runs if any
+      if (runner && typeof runner.cancel === 'function') {
+        runner.cancel()
+      }
+
+      if (debounceDuration.value && debounceDuration.value > 0) {
+        // Debounce: fire immediately, suppress subsequent clicks during the window
+        runner = debounce(executeClick, debounceDuration.value, { leading: true, trailing: false })
+      } else if (throttleDuration.value && throttleDuration.value > 0) {
+        // Throttle: single call on leading edge, no trailing
+        runner = throttle(executeClick, throttleDuration.value, { leading: true, trailing: false })
+      } else {
+        runner = executeClick
+      }
+    }
 
     watch([debounceDuration, throttleDuration], () => {
-      debouncedClick = debounce(executeClick, debounceDuration.value)
-      throttledClick = throttle(debouncedClick, throttleDuration.value)
+      rebuildRunner()
     }, { immediate: true })
 
     watch(() => props.modelValue, (newValue) => {
@@ -99,8 +118,7 @@ export default defineComponent({
     })
 
     onUnmounted(() => {
-      debouncedClick.cancel()
-      throttledClick.cancel()
+      if (runner && typeof runner.cancel === 'function') runner.cancel()
     })
 
     const buttonAttrs = {
@@ -110,7 +128,7 @@ export default defineComponent({
 
     return {
       loading,
-      handleClick: throttledClick,
+      handleClick: (...args) => runner(...args),
       buttonAttrs,
       isEmpty
     }

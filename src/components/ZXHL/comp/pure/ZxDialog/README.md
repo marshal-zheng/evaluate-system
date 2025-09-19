@@ -12,6 +12,9 @@
 - ✅ 响应式设计，适配移动端
 - ✅ 支持暗色主题
 - ✅ JavaScript 类型支持
+- ✅ 可选：自动表单重置（关闭时清除校验+恢复初始值）
+- ✅ 可选：确认前自动表单校验
+- ✅ 可选：校验失败时自动滚动到第一个错误项
 
 ## 基础用法
 
@@ -39,6 +42,82 @@ const dialog = ref(false)
 ```
 
 ## 高级用法
+
+### 表单增强：自动重置 + 自动滚动错误
+
+当对话框内容里包含 `el-form` 时，可通过传入 `formRef` 与 `formModel` 获得增强体验：
+
+```vue
+<template>
+  <ZxDialog
+    v-model="visible"
+    title="创建用户"
+    :confirm="handleSubmit"
+    :form-ref="formRef"      <!-- 传入 el-form 的 ref -->
+    :form-model="formData"   <!-- 传入响应式表单对象 -->
+    :auto-reset-form="true"  <!-- 关闭时自动重置 (默认 true) -->
+    :pre-validate="true"     <!-- 点击确定前自动 validate (默认 true) -->
+    :auto-scroll-to-error="true" <!-- 校验失败自动滚动 (默认 true) -->
+  >
+    <el-form ref="formRef" :model="formData" :rules="rules" label-width="100px">
+      <el-form-item label="用户名" prop="name" required>
+        <el-input v-model="formData.name" />
+      </el-form-item>
+      <el-form-item label="邮箱" prop="email" required>
+        <el-input v-model="formData.email" />
+      </el-form-item>
+      <!-- 其它很多字段... 当第一个错误项不在可视区域会自动滚动定位 -->
+    </el-form>
+  </ZxDialog>
+</template>
+
+<script setup>
+import { ref, reactive } from 'vue'
+
+const visible = ref(false)
+const formRef = ref()
+const formData = reactive({ name: '', email: '' })
+const rules = {
+  name: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
+  email: [
+    { required: true, message: '请输入邮箱', trigger: 'blur' },
+    { type: 'email', message: '邮箱格式不正确', trigger: 'blur' }
+  ]
+}
+
+const handleSubmit = async () => {
+  // 如果 preValidate=true，这里能确保已经通过校验
+  // 返回 false 可阻止自动关闭
+  // 正常返回即自动关闭；或手动 visible.value = false
+  // 这里模拟提交
+  await new Promise(r => setTimeout(r, 300))
+}
+</script>
+```
+
+#### 行为说明
+
+1. 打开对话框时自动快照表单初始值（深拷贝）
+2. 关闭（包括取消、确认成功、点击遮罩等）后：
+   - 若 `auto-reset-form = true`，执行 `formRef.resetFields()`；若无该方法，则根据初始快照逐项恢复
+   - 自动调用 `clearValidate()` 清除所有校验提示
+3. 点击“确定”时：
+   - 若 `pre-validate = true` 且校验失败，则阻止后续 `confirm`，并自动滚动到第一个错误项
+4. 滚动定位：自动向上预留 `scrollErrorOffset`（默认 24px）避免被标题遮挡
+
+### 自定义滚动偏移
+
+```vue
+<ZxDialog
+  v-model="visible"
+  :confirm="handleSubmit"
+  :form-ref="formRef"
+  :form-model="formData"
+  :scroll-error-offset="80"  <!-- 需要更大可视安全区时调整 -->
+>
+  <!-- form -->
+</ZxDialog>
+```
 
 ### 带开关的对话框
 
@@ -232,6 +311,12 @@ const showLarge = () => {
 | switchProps | 开关配置对象 | object | — | {} |
 | handleBeforeCancel | 取消前的回调函数 | function | — | null |
 | confirm | 确认回调函数 | function | — | null |
+| formRef | el-form 的 ref（用于增强：校验、重置、滚动） | object | — | — |
+| formModel | 表单的响应式数据对象（用于快照恢复） | object | — | — |
+| autoResetForm | 关闭时自动重置表单+清除校验 | boolean | — | true |
+| preValidate | 点击确定前自动执行 validate | boolean | — | true |
+| autoScrollToError | 校验失败时自动滚动到第一个错误项 | boolean | — | true |
+| scrollErrorOffset | 滚动定位时的向上偏移量(px) | number | — | 24 |
 
 ### switchProps 配置
 

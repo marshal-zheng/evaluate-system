@@ -18,32 +18,76 @@ export const setHostAppContext = (appContext) => {
  * @returns {Promise} 返回 Promise，resolve 时传入用户输入的值
  */
 export const createConfirmInput = (options = {}) => {
+  const {
+    rejectOnError = false,
+    onConfirm: userOnConfirm,
+    onCancel: userOnCancel,
+    onClose: userOnClose,
+    onError: userOnError,
+    ...componentOptions
+  } = options
+
   return new Promise((resolve, reject) => {
     // 创建容器
     const container = document.createElement('div')
     document.body.appendChild(container)
 
+    let app = null
+    let cleaned = false
+    let settled = false
+
+    const cleanup = () => {
+      if (cleaned) return
+      cleaned = true
+      nextTick(() => {
+        app?.unmount()
+        if (container.parentNode) {
+          container.parentNode.removeChild(container)
+        }
+      })
+    }
+
+    const resolveOnce = (payload) => {
+      if (settled) return
+      settled = true
+      cleanup()
+      resolve(payload)
+    }
+
+    const rejectOnce = (error) => {
+      if (settled) return
+      settled = true
+      cleanup()
+      reject(error)
+    }
+
     // 创建 Vue 应用实例
-    const app = createApp({
+    app = createApp({
       render() {
         return h(ZxConfirmInputComponent, {
           modelValue: true,
-          ...options,
+          ...componentOptions,
           onConfirm: (payload) => {
-            cleanup()
-            resolve(payload)
+            userOnConfirm?.(payload)
+            resolveOnce(payload)
           },
           onCancel: () => {
-            cleanup()
-            reject(new Error('用户取消操作'))
+            userOnCancel?.()
+            rejectOnce(new Error('用户取消操作'))
           },
           onClose: () => {
-            cleanup()
-            reject(new Error('对话框关闭'))
+            userOnClose?.()
+            rejectOnce(new Error('对话框关闭'))
           },
-          onError: ({ error, payload }) => {
-            // 不清理，让用户可以重试
-            reject(error)
+          onError: (payload) => {
+            if (settled) return
+
+            userOnError?.(payload)
+
+            if (rejectOnError) {
+              // 仅在明确要求时才对外拒绝 Promise；不清理，允许用户修正后重试
+              reject(payload?.error ?? new Error('确认操作失败'))
+            }
           }
         })
       }
@@ -59,14 +103,6 @@ export const createConfirmInput = (options = {}) => {
 
     // 挂载应用
     app.mount(container)
-
-    // 清理函数
-    const cleanup = () => {
-      nextTick(() => {
-        app.unmount()
-        document.body.removeChild(container)
-      })
-    }
   })
 }
 
@@ -138,6 +174,5 @@ if (typeof window !== 'undefined') {
     info
   }
 }
-
 
 
