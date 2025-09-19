@@ -265,6 +265,10 @@ const props = defineProps({
     type: Function,
     default: null
   },
+  autoConfirmLoading: {
+    type: Boolean,
+    default: true
+  },
   // 表单增强配置
   formRef: {
     type: Object,
@@ -478,19 +482,46 @@ const handleOk = async () => {
     return
   }
 
-  confirmLoading.value = true
+  const setLoading = (state = true) => {
+    confirmLoading.value = !!state
+  }
+
+  let shouldAutoClose = true
+  const close = () => {
+    shouldAutoClose = false
+    visible.value = false
+  }
+
+  const context = {
+    close,
+    setLoading,
+    get isFullScreen() {
+      return fullScreenAPI.isFullScreen
+    }
+  }
+
+  if (props.autoConfirmLoading) {
+    setLoading(true)
+  }
+
   let confirmResult
   let confirmError
+
   try {
-    confirmResult = await props.confirm()
-    if (confirmResult !== false) {
+    confirmResult = await props.confirm(context)
+    if (confirmResult === false) {
+      shouldAutoClose = false
+    }
+    if (shouldAutoClose && confirmResult !== false) {
       visible.value = false
     }
   } catch (error) {
     confirmError = error
     console.error('[ZxDrawer] confirm handler threw error:', error)
   } finally {
-    confirmLoading.value = false
+    if (props.autoConfirmLoading) {
+      setLoading(false)
+    }
     emit('confirm', confirmResult)
     if (confirmError) {
       emit('confirm-error', confirmError)

@@ -28,6 +28,9 @@
         <el-button type="primary" @click="openValidationDrawer">
           表单校验抽屉
         </el-button>
+        <el-button type="success" plain @click="openManualLoadingDrawer">
+          手动 loading 抽屉
+        </el-button>
       </el-space>
     </div>
 
@@ -68,6 +71,7 @@
       :pre-validate="currentDrawer.preValidate"
       :auto-scroll-to-error="currentDrawer.autoScrollToError"
       :scroll-error-offset="currentDrawer.scrollErrorOffset"
+      :auto-confirm-loading="currentDrawer.autoConfirmLoading"
       @confirm="(payload) => currentDrawer.onConfirm?.(payload)"
       @cancel="handleDrawerCancel"
     >
@@ -123,6 +127,34 @@
                 type="textarea"
                 :rows="4"
                 placeholder="选填：补充其他信息"
+              />
+            </el-form-item>
+          </el-form>
+        </div>
+      </template>
+
+      <template v-else-if="currentDrawer.type === 'manual-loading'">
+        <div class="validation-form-wrapper">
+          <el-alert
+            title="手动 loading 示例"
+            type="info"
+            :closable="false"
+            description="点击确定后 2 秒内按钮保持自定义 loading，结束后自动关闭抽屉。"
+            style="margin-bottom: 16px;"
+            show-icon
+          />
+          <el-form label-width="120px">
+            <el-form-item label="当前状态">
+              <el-tag :type="manualState.running ? 'warning' : 'success'">
+                {{ manualState.running ? '执行中' : '空闲' }}
+              </el-tag>
+            </el-form-item>
+            <el-form-item label="进度日志">
+              <el-input
+                v-model="manualState.log"
+                type="textarea"
+                :rows="4"
+                readonly
               />
             </el-form-item>
           </el-form>
@@ -206,6 +238,12 @@ const validationRules = {
   resource: [{ required: true, message: '请填写资源需求', trigger: 'blur' }],
   remark: [{ max: 200, message: '备注不能超过 200 字', trigger: 'blur' }]
 }
+
+// 手动 loading 状态
+const manualState = reactive({
+  running: false,
+  log: '等待触发...'
+})
 
 // 表格数据
 const tableData = [
@@ -465,14 +503,44 @@ const createDrawerConfig = (type) => {
       preValidate: true,
       autoScrollToError: true,
       autoResetForm: true,
-      confirm: async () => {
-        // 模拟异步提交
-        await new Promise((resolve) => setTimeout(resolve, 600))
-        return { ...validationForm }
+      autoConfirmLoading: false,
+      confirm: async ({ setLoading }) => {
+        setLoading(true)
+        try {
+          // 模拟异步提交
+          await new Promise((resolve) => setTimeout(resolve, 600))
+          return { ...validationForm }
+        } finally {
+          setLoading(false)
+        }
       },
       onConfirm: (payload) => {
         ElMessage.success(`提交成功：${payload?.name || '未命名项目'}`)
         handleDrawerCancel()
+      }
+    },
+    manualLoading: {
+      title: '手动 loading 抽屉',
+      width: 500,
+      showFullScreen: false,
+      disabledWidthDrag: true,
+      mask: true,
+      type: 'manual-loading',
+      autoConfirmLoading: false,
+      autoResetForm: true,
+      confirm: async ({ setLoading, close }) => {
+        manualState.running = true
+        manualState.log = '开始执行...'
+        setLoading(true)
+        await new Promise((resolve) => setTimeout(resolve, 800))
+        manualState.log = '执行完成，准备关闭'
+        setLoading(false)
+        close()
+        manualState.running = false
+        return true
+      },
+      onConfirm: () => {
+        ElMessage.success('手动 loading 示例完成')
       }
     }
   }
@@ -522,6 +590,12 @@ const openValidationDrawer = () => {
     remark: ''
   })
   showDrawer('validateForm')
+}
+
+const openManualLoadingDrawer = () => {
+  manualState.running = false
+  manualState.log = '等待触发...'
+  showDrawer('manualLoading')
 }
 
 // 头部操作按钮事件处理

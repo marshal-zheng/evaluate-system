@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@antv/hierarchy": "^0.6.11",
-    "@antv/layout": "^0.2.25",
+    "@antv/layout": "^0.2.5",
     "@element-plus/icons-vue": "^2.3.2",
     "@logicflow/core": "^1.2.10",
     "@logicflow/extension": "^1.2.10",
