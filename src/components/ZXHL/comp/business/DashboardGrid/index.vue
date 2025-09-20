@@ -14,7 +14,7 @@
     :cols="GRID_COLUMN_COUNT"
     :draggableHandle="'.grid-drag-handle'"
     :useCSSTransforms="mounted"
-    :isDroppable="true"
+    :isDroppable="isEditable"
     @layoutChange="onLayoutChange"
     @drop="onDrop"
     @dropDragOver="onDropDragOver"

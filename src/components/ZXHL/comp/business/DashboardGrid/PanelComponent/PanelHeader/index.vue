@@ -64,7 +64,7 @@
       
       <!-- 菜单提供者 -->
       <PanelHeaderMenuProvider
-        v-if="showMenu"
+        v-if="showMenu && draggable"
         :panel-id="panelId"
         :initial-menu-items="initialMenuItems"
         :auto-load-default="autoLoadDefaultMenu"
@@ -335,6 +335,11 @@ defineExpose({
     cursor: move;
   }
   
+  /* 确保非拖拽状态下使用默认光标 */
+  &:not(.panel-header--draggable) {
+    cursor: default !important;
+  }
+  
   &--has-menu {
     padding-right: 8px;
   }
@@ -368,8 +373,13 @@ defineExpose({
   gap: 8px;
 }
 
-/* 作为兜底：拖拽句柄类名始终显示为 move 光标（与 VueGridLayout 的 draggableHandle 一致） */
-.grid-drag-handle {
+/* 拖拽句柄类名：仅在可拖拽状态下显示 move 光标（与 VueGridLayout 的 draggableHandle 一致） */
+.panel-header--draggable .grid-drag-handle {
   cursor: move;
+}
+
+/* 非拖拽状态下的拖拽句柄使用默认光标 */
+.zx-panel-header:not(.panel-header--draggable) .grid-drag-handle {
+  cursor: default !important;
 }
 </style>

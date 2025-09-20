@@ -138,7 +138,7 @@ const onHeaderMenuAction = async (action) => {
 
 // Lifecycle
 onMounted(() => {
-  if (!panelHdRef.value) {
+  if (!panelHdRef.value || !props.isEditable) {
     return
   }
   

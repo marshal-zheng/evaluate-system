@@ -17,10 +17,15 @@
   border-bottom: var(--panel-header-border-bottom, 1px solid var(--el-border-color-lighter));
   
   /* 拖拽光标 */
-  cursor: var、(--panel-header-cursor, default);
+  cursor: var(--panel-header-cursor, default);
   
   /* 过渡动画 */
   transition: all var(--panel-header-transition-duration, var(--el-transition-duration)) ease;
+  
+  /* 非拖拽状态确保使用默认光标 */
+  &:not(.panel-header--draggable) {
+    cursor: default !important;
+  }
   
   /* 悬停状态（普通状态） */
   &:hover:not(.panel-header--draggable) {

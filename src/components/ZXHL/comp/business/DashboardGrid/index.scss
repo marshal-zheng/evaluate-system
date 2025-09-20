@@ -13,8 +13,9 @@
     margin-top: -20px;
     margin-bottom: -20px;
 
-    .m-panel-header {
-      cursor: auto;
+    .m-panel-header,
+    .zx-panel-header {
+      cursor: default !important;
       border-bottom: 1px solid var(--el-border-color-lighter, #e8e8e8);
       transition: background-color 150ms ease;
 
@@ -23,6 +24,11 @@
         .el-icon-delete {
           display: none;
         }
+      }
+      
+      /* 确保所有子元素也使用默认光标 */
+      * {
+        cursor: default !important;
       }
     }
 

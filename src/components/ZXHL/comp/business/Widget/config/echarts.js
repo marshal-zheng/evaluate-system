@@ -99,7 +99,9 @@ function applyEnterpriseTheme(option, ctx = {}) {
   
   // 3. 图例系统 - 现代化图例设计
   if (o.legend !== false) {
-    o.legend = Array.isArray(o.legend) ? o.legend.map(l => createEnterpriseLegend(l, container)) : createEnterpriseLegend(o.legend || {}, container)
+    o.legend = Array.isArray(o.legend)
+      ? o.legend.map(l => createEnterpriseLegend(l, container, chartType))
+      : createEnterpriseLegend(o.legend || {}, container, chartType)
   }
   
   // 4. 工具提示 - 专业级交互反馈
@@ -196,10 +198,9 @@ function applyEnterpriseGrid(option, chartType, isDark) {
 /**
  * 现代化图例设计 - 让ZxChart处理颜色
  */
-function createEnterpriseLegend(legend, container) {
+function createEnterpriseLegend(legend, container, chartType) {
   const { typography, spacing } = GRAFANA_DESIGN_TOKENS
-  
-  return {
+  const defaults = {
     type: 'scroll',              // 支持大量数据项
     orient: 'horizontal',
     left: 'center',
@@ -214,14 +215,52 @@ function createEnterpriseLegend(legend, container) {
       fontFamily: typography.fontFamily,
       fontSize: typography.sizes.sm,
       fontWeight: typography.weights.normal,
-      // 移除color设置，让ZxChart主题处理
+      // 颜色由 ZxChart 主题接管
       padding: [0, 0, 0, spacing.xs]  // 文字与图标间距
     },
-    // 移除颜色设置，让ZxChart主题处理
     animation: true,
-    animationDuration: 300,
-    ...legend
+    animationDuration: 300
   }
+
+  const config = {
+    ...defaults,
+    ...legend,
+    textStyle: {
+      ...defaults.textStyle,
+      ...(legend?.textStyle || {})
+    }
+  }
+
+  const chartTypeLower = (chartType || '').toLowerCase()
+  const isCircularChart = chartTypeLower === 'pie' || chartTypeLower === 'donut'
+
+  if (isCircularChart) {
+    if (!('orient' in (legend || {}))) {
+      config.orient = 'vertical'
+    }
+
+    const hasHorizontalPosition = 'left' in (legend || {}) || 'right' in (legend || {})
+    if (!hasHorizontalPosition) {
+      delete config.left
+      config.right = spacing.lg
+    }
+
+    const hasVerticalPosition = 'top' in (legend || {}) || 'bottom' in (legend || {})
+    if (!hasVerticalPosition) {
+      config.top = 'middle'
+      delete config.bottom
+    }
+
+    if (!('align' in (legend || {}))) {
+      config.align = 'left'
+    }
+  }
+
+  if (config.show === false) {
+    config.show = true
+  }
+
+  return config
 }
 
 /**
@@ -231,6 +270,7 @@ function applyEnterpriseTooltip(option, chartType, container) {
   const { typography, spacing, borderRadius } = GRAFANA_DESIGN_TOKENS
   
   const trigger = getOptimalTooltipTrigger(chartType)
+  const computedLineHeight = Math.round(typography.sizes.sm * 1.5)
   
   option.tooltip = {
     trigger,
@@ -242,7 +282,7 @@ function applyEnterpriseTooltip(option, chartType, container) {
       fontFamily: typography.fontFamily,
       fontSize: typography.sizes.sm,
       // 移除color设置，让ZxChart主题处理
-      lineHeight: 1.5
+      lineHeight: computedLineHeight
     },
     extraCssText: `
       backdrop-filter: blur(8px);
@@ -551,6 +591,13 @@ function applyEnterpriseAnimation(option, chartType) {
     animationEasing: 'cubicOut',
     animationDelay: function (idx) {
       return idx * 50  // 错开延迟
+    },
+    animationDurationUpdate: function () {
+      return 480
+    },
+    animationEasingUpdate: 'cubicOut',
+    animationDelayUpdate: function (idx) {
+      return idx * 30
     }
   }
   
@@ -558,6 +605,9 @@ function applyEnterpriseAnimation(option, chartType) {
   if (chartType === 'pie') {
     animationConfig.animationEasing = 'elasticOut'
     animationConfig.animationDuration = 1000
+    animationConfig.animationTypeUpdate = 'expansion'
+    animationConfig.animationDurationUpdate = 520
+    animationConfig.animationEasingUpdate = 'cubicOut'
   } else if (chartType === 'bar') {
     animationConfig.animationEasing = 'bounceOut'
   }
