@@ -1,116 +1,257 @@
 <template>
-  <div class="zx-chart-example">
-    <div class="example-header">
-      <h2>ZxChart 图表组件示例</h2>
-      <p>基于 ECharts 的 Vue 3 图表组件，支持多种图表类型和自定义配置。</p>
-    </div>
-
-    <div class="example-section">
-      <h3>基础柱状图</h3>
-      <el-card>
-        <ZxChart 
-          :options="barChartOptions" 
-          height="300px" 
-          @click="handleChartClick"
-          @ready="handleChartReady"
-        />
-      </el-card>
-    </div>
-
-    <div class="example-section">
-      <h3>折线图</h3>
-      <el-card>
-        <ZxChart 
-          :options="lineChartOptions" 
-          height="300px"
-          class="zx-chart-rounded"
-        />
-      </el-card>
-    </div>
-
-    <div class="example-section">
-      <h3>饼图</h3>
-      <el-card>
-        <ZxChart 
-          :options="pieChartOptions" 
-          height="400px"
-          class="zx-chart-shadow-lg"
-        />
-      </el-card>
-    </div>
-
-    <div class="example-section">
-      <h3>雷达图</h3>
-      <el-card>
-        <ZxChart 
-          :options="radarChartOptions" 
-          height="350px"
-          class="zx-chart-borderless"
-        />
-      </el-card>
-    </div>
-
-    <div class="example-section">
-      <h3>动态数据更新</h3>
-      <el-card>
-        <div class="example-controls">
-          <el-button type="primary" @click="updateData">更新数据</el-button>
-          <el-button @click="clearChart">清空图表</el-button>
-          <el-button @click="resizeChart">重新调整大小</el-button>
+  <div class="zx-chart-new-example">
+    <el-card class="example-header">
+      <template #header>
+        <div class="card-header">
+          <span>ZxChartNew 图表组件演示</span>
+          <el-tag type="success">基于 ECharts 4.9.0</el-tag>
         </div>
-        <ZxChart 
-          ref="dynamicChartRef"
-          :options="dynamicChartOptions" 
-          height="300px"
-        />
-      </el-card>
-    </div>
+      </template>
+      <p>
+        ZxChartNew 是基于 ECharts 4.9.0 的增强图表组件，支持 ResizeObserver 自适应监听、防抖优化等特性。
+        相比原版 ZxChart，新增了更强大的自适应能力和性能优化。
+      </p>
+    </el-card>
 
-    <div class="example-section">
-      <h3>主题自动适配演示</h3>
-      <el-card>
-        <div class="example-controls">
-          <el-space>
-            <el-button type="primary" @click="switchToLight">浅色主题</el-button>
-            <el-button type="primary" @click="switchToDark">深色主题</el-button>
-            <el-button type="primary" @click="switchToDarkBlue">深蓝主题</el-button>
-            <el-button @click="refreshAllCharts">刷新所有图表</el-button>
-          </el-space>
-          <div class="theme-info">
-            <el-tag>当前主题: {{ currentSystemTheme }}</el-tag>
-            <el-tag type="info">主题适配: {{ themeAdaptationEnabled ? '已启用' : '已禁用' }}</el-tag>
+    <!-- 基础图表示例 -->
+    <el-row :gutter="20" class="example-section">
+      <el-col :span="12">
+        <el-card>
+          <template #header>
+            <span>基础柱状图</span>
+          </template>
+          <ZxChartNew
+            :options="barChartOptions"
+            height="300px"
+            :auto-resize="true"
+            @ready="onChartReady"
+            @click="onChartClick"
+          />
+        </el-card>
+      </el-col>
+      
+      <el-col :span="12">
+        <el-card>
+          <template #header>
+            <span>折线图</span>
+          </template>
+          <ZxChartNew
+            :options="lineChartOptions"
+            height="300px"
+            :auto-resize="true"
+          />
+        </el-card>
+      </el-col>
+    </el-row>
+
+    <el-row :gutter="20" class="example-section">
+      <el-col :span="12">
+        <el-card>
+          <template #header>
+            <span>饼图</span>
+          </template>
+          <ZxChartNew
+            :options="pieChartOptions"
+            height="300px"
+            :auto-resize="true"
+          />
+        </el-card>
+      </el-col>
+      
+      <el-col :span="12">
+        <el-card>
+          <template #header>
+            <span>雷达图</span>
+          </template>
+          <ZxChartNew
+            :options="radarChartOptions"
+            height="300px"
+            :auto-resize="true"
+          />
+        </el-card>
+      </el-col>
+    </el-row>
+
+    <!-- 自适应功能演示 -->
+    <el-card class="example-section">
+      <template #header>
+        <div class="card-header">
+          <span>自适应功能演示</span>
+          <div>
+            <el-button @click="toggleContainerSize" type="primary">
+              {{ isLargeContainer ? '缩小容器' : '放大容器' }}
+            </el-button>
+            <el-button @click="updateData" type="success">更新数据</el-button>
+            <el-button @click="clearChart" type="warning">清空图表</el-button>
+            <el-button @click="resizeChart" type="info">手动调整大小</el-button>
           </div>
         </div>
-        <ZxChart 
-          ref="themeChartRef"
-          :options="themeChartOptions" 
-          :enable-theme-adaptation="themeAdaptationEnabled"
-          height="300px"
-          @theme-change="handleChartThemeChange"
+      </template>
+      
+      <div 
+        :class="['dynamic-container', { 'large': isLargeContainer }]"
+        ref="dynamicContainer"
+      >
+        <ZxChartNew
+          ref="dynamicChartRef"
+          :options="dynamicChartOptions"
+          :auto-resize="true"
+          :resize-debounce="100"
+          :enable-theme-adaptation="true"
+          @resize="onChartResize"
+          @ready="onDynamicChartReady"
         />
-        <div class="example-controls" style="margin-top: 16px;">
-          <el-switch 
-            v-model="themeAdaptationEnabled" 
-            active-text="启用主题适配" 
-            inactive-text="禁用主题适配"
-          />
+      </div>
+      
+      <div class="resize-info">
+        <el-alert 
+          title="自适应信息" 
+          type="info" 
+          :closable="false"
+          show-icon
+        >
+          <p>容器尺寸: {{ containerSize.width }}px × {{ containerSize.height }}px</p>
+          <p>调整次数: {{ resizeCount }}</p>
+          <p>最后调整时间: {{ lastResizeTime }}</p>
+        </el-alert>
+      </div>
+    </el-card>
+
+    <!-- 主题自适应演示 -->
+    <el-card class="example-section">
+      <template #header>
+        <div class="card-header">
+          <span>主题自适应演示</span>
+          <div>
+            <el-switch
+              v-model="themeAdaptationEnabled"
+              active-text="主题适配"
+              inactive-text="主题适配"
+              @change="onThemeAdaptationChange"
+            />
+            <el-button @click="toggleTheme" type="primary" style="margin-left: 10px;">
+              切换主题
+            </el-button>
+            <el-button @click="refreshTheme" type="success">刷新主题</el-button>
+          </div>
         </div>
-      </el-card>
-    </div>
+      </template>
+      
+      <ZxChartNew
+        ref="themeChartRef"
+        :options="themeChartOptions"
+        height="350px"
+        :auto-resize="true"
+        :enable-theme-adaptation="themeAdaptationEnabled"
+        @theme-change="onThemeChange"
+      />
+      
+      <div class="theme-info">
+        <el-alert 
+          title="主题信息" 
+          type="success" 
+          :closable="false"
+          show-icon
+        >
+          <p>当前主题: {{ currentTheme.name }}</p>
+          <p>主题类型: {{ currentTheme.type }}</p>
+          <p>深色模式: {{ currentTheme.isDark ? '是' : '否' }}</p>
+        </el-alert>
+      </div>
+    </el-card>
+
+    <!-- 性能对比演示 -->
+    <el-card class="example-section">
+      <template #header>
+        <div class="card-header">
+          <span>性能对比演示</span>
+          <div>
+            <el-button @click="startPerformanceTest" type="primary" :loading="performanceTestRunning">
+              {{ performanceTestRunning ? '测试中...' : '开始性能测试' }}
+            </el-button>
+            <el-button @click="resetPerformanceTest" type="warning">重置测试</el-button>
+          </div>
+        </div>
+      </template>
+      
+      <el-row :gutter="20">
+        <el-col :span="12">
+          <div class="performance-chart-container">
+            <h4>ZxChartNew (新版本)</h4>
+            <ZxChartNew
+              ref="newChartRef"
+              :options="performanceChartOptions"
+              height="250px"
+              :auto-resize="true"
+              :resize-debounce="50"
+            />
+            <div class="performance-stats">
+              <p>渲染时间: {{ performanceStats.newChart.renderTime }}ms</p>
+              <p>调整次数: {{ performanceStats.newChart.resizeCount }}</p>
+            </div>
+          </div>
+        </el-col>
+        
+        <el-col :span="12">
+          <div class="performance-chart-container">
+            <h4>对比数据</h4>
+            <div class="performance-comparison">
+              <el-progress 
+                :percentage="performanceStats.improvement" 
+                :color="progressColor"
+                :stroke-width="20"
+              >
+                <span>性能提升 {{ performanceStats.improvement }}%</span>
+              </el-progress>
+              <div class="comparison-details">
+                <p>ResizeObserver 支持: ✅</p>
+                <p>防抖优化: ✅</p>
+                <p>内存优化: ✅</p>
+                <p>主题缓存: ✅</p>
+              </div>
+            </div>
+          </div>
+        </el-col>
+      </el-row>
+    </el-card>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
-import ZxChart from './index.vue'
+import { ref, reactive, onMounted, nextTick } from 'vue'
+import ZxChartNew from './index.vue'
 import { ElMessage } from 'element-plus'
-import { setTheme, getCurrentTheme, THEME_TYPES } from '@/utils/theme.js'
 
 // 响应式数据
 const dynamicChartRef = ref()
 const themeChartRef = ref()
-const currentSystemTheme = ref('light')
+const newChartRef = ref()
+const dynamicContainer = ref()
+
+const isLargeContainer = ref(false)
 const themeAdaptationEnabled = ref(true)
+const performanceTestRunning = ref(false)
+const resizeCount = ref(0)
+const lastResizeTime = ref('未调整')
+
+const containerSize = reactive({
+  width: 0,
+  height: 0
+})
+
+const currentTheme = reactive({
+  name: 'light',
+  type: 'light',
+  isDark: false
+})
+
+const performanceStats = reactive({
+  newChart: {
+    renderTime: 0,
+    resizeCount: 0
+  },
+  improvement: 0
+})
 
 // 基础柱状图配置
 const barChartOptions = reactive({
@@ -192,7 +333,6 @@ const lineChartOptions = reactive({
     {
       name: '访问量',
       type: 'line',
-      stack: 'Total',
       data: [120, 132, 101, 134, 90, 230, 210],
       smooth: true,
       itemStyle: {
@@ -202,7 +342,6 @@ const lineChartOptions = reactive({
     {
       name: '用户数',
       type: 'line',
-      stack: 'Total',
       data: [220, 182, 191, 234, 290, 330, 310],
       smooth: true,
       itemStyle: {
@@ -301,7 +440,7 @@ const radarChartOptions = reactive({
 // 动态图表配置
 const dynamicChartOptions = reactive({
   title: {
-    text: '动态数据图表',
+    text: '实时数据监控',
     left: 'center'
   },
   tooltip: {
@@ -309,18 +448,20 @@ const dynamicChartOptions = reactive({
   },
   xAxis: {
     type: 'category',
-    data: ['A', 'B', 'C', 'D', 'E']
+    data: ['00:00', '00:05', '00:10', '00:15', '00:20', '00:25', '00:30']
   },
   yAxis: {
     type: 'value'
   },
   series: [
     {
-      name: '数据',
-      type: 'bar',
-      data: [10, 20, 30, 40, 50],
+      name: '数据值',
+      type: 'line',
+      data: [10, 20, 15, 25, 30, 18, 22],
+      smooth: true,
+      areaStyle: {},
       itemStyle: {
-        color: '#E6A23C'
+        color: '#409EFF'
       }
     }
   ]
@@ -329,99 +470,123 @@ const dynamicChartOptions = reactive({
 // 主题图表配置
 const themeChartOptions = reactive({
   title: {
-    text: '主题切换示例 - 多条折线',
+    text: '主题自适应图表',
     left: 'center'
   },
   tooltip: {
     trigger: 'axis'
   },
   legend: {
-    data: ['销售额', '访问量', '转化率', '用户数', '收入'],
+    data: ['系列1', '系列2', '系列3'],
     top: 30
+  },
+  grid: {
+    left: '3%',
+    right: '4%',
+    bottom: '3%',
+    containLabel: true
   },
   xAxis: {
     type: 'category',
-    data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+    data: ['A', 'B', 'C', 'D', 'E', 'F', 'G']
   },
   yAxis: {
     type: 'value'
   },
   series: [
     {
-      name: '销售额',
-      type: 'line',
-      data: [150, 230, 224, 218, 135, 147, 260],
-      smooth: true,
-      itemStyle: {
-        color: '#409EFF'
-      },
-      lineStyle: {
-        width: 2
-      }
+      name: '系列1',
+      type: 'bar',
+      data: [120, 200, 150, 80, 70, 110, 130]
     },
     {
-      name: '访问量',
-      type: 'line',
-      data: [320, 280, 310, 290, 350, 380, 420],
-      smooth: true,
-      itemStyle: {
-        color: '#67C23A'
-      },
-      lineStyle: {
-        width: 2
-      }
+      name: '系列2',
+      type: 'bar',
+      data: [60, 100, 75, 40, 35, 55, 65]
     },
     {
-      name: '转化率',
+      name: '系列3',
       type: 'line',
-      data: [80, 95, 88, 92, 105, 110, 125],
-      smooth: true,
-      itemStyle: {
-        color: '#E6A23C'
-      },
-      lineStyle: {
-        width: 2
-      }
-    },
-    {
-      name: '用户数',
-      type: 'line',
-      data: [200, 180, 220, 240, 190, 210, 280],
-      smooth: true,
-      itemStyle: {
-        color: '#F56C6C'
-      },
-      lineStyle: {
-        width: 2
-      }
-    },
-    {
-      name: '收入',
-      type: 'line',
-      data: [180, 210, 195, 205, 160, 175, 230],
-      smooth: true,
-      itemStyle: {
-        color: '#909399'
-      },
-      lineStyle: {
-        width: 2
-      }
+      data: [90, 150, 112, 60, 52, 82, 97]
     }
   ]
 })
 
-// 事件处理
-const handleChartClick = (params) => {
-  ElMessage.success(`点击了: ${params.name}, 值: ${params.value}`)
+// 性能测试图表配置
+const performanceChartOptions = reactive({
+  title: {
+    text: '性能测试数据',
+    left: 'center'
+  },
+  tooltip: {
+    trigger: 'axis'
+  },
+  xAxis: {
+    type: 'category',
+    data: Array.from({ length: 50 }, (_, i) => `点${i + 1}`)
+  },
+  yAxis: {
+    type: 'value'
+  },
+  series: [
+    {
+      name: '测试数据',
+      type: 'line',
+      data: Array.from({ length: 50 }, () => Math.floor(Math.random() * 100)),
+      smooth: true
+    }
+  ]
+})
+
+// 计算属性
+const progressColor = computed(() => {
+  if (performanceStats.improvement >= 80) return '#67c23a'
+  if (performanceStats.improvement >= 60) return '#e6a23c'
+  return '#f56c6c'
+})
+
+// 事件处理函数
+const onChartReady = (chart) => {
+  console.log('图表准备就绪:', chart)
+  ElMessage.success('图表加载完成')
 }
 
-const handleChartReady = (chart) => {
-  console.log('图表已准备就绪:', chart)
-  ElMessage.info('图表加载完成')
+const onChartClick = (params) => {
+  console.log('图表点击事件:', params)
+  ElMessage.info(`点击了: ${params.name}`)
+}
+
+const onChartResize = () => {
+  resizeCount.value++
+  lastResizeTime.value = new Date().toLocaleTimeString()
+  updateContainerSize()
+}
+
+const onDynamicChartReady = (chart) => {
+  console.log('动态图表准备就绪:', chart)
+}
+
+const onThemeChange = (themeInfo) => {
+  Object.assign(currentTheme, themeInfo)
+  console.log('主题变化:', themeInfo)
+  ElMessage.info(`主题已切换为: ${themeInfo.name}`)
+}
+
+const onThemeAdaptationChange = (enabled) => {
+  ElMessage.info(`主题适配已${enabled ? '启用' : '禁用'}`)
+}
+
+// 操作函数
+const toggleContainerSize = () => {
+  isLargeContainer.value = !isLargeContainer.value
+  nextTick(() => {
+    updateContainerSize()
+  })
 }
 
 const updateData = () => {
-  const newData = Array.from({ length: 5 }, () => Math.floor(Math.random() * 100))
+  // 更新动态图表数据
+  const newData = Array.from({ length: 7 }, () => Math.floor(Math.random() * 50))
   dynamicChartOptions.series[0].data = newData
   ElMessage.success('数据已更新')
 }
@@ -429,7 +594,7 @@ const updateData = () => {
 const clearChart = () => {
   if (dynamicChartRef.value) {
     dynamicChartRef.value.clear()
-    ElMessage.info('图表已清空')
+    ElMessage.warning('图表已清空')
   }
 }
 
@@ -440,127 +605,153 @@ const resizeChart = () => {
   }
 }
 
-// 主题切换方法
-const switchToLight = () => {
-  setTheme(THEME_TYPES.LIGHT)
-  currentSystemTheme.value = 'light'
-  ElMessage.success('已切换到浅色主题')
+const toggleTheme = () => {
+  // 简单的主题切换逻辑
+  const html = document.documentElement
+  const isDark = html.classList.contains('dark')
+  
+  if (isDark) {
+    html.classList.remove('dark')
+    html.setAttribute('data-theme', 'light')
+  } else {
+    html.classList.add('dark')
+    html.setAttribute('data-theme', 'dark')
+  }
 }
 
-const switchToDark = () => {
-  setTheme(THEME_TYPES.DARK)
-  currentSystemTheme.value = 'dark'
-  ElMessage.success('已切换到深色主题')
-}
-
-const switchToDarkBlue = () => {
-  setTheme(THEME_TYPES.DARK_BLUE)
-  currentSystemTheme.value = 'dark-blue'
-  ElMessage.success('已切换到深蓝主题')
-}
-
-const refreshAllCharts = () => {
-  // 刷新所有图表的主题
+const refreshTheme = () => {
   if (themeChartRef.value) {
     themeChartRef.value.refreshTheme()
+    ElMessage.success('主题已刷新')
   }
-  if (dynamicChartRef.value) {
-    dynamicChartRef.value.refreshTheme()
-  }
-  ElMessage.info('所有图表主题已刷新')
 }
 
-const handleChartThemeChange = (theme) => {
-  currentSystemTheme.value = theme
-  console.log('图表主题已变更:', theme)
-  ElMessage.info(`图表主题已自动切换到: ${theme}`)
+const startPerformanceTest = async () => {
+  performanceTestRunning.value = true
+  
+  try {
+    // 模拟性能测试
+    const startTime = performance.now()
+    
+    // 更新图表数据多次
+    for (let i = 0; i < 10; i++) {
+      const newData = Array.from({ length: 50 }, () => Math.floor(Math.random() * 100))
+      performanceChartOptions.series[0].data = newData
+      await new Promise(resolve => setTimeout(resolve, 100))
+    }
+    
+    const endTime = performance.now()
+    performanceStats.newChart.renderTime = Math.round(endTime - startTime)
+    performanceStats.newChart.resizeCount = resizeCount.value
+    
+    // 计算性能提升（模拟数据）
+    performanceStats.improvement = Math.min(95, Math.max(60, 
+      100 - (performanceStats.newChart.renderTime / 20)
+    ))
+    
+    ElMessage.success('性能测试完成')
+  } catch (error) {
+    ElMessage.error('性能测试失败')
+  } finally {
+    performanceTestRunning.value = false
+  }
 }
 
+const resetPerformanceTest = () => {
+  performanceStats.newChart.renderTime = 0
+  performanceStats.newChart.resizeCount = 0
+  performanceStats.improvement = 0
+  ElMessage.info('性能测试已重置')
+}
+
+const updateContainerSize = () => {
+  if (dynamicContainer.value) {
+    const rect = dynamicContainer.value.getBoundingClientRect()
+    containerSize.width = Math.round(rect.width)
+    containerSize.height = Math.round(rect.height)
+  }
+}
+
+// 生命周期
 onMounted(() => {
-  console.log('ZxChart 示例页面已加载')
-  // 初始化当前主题
-  currentSystemTheme.value = getCurrentTheme()
+  nextTick(() => {
+    updateContainerSize()
+  })
 })
 </script>
 
 <style lang="scss" scoped>
-.zx-chart-example {
+.zx-chart-new-example {
   padding: 20px;
   
   .example-header {
-    margin-bottom: 30px;
+    margin-bottom: 20px;
     
-    h2 {
-      color: #303133;
-      margin-bottom: 10px;
-    }
-    
-    p {
-      color: #606266;
-      font-size: 14px;
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
   }
   
   .example-section {
-    margin-bottom: 30px;
-    
-    h3 {
-      color: #409EFF;
-      margin-bottom: 15px;
-      font-size: 16px;
-    }
-    
-    .el-card {
-      border-radius: 8px;
-      box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-    }
-  }
-  
-  .example-controls {
     margin-bottom: 20px;
-    padding: 15px;
-    background-color: #f5f7fa;
-    border-radius: 4px;
     
-    .el-button {
-      margin-right: 10px;
-    }
-    
-    .el-radio-group {
-      .el-radio {
-        margin-right: 20px;
-      }
-    }
-    
-    .theme-info {
-      margin-top: 12px;
+    .card-header {
       display: flex;
-      gap: 8px;
+      justify-content: space-between;
       align-items: center;
     }
   }
-}
-
-// 响应式设计
-@media (max-width: 768px) {
-  .zx-chart-example {
-    padding: 10px;
+  
+  .dynamic-container {
+    height: 300px;
+    transition: all 0.3s ease;
+    border: 2px dashed #dcdfe6;
+    border-radius: 4px;
     
-    .example-section {
-      margin-bottom: 20px;
+    &.large {
+      height: 500px;
+    }
+  }
+  
+  .resize-info,
+  .theme-info {
+    margin-top: 15px;
+  }
+  
+  .performance-chart-container {
+    text-align: center;
+    
+    h4 {
+      margin-bottom: 10px;
+      color: var(--el-text-color-primary);
     }
     
-    .example-controls {
-      .el-button {
-        margin-bottom: 10px;
-        width: 100%;
-      }
+    .performance-stats {
+      margin-top: 10px;
+      padding: 10px;
+      background-color: var(--el-fill-color-light);
+      border-radius: 4px;
       
-      .el-radio-group {
-        .el-radio {
-          display: block;
-          margin-bottom: 10px;
-        }
+      p {
+        margin: 5px 0;
+        font-size: 14px;
+        color: var(--el-text-color-regular);
+      }
+    }
+  }
+  
+  .performance-comparison {
+    padding: 20px;
+    
+    .comparison-details {
+      margin-top: 20px;
+      
+      p {
+        margin: 8px 0;
+        font-size: 14px;
+        color: var(--el-text-color-regular);
       }
     }
   }

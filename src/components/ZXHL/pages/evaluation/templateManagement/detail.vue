@@ -26,6 +26,7 @@
           应用Mock数据
         </ZxButton>
         <ZxButton 
+          v-if="isEditable"
           @click="applyRealLayoutData" 
           type="warning"
           :tooltip="{ 
@@ -56,6 +57,7 @@
 
     <!-- 图表库面板 - 悬浮组件 -->
     <LibraryPanels 
+      v-if="isEditable"
       @chart-select="handleChartSelect"
       @chart-drag="handleChartDrag"
     />
@@ -65,7 +67,7 @@
       <div class="canvas-shell">
         <DashboardGrid 
           :panels="panels"
-          :isEditable="true"
+          :isEditable="false"
           @panel-added="handlePanelAdded"
           @panel-removed="handlePanelRemoved"
           @layout-changed="handleLayoutChanged"
@@ -74,8 +76,10 @@
         <div v-if="panels.length === 0" class="empty-state">
           <div class="empty-inner">
             <el-icon class="empty-icon"><i class="el-icon-box" /></el-icon>
-            <h3>开始构建你的仪表盘</h3>
-            <p>从组件调色板拖拽组件到此区域</p>
+            <h3 v-if="isEditable">开始构建你的仪表盘</h3>
+            <h3 v-else>暂无数据</h3>
+            <p v-if="isEditable">从组件调色板拖拽组件到此区域</p>
+            <p v-else>当前仪表盘没有配置任何面板</p>
           </div>
         </div>
       </div>
@@ -125,6 +129,10 @@ export default {
       default: null
     },
     showBack: {
+      type: Boolean,
+      default: true
+    },
+    isEditable: {
       type: Boolean,
       default: true
     }
@@ -386,7 +394,9 @@ export default {
       handleEditSuccess,
       getStatusText,
       getStatusType,
-      currentTemplateId
+      currentTemplateId,
+      // 编辑状态
+      isEditable: props.isEditable
     }
   }
 }

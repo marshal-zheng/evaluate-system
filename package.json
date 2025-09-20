@@ -21,7 +21,7 @@
     "@wangeditor/editor-for-vue": "^5.1.12",
     "axios": "^1.4.0",
     "classnames": "^2.5.1",
-    "echarts": "^5.4.2",
+    "echarts": "4.9.0",
     "el-table-infinite-scroll": "^1.0.1",
     "element-plus": "^2.3.8",
     "eventemitter3": "^5.0.1",
