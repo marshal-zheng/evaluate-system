@@ -3,7 +3,7 @@
 </template>
 
 <script setup>
-import { onMounted, watch } from 'vue';
+import { onMounted, watch, nextTick } from 'vue';
 import { useGraphInstance } from '../composables/useGraphInstance';
 
 // Props 定义
@@ -30,24 +30,41 @@ const props = defineProps({
 const graph = useGraphInstance();
 
 // 更新网格
-const updateGrid = () => {
+const updateGrid = async () => {
   if (!graph || !graph.value) return;
   
-  if (props.visible) {
-    graph.value.drawGrid({
-      type: props.type,
-      args: {
-        size: props.size,
-        ...props.args,
-      },
-    });
-  } else {
+  // 等待DOM更新
+  await nextTick();
+  
+  try {
+    // 先清除，再根据最新类型重绘，保证切换立即生效
     graph.value.clearGrid();
+
+    if (props.visible) {
+      graph.value.drawGrid({
+        type: props.type,
+        args: {
+          size: props.size,
+          ...props.args,
+        },
+      });
+      // 显示网格
+      graph.value.showGrid();
+    } else {
+      // 隐藏网格
+      graph.value.hideGrid();
+    }
+  } catch (error) {
+    console.warn('Grid update error:', error);
   }
 };
 
-onMounted(() => {
-  updateGrid();
+onMounted(async () => {
+  // 等待一小段时间确保Graph完全初始化
+  await nextTick();
+  setTimeout(() => {
+    updateGrid();
+  }, 100);
 });
 
 // 监听属性变化

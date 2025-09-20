@@ -255,6 +255,13 @@ const initGraph = async () => {
     graph.value = g;
   }
 
+  // 初始应用交互与限制配置
+  updateZoom(props.zoomable, props.zoomOptions);
+  updatePan(props.pannable, props.panOptions);
+  updateEmbed(props.embedable, props.embedOptions);
+  updateRestrict(props.restrict, props.restrictOptions);
+  updateReadonly(props.readonly);
+
   // 向外通知已就绪
   emit('ready', g);
 
@@ -379,19 +386,19 @@ onUnmounted(() => {
 });
 
 // 监听属性变化
-watch(() => props.readonly, updateReadonly);
+watch(() => props.readonly, updateReadonly, { immediate: true });
 watch(() => [props.zoomable, props.zoomOptions], ([zoomable, zoomOptions]) => {
   updateZoom(zoomable, zoomOptions);
-});
+}, { immediate: true });
 watch(() => [props.pannable, props.panOptions], ([pannable, panOptions]) => {
   updatePan(pannable, panOptions);
-});
+}, { immediate: true });
 watch(() => [props.embedable, props.embedOptions], ([embedable, embedOptions]) => {
   updateEmbed(embedable, embedOptions);
-});
+}, { immediate: true });
 watch(() => [props.restrict, props.restrictOptions], ([restrict, restrictOptions]) => {
   updateRestrict(restrict, restrictOptions);
-});
+}, { immediate: true });
 watch(() => [props.centerView, props.fitView], handleViewOperations);
 </script>
 
@@ -414,6 +421,10 @@ watch(() => [props.centerView, props.fitView], handleViewOperations);
   position: absolute;
   top: 0;
   left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
   z-index: 1;
 }

@@ -3,12 +3,13 @@
     ref="containerRef" 
     class="xflow-minimap"
     :class="className" 
-    :style="style"
+    :style="containerStyle"
   />
+  
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, nextTick, computed } from 'vue';
 import { NodeView } from '@antv/x6';
 import { MiniMap } from '@antv/x6-plugin-minimap';
 import { useGraphInstance } from '../composables/useGraphInstance';
@@ -83,15 +84,31 @@ const props = defineProps({
 const containerRef = ref(null);
 const graph = useGraphInstance();
 
+// 容器样式：限制宽高并默认绝对定位，避免占满整行
+const containerStyle = computed(() => {
+  const base = {
+    width: props.width + 'px',
+    height: props.height + 'px',
+    position: 'absolute',
+    zIndex: 10,
+  };
+  
+  // 直接合并用户传入的样式，不做额外处理
+  return {
+    ...base,
+    ...(props.style || {}),
+  };
+});
+
 // 初始化 Minimap 插件
 const initMinimap = () => {
   if (!graph || !graph.value || !containerRef.value) return;
-  
-  // 移除已存在的插件
-  if (graph.value.getPlugin('minimap')) {
-    graph.value.disposePlugins('minimap');
+
+  // 移除已存在的插件（用类引用更稳妥）
+  if (graph.value.getPlugin(MiniMap)) {
+    graph.value.removePlugin(MiniMap);
   }
-  
+
   // 设置简单节点背景色
   SimpleNodeView.nodeBackground = props.simpleNodeBackground;
   
@@ -120,7 +137,8 @@ const initMinimap = () => {
   );
 };
 
-onMounted(() => {
+onMounted(async () => {
+  await nextTick();
   initMinimap();
 });
 
@@ -137,10 +155,17 @@ watch(() => [
 ], () => {
   initMinimap();
 });
+
+// 当 graph 实例就绪时再初始化（解决装载时序竞态）
+watch(() => graph && graph.value, (g) => {
+  if (g) initMinimap();
+}, { immediate: true });
 </script>
 
 <style scoped>
 .xflow-minimap {
+  display: inline-block;
+  box-sizing: border-box;
   border: 1px solid #ddd;
   border-radius: 4px;
   background: #fff;
