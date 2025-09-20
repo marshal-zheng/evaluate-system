@@ -115,6 +115,7 @@
           <XFlowClipboard />
           <XFlowSnapline />
           <XFlowTransform />
+          <XFlowExport />
           <XFlowBackground color="#fafafa" />
           <XFlowGrid :size="20" type="dot" />
           
@@ -165,6 +166,7 @@ import {
   XFlowTransform,
   XFlowBackground,
   XFlowGrid,
+  XFlowExport,
   XFlowMinimap,
 } from '../xflow-vue/src/components/index.js';
 

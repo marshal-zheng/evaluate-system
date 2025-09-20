@@ -196,4 +196,15 @@ onMounted(() => {
   font-size: 12px;
   color: #666;
 }
+
+:deep(.x6-node-selected rect) {
+  stroke: #ff4d4f;
+  stroke-width: 3;
+  fill: #fff2f0;
+}
+
+:deep(.x6-node-selected text) {
+  fill: #a8071a;
+  font-weight: 600;
+}
 </style>

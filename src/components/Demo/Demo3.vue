@@ -112,7 +112,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue';
+import { ref, computed, onMounted, nextTick, markRaw } from 'vue';
 import { 
   Plus, 
   Connection,
@@ -381,26 +381,26 @@ const showContextMenu = (x, y, type, target = null) => {
   
   if (type === 'node') {
     items = [
-      { label: '编辑', icon: Edit, action: 'edit', target },
-      { label: '复制', icon: DocumentCopy, action: 'copy', target },
+      { label: '编辑', icon: markRaw(Edit), action: 'edit', target },
+      { label: '复制', icon: markRaw(DocumentCopy), action: 'copy', target },
       { divider: true },
-      { label: target?.prop('locked') ? '解锁' : '锁定', icon: target?.prop('locked') ? Unlock : Lock, action: 'toggle-lock', target },
-      { label: '查看数据', icon: InfoFilled, action: 'inspect', target },
+      { label: target?.prop('locked') ? '解锁' : '锁定', icon: markRaw(target?.prop('locked') ? Unlock : Lock), action: 'toggle-lock', target },
+      { label: '查看数据', icon: markRaw(InfoFilled), action: 'inspect', target },
       { divider: true },
-      { label: '删除', icon: Delete, action: 'delete', target, style: 'color: #f5222d' }
+      { label: '删除', icon: markRaw(Delete), action: 'delete', target, style: 'color: #f5222d' }
     ];
   } else if (type === 'edge') {
     items = [
-      { label: '编辑标签', icon: Edit, action: 'edit-label', target },
-      { label: '删除连接', icon: Delete, action: 'delete', target, style: 'color: #f5222d' }
+      { label: '编辑标签', icon: markRaw(Edit), action: 'edit-label', target },
+      { label: '删除连接', icon: markRaw(Delete), action: 'delete', target, style: 'color: #f5222d' }
     ];
   } else {
     items = [
-      { label: '添加节点', icon: Plus, action: 'add-node' },
-      { label: '粘贴', icon: DocumentCopy, action: 'paste', disabled: clipboardActions?.isEmpty() },
+      { label: '添加节点', icon: markRaw(Plus), action: 'add-node' },
+      { label: '粘贴', icon: markRaw(DocumentCopy), action: 'paste', disabled: clipboardActions?.isEmpty() },
       { divider: true },
       { label: '全选', action: 'select-all' },
-      { label: '清空画布', icon: Delete, action: 'clear', style: 'color: #f5222d' }
+      { label: '清空画布', icon: markRaw(Delete), action: 'clear', style: 'color: #f5222d' }
     ];
   }
   

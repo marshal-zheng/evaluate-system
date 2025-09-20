@@ -9,33 +9,46 @@ export function useExport(graphInstance = null) {
     graph = graphInstance;
   }
   
-  const exportPNG = (options = {}) => {
+  const normalizeArgs = (fileNameOrOptions, maybeOptions) => {
+    if (typeof fileNameOrOptions === 'string' || typeof fileNameOrOptions === 'number') {
+      return [fileNameOrOptions, maybeOptions];
+    }
+    if (fileNameOrOptions && typeof fileNameOrOptions === 'object') {
+      return [undefined, fileNameOrOptions];
+    }
+    return [fileNameOrOptions, maybeOptions];
+  };
+  
+  const exportPNG = (fileNameOrOptions, options = {}) => {
     const g = graph?.value || graph;
-    if (g) {
-      return g.exportPNG(options);
+    if (g?.exportPNG) {
+      const [fileName, exportOptions] = normalizeArgs(fileNameOrOptions, options);
+      return g.exportPNG(fileName, exportOptions);
     }
     return null;
   };
   
-  const exportJPEG = (options = {}) => {
+  const exportJPEG = (fileNameOrOptions, options = {}) => {
     const g = graph?.value || graph;
-    if (g) {
-      return g.exportJPEG(options);
+    if (g?.exportJPEG) {
+      const [fileName, exportOptions] = normalizeArgs(fileNameOrOptions, options);
+      return g.exportJPEG(fileName, exportOptions);
     }
     return null;
   };
   
-  const exportSVG = (options = {}) => {
+  const exportSVG = (fileNameOrOptions, options = {}) => {
     const g = graph?.value || graph;
-    if (g) {
-      return g.exportSVG(options);
+    if (g?.exportSVG) {
+      const [fileName, exportOptions] = normalizeArgs(fileNameOrOptions, options);
+      return g.exportSVG(fileName, exportOptions);
     }
     return null;
   };
   
   const toDataURL = (type = 'image/png', options = {}) => {
     const g = graph?.value || graph;
-    if (g) {
+    if (g?.toDataURL) {
       return g.toDataURL(type, options);
     }
     return null;
