@@ -64,6 +64,14 @@
           :pannable="true"
           :scroller="false"
           :readonly="false"
+          :selectOptions="{ 
+            multiple: true, 
+            rubberband: true, 
+            rubberbandModifiers: ['shift'],
+            movable: true,
+            showNodeSelectionBox: true, 
+            showEdgeSelectionBox: false 
+          }"
           @ready="onGraphReady"
         >
           <!-- 插件 -->
@@ -190,9 +198,10 @@ const getEdgeLabelText = (edge) => {
 
 const selectAllCells = () => {
   if (!graph) return;
-  const cells = graph.getCells();
-  if (cells.length) {
-    graph.resetSelection(cells);
+  const nodes = graph.getNodes();
+  if (nodes.length) {
+    graph.cleanSelection();
+    graph.select(nodes);
   }
 };
 
@@ -474,7 +483,8 @@ const handleMenuClick = (item) => {
       {
         const cells = clipboardActions?.paste();
         if (cells?.length) {
-          graph.resetSelection(cells);
+          graph.cleanSelection();
+          graph.select(cells);
         }
       }
       break;

@@ -204,7 +204,8 @@ const selectAllCells = () => {
   if (!graph) return;
   const cells = graph.getCells();
   if (cells.length) {
-    graph.resetSelection(cells);
+    graph.cleanSelection();
+    graph.select(cells);
   }
 };
 
@@ -355,7 +356,8 @@ const paste = () => {
   if (clipboardActions) {
     const cells = clipboardActions.paste({ offset: 20 });
     if (cells?.length) {
-      graph.resetSelection(cells);
+      graph.cleanSelection();
+      graph.select(cells);
     }
   }
 };
