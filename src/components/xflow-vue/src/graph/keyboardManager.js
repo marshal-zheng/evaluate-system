@@ -1,0 +1,319 @@
+/**
+ * 键盘管理器 - 基于 X6 Keyboard 插件的企业级键盘事件管理
+ * 参考 Figma/Sketch/Adobe XD 的交互设计
+ */
+
+import { Keyboard } from '@antv/x6-plugin-keyboard';
+import { Selection } from '@antv/x6-plugin-selection';
+
+// 默认快捷键配置（参考大厂标准）
+export const DEFAULT_KEYBOARD_CONFIG = {
+  // 选择操作
+  'meta+a': 'select-all',           // Cmd+A 全选（Mac）
+  'ctrl+a': 'select-all',           // Ctrl+A 全选（Windows/Linux）
+  
+  // 历史操作
+  'meta+z': 'undo',                 // Cmd+Z 撤销
+  'ctrl+z': 'undo',                 // Ctrl+Z 撤销
+  'meta+shift+z': 'redo',           // Cmd+Shift+Z 重做
+  'ctrl+y': 'redo',                 // Ctrl+Y 重做
+  
+  // 剪贴板操作
+  'meta+c': 'copy',                 // Cmd+C 复制
+  'ctrl+c': 'copy',                 // Ctrl+C 复制
+  'meta+v': 'paste',                // Cmd+V 粘贴
+  'ctrl+v': 'paste',                // Ctrl+V 粘贴
+  'meta+x': 'cut',                  // Cmd+X 剪切
+  'ctrl+x': 'cut',                  // Ctrl+X 剪切
+  
+  // 删除操作
+  'delete': 'delete-selected',      // Delete 删除
+  'backspace': 'delete-selected',   // Backspace 删除
+  
+  // 视图操作
+  'meta+0': 'zoom-to-fit',          // Cmd+0 适应画布
+  'ctrl+0': 'zoom-to-fit',          // Ctrl+0 适应画布
+  'meta+1': 'zoom-to-actual',       // Cmd+1 实际大小
+  'ctrl+1': 'zoom-to-actual',       // Ctrl+1 实际大小
+  
+  // 临时拖拽（空格键）
+  'space': 'temp-pan-start',        // 空格键开始临时拖拽
+};
+
+// 交互模式定义
+export const INTERACTION_MODES = {
+  PAN: 'pan',           // 画布拖拽模式
+  SELECT: 'select',     // 框选模式
+  CONNECT: 'connect',   // 连接模式
+  EDIT: 'edit',         // 编辑模式
+};
+
+/**
+ * 键盘管理器类
+ */
+export class KeyboardManager {
+  constructor(graph, options = {}) {
+    this.graph = graph;
+    this.options = {
+      keyboardConfig: DEFAULT_KEYBOARD_CONFIG,
+      globalKeys: ['space'], // 需要全局监听的键
+      ...options,
+    };
+    
+    this.keyboardPlugin = null;
+    this.currentMode = INTERACTION_MODES.PAN;
+    this.spacePressed = false;
+    this.originalPannable = true;
+    
+    this.actionHandlers = new Map();
+    this.globalKeyListeners = new Map();
+    
+    this.init();
+  }
+  
+  /**
+   * 初始化键盘管理器
+   */
+  init() {
+    this.setupKeyboardPlugin();
+    this.setupGlobalKeys();
+    this.registerDefaultActions();
+    // 初始化Selection插件，使用默认的PAN模式配置
+    this.setInteractionMode(this.currentMode);
+  }
+  
+  /**
+   * 设置 X6 键盘插件
+   */
+  setupKeyboardPlugin() {
+    // 移除现有插件
+    if (this.graph.getPlugin('keyboard')) {
+      this.graph.disposePlugins('keyboard');
+    }
+    
+    // 添加键盘插件
+    this.keyboardPlugin = new Keyboard({
+      enabled: true,
+      global: false, // 不使用全局模式，避免冲突
+    });
+    
+    this.graph.use(this.keyboardPlugin);
+    
+    // 绑定快捷键
+    Object.entries(this.options.keyboardConfig).forEach(([key, action]) => {
+      if (!this.options.globalKeys.includes(key.split('+').pop())) {
+        this.graph.bindKey(key, (e) => this.handleAction(action, e));
+      }
+    });
+  }
+  
+  /**
+   * 设置全局键盘监听（仅限必要的键）
+   */
+  setupGlobalKeys() {
+    this.options.globalKeys.forEach(key => {
+      const keydownHandler = (e) => {
+        if (e.code === 'Space' && e.target === document.body) {
+          this.handleSpaceDown(e);
+        }
+      };
+      
+      const keyupHandler = (e) => {
+        if (e.code === 'Space') {
+          this.handleSpaceUp(e);
+        }
+      };
+      
+      document.addEventListener('keydown', keydownHandler);
+      document.addEventListener('keyup', keyupHandler);
+      
+      // 保存引用用于清理
+      this.globalKeyListeners.set(key, { keydownHandler, keyupHandler });
+    });
+  }
+  
+  /**
+   * 注册默认动作处理器
+   */
+  registerDefaultActions() {
+    this.registerAction('select-all', () => this.graph.selectAll());
+    this.registerAction('delete-selected', () => this.deleteSelected());
+    this.registerAction('zoom-to-fit', () => this.graph.scaleContentToFit());
+    this.registerAction('zoom-to-actual', () => this.graph.scale(1));
+    
+    // 剪贴板操作需要外部注入
+    this.registerAction('copy', () => this.handleClipboard('copy'));
+    this.registerAction('paste', () => this.handleClipboard('paste'));
+    this.registerAction('cut', () => this.handleClipboard('cut'));
+    
+    // 历史操作需要外部注入
+    this.registerAction('undo', () => this.handleHistory('undo'));
+    this.registerAction('redo', () => this.handleHistory('redo'));
+  }
+  
+  /**
+   * 注册动作处理器
+   */
+  registerAction(action, handler) {
+    this.actionHandlers.set(action, handler);
+  }
+  
+  /**
+   * 执行动作
+   */
+  handleAction(action, event) {
+    const handler = this.actionHandlers.get(action);
+    if (handler) {
+      event?.preventDefault();
+      handler(event);
+    }
+  }
+  
+  /**
+   * 设置交互模式
+   */
+  setInteractionMode(mode) {
+    this.currentMode = mode;
+    
+    switch (mode) {
+      case INTERACTION_MODES.PAN:
+        this.graph.enablePanning();
+        this.updateSelectionPlugin({ 
+          enabled: true,
+          multiple: true,
+          rubberband: false,
+          modifiers: ['meta', 'ctrl'],
+        });
+        break;
+        
+      case INTERACTION_MODES.SELECT:
+        this.graph.disablePanning();
+        this.updateSelectionPlugin({ 
+          enabled: true,
+          multiple: true,
+          rubberband: true,
+          modifiers: ['meta', 'ctrl'],
+        });
+        break;
+        
+      // 可扩展其他模式
+    }
+  }
+  
+  /**
+   * 更新选择插件配置
+   */
+  updateSelectionPlugin(options) {
+    // 移除现有插件
+    if (this.graph.getPlugin('selection')) {
+      this.graph.disposePlugins('selection');
+    }
+    
+    // 重新添加插件，使用新配置
+    this.graph.use(new Selection({
+      enabled: true,
+      multiple: true,
+      showNodeSelectionBox: true,
+      showEdgeSelectionBox: true,
+      modifiers: ['meta', 'ctrl'], // 支持 Cmd/Ctrl 多选
+      ...options,
+    }));
+    
+    console.log('Selection plugin updated with options:', options);
+  }
+  
+  /**
+   * 处理空格键按下
+   */
+  handleSpaceDown(e) {
+    if (this.spacePressed) return;
+    
+    this.spacePressed = true;
+    this.originalPannable = this.graph.options.panning?.enabled !== false;
+    
+    // 临时启用拖拽
+    this.graph.enablePanning();
+    e.preventDefault();
+  }
+  
+  /**
+   * 处理空格键释放
+   */
+  handleSpaceUp(e) {
+    if (!this.spacePressed) return;
+    
+    this.spacePressed = false;
+    
+    // 恢复原来的拖拽状态
+    if (this.currentMode === INTERACTION_MODES.SELECT) {
+      this.graph.disablePanning();
+    }
+    
+    e.preventDefault();
+  }
+  
+  /**
+   * 删除选中元素
+   */
+  deleteSelected() {
+    const selectedCells = this.graph.getSelectedCells();
+    if (selectedCells.length > 0) {
+      this.graph.removeCells(selectedCells);
+    }
+  }
+  
+  /**
+   * 处理剪贴板操作（需要外部注入处理器）
+   */
+  handleClipboard(action) {
+    if (this.clipboardHandler) {
+      this.clipboardHandler(action);
+    }
+  }
+  
+  /**
+   * 处理历史操作（需要外部注入处理器）
+   */
+  handleHistory(action) {
+    if (this.historyHandler) {
+      this.historyHandler(action);
+    }
+  }
+  
+  /**
+   * 注入剪贴板处理器
+   */
+  setClipboardHandler(handler) {
+    this.clipboardHandler = handler;
+  }
+  
+  /**
+   * 注入历史处理器
+   */
+  setHistoryHandler(handler) {
+    this.historyHandler = handler;
+  }
+  
+  /**
+   * 销毁管理器
+   */
+  destroy() {
+    // 清理全局事件监听
+    this.globalKeyListeners.forEach(({ keydownHandler, keyupHandler }, key) => {
+      document.removeEventListener('keydown', keydownHandler);
+      document.removeEventListener('keyup', keyupHandler);
+    });
+    
+    this.globalKeyListeners.clear();
+    this.actionHandlers.clear();
+    
+    // X6 插件会在 graph.dispose() 时自动清理
+  }
+}
+
+/**
+ * 创建键盘管理器的工厂函数
+ */
+export function createKeyboardManager(graph, options = {}) {
+  return new KeyboardManager(graph, options);
+}

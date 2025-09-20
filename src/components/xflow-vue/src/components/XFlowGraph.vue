@@ -18,6 +18,7 @@ import { Keyboard } from '@antv/x6-plugin-keyboard';
 import { Scroller } from '@antv/x6-plugin-scroller';
 import { Selection } from '@antv/x6-plugin-selection';
 import { useGraphInstance } from '../composables/useGraphInstance';
+import { useKeyboardManager } from '../composables/useKeyboardManager';
 
 // Props 定义
 const props = defineProps({
@@ -155,6 +156,15 @@ const containerRef = ref(null);
 const graph = useGraphInstance();
 const emit = defineEmits(['ready']);
 
+// 键盘管理器
+const {
+  initKeyboardManager,
+  setInteractionMode,
+  setClipboardHandler,
+  setHistoryHandler,
+  INTERACTION_MODES,
+} = useKeyboardManager(graph);
+
 // 初始化 Graph
 const initGraph = async () => {
   await nextTick();
@@ -242,8 +252,8 @@ const initGraph = async () => {
     createCellView: props.createCellView,
   });
 
-  // 添加插件
-  g.use(new Selection({ enabled: true, ...props.selectOptions }));
+  // 添加插件 - Selection插件由KeyboardManager管理，避免冲突
+  // g.use(new Selection({ enabled: true, ...props.selectOptions }));
   g.use(new Keyboard({ enabled: true, ...props.keyboardOptions }));
 
   if (props.scroller) {
@@ -262,8 +272,11 @@ const initGraph = async () => {
   updateRestrict(props.restrict, props.restrictOptions);
   updateReadonly(props.readonly);
 
-  // 向外通知已就绪
-  emit('ready', g);
+  // 初始化键盘管理器
+  const keyboardMgr = initKeyboardManager();
+  
+  // 向外通知已就绪，同时传递键盘管理器
+  emit('ready', g, keyboardMgr);
 
   return g;
 };
@@ -400,6 +413,24 @@ watch(() => [props.restrict, props.restrictOptions], ([restrict, restrictOptions
   updateRestrict(restrict, restrictOptions);
 }, { immediate: true });
 watch(() => [props.centerView, props.fitView], handleViewOperations);
+
+// 监听选择配置变化 - 由KeyboardManager管理，避免冲突
+// watch(
+//   () => props.selectOptions,
+//   (opts) => {
+//     if (!graph || !graph.value) return;
+//     if (graph.value.getPlugin('selection')) {
+//       graph.value.disposePlugins('selection');
+//     }
+//     graph.value.use(
+//       new Selection({
+//         enabled: true,
+//         ...(opts || {}),
+//       }),
+//     );
+//   },
+//   { deep: true, immediate: false },
+// );
 </script>
 
 <style scoped>

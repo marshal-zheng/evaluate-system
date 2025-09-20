@@ -7,3 +7,4 @@ export { useExport } from './useExport';
 export { useHistory } from './useHistory';
 export { useKeyboard } from './useKeyboard';
 export { useContextMenu } from './useContextMenu';
+export { useKeyboardManager, INTERACTION_MODES } from './useKeyboardManager';
