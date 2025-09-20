@@ -12,12 +12,24 @@
   "dependencies": {
     "@antv/hierarchy": "^0.6.11",
     "@antv/layout": "^0.2.25",
+    "@antv/x6": "^2.18.1",
+    "@antv/x6-plugin-clipboard": "^2.1.6",
+    "@antv/x6-plugin-dnd": "^2.1.1",
+    "@antv/x6-plugin-export": "^2.1.6",
+    "@antv/x6-plugin-history": "^2.2.4",
+    "@antv/x6-plugin-keyboard": "^2.2.3",
+    "@antv/x6-plugin-minimap": "^2.0.7",
+    "@antv/x6-plugin-scroller": "^2.0.10",
+    "@antv/x6-plugin-selection": "^2.2.2",
+    "@antv/x6-plugin-snapline": "^2.1.7",
+    "@antv/x6-plugin-transform": "^2.1.8",
+    "@antv/x6-vue-shape": "^2",
+    "@antv/xflow": "^2.1.13",
     "@logicflow/core": "^1.2.10",
     "@logicflow/extension": "^1.2.10",
     "@vitejs/plugin-legacy": "^2.3.1",
     "@wangeditor/editor": "^5.1.23",
     "@wangeditor/editor-for-vue": "^5.1.12",
-    "@wfjhm/utils": "^1.0.0",
     "axios": "^1.4.0",
     "echarts": "^5.4.2",
     "el-table-infinite-scroll": "^1.0.1",
@@ -28,6 +40,7 @@
     "screenfull": "^5.2.0",
     "terser": "^5.19.2",
     "uuid": "^9.0.0",
+    "v-contextmenu": "^2.9.2",
     "vue": "^3.3.4",
     "vue-router": "^4.2.4"
   },
@@ -43,5 +56,6 @@
   "browserslist": [
     "defaults and supports es6-module",
     "maintained node versions"
-  ]
+  ],
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

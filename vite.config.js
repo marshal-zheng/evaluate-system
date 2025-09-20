@@ -1,8 +1,3 @@
-code
-JavaScript
-download
-content_copy
-expand_less
 
 import { fileURLToPath, URL } from 'node:url'
 
