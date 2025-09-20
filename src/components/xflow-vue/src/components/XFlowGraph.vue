@@ -8,6 +8,20 @@
     <div class="xflow-graph-wrapper">
       <slot />
     </div>
+    
+    <!-- 右键菜单 -->
+    <XFlowContextMenu
+      v-if="standardInteractions && standardInteractions.contextMenu"
+      :context-menu="standardInteractions.contextMenu"
+      @menu-click="handleContextMenuClick"
+    />
+    
+    <!-- Debug: 显示菜单状态 -->
+    <div v-if="true" style="position: fixed; top: 10px; right: 10px; background: white; padding: 10px; z-index: 10000; border: 1px solid red;">
+      Debug: {{ standardInteractions?.contextMenu?.visible ? 'Menu Visible' : 'Menu Hidden' }}<br>
+      HasContextMenu: {{ !!standardInteractions?.contextMenu }}<br>
+      MenuItems: {{ standardInteractions?.contextMenu?.items?.length || 0 }}
+    </div>
   </div>
 </template>
 
@@ -19,6 +33,8 @@ import { Scroller } from '@antv/x6-plugin-scroller';
 import { Selection } from '@antv/x6-plugin-selection';
 import { useGraphInstance } from '../composables/useGraphInstance';
 import { useKeyboardManager } from '../composables/useKeyboardManager';
+import { useStandardInteractions } from '../composables/useStandardInteractions';
+import XFlowContextMenu from './XFlowContextMenu.vue';
 
 // Props 定义
 const props = defineProps({
@@ -150,6 +166,23 @@ const props = defineProps({
     type: Object,
     default: () => ({}),
   },
+  // 标准交互配置
+  enableStandardInteractions: {
+    type: Boolean,
+    default: true,
+  },
+  enableContextMenu: {
+    type: Boolean,
+    default: true,
+  },
+  enableDoubleClickFit: {
+    type: Boolean,
+    default: true,
+  },
+  contextMenuOptions: {
+    type: Object,
+    default: () => ({}),
+  },
 });
 
 const containerRef = ref(null);
@@ -164,6 +197,17 @@ const {
   setHistoryHandler,
   INTERACTION_MODES,
 } = useKeyboardManager(graph);
+
+// 标准交互管理器
+const standardInteractions = props.enableStandardInteractions 
+  ? useStandardInteractions(graph, {
+      enableContextMenu: props.enableContextMenu,
+      enableDoubleClickFit: props.enableDoubleClickFit,
+      contextMenuOptions: props.contextMenuOptions,
+      // 当未开启边的选择框时，不允许边被选中/框选
+      allowEdgeSelection: props.selectOptions?.showEdgeSelectionBox === true || props.selectOptions?.allowEdgeSelection === true,
+    })
+  : null;
 
 // 初始化 Graph
 const initGraph = async () => {
@@ -252,8 +296,28 @@ const initGraph = async () => {
     createCellView: props.createCellView,
   });
 
-  // 添加插件 - Selection插件由KeyboardManager管理，避免冲突
-  // g.use(new Selection({ enabled: true, ...props.selectOptions }));
+  // 添加插件：启用 Selection 作为基础能力（支持多选/框选/Shift 触发）
+  g.use(new Selection({
+    enabled: true,
+    multiple: true,
+    rubberband: true,
+    rubberbandModifiers: ['shift'],
+    showNodeSelectionBox: true,
+    // 根据配置决定是否显示边的选择框
+    showEdgeSelectionBox: props.selectOptions?.showEdgeSelectionBox ?? false,
+    selectEdgeOnMoveEdge: false,
+    modifiers: ['meta', 'ctrl'],
+    // 动态过滤器：根据是否显示边选择框来决定是否允许选择边
+    filter: (cell) => {
+      if (cell.isNode()) return true;
+      if (cell.isEdge()) {
+        // 只有在显示边选择框时才允许选择边
+        return props.selectOptions?.showEdgeSelectionBox ?? false;
+      }
+      return true;
+    },
+    ...(props.selectOptions || {}),
+  }));
   g.use(new Keyboard({ enabled: true, ...props.keyboardOptions }));
 
   if (props.scroller) {
@@ -275,8 +339,14 @@ const initGraph = async () => {
   // 初始化键盘管理器
   const keyboardMgr = initKeyboardManager();
   
-  // 向外通知已就绪，同时传递键盘管理器
-  emit('ready', g, keyboardMgr);
+  // 初始化标准交互（在键盘管理器之后）
+  if (standardInteractions) {
+    // 直接传递 graph 实例
+    standardInteractions.setupStandardEvents(g);
+  }
+  
+  // 向外通知已就绪，同时传递键盘管理器和标准交互
+  emit('ready', g, keyboardMgr, standardInteractions);
 
   return g;
 };
@@ -301,10 +371,8 @@ const updateReadonly = (readonly) => {
         const cell = view.cell;
         return cell.prop('draggable') !== false;
       },
-      edgeMovable: (view) => {
-        const cell = view.cell;
-        return cell.prop('draggable') !== false;
-      },
+      // 禁用边的拖拽移动，避免出现可拖拽但无法移动的选框
+      edgeMovable: false,
       edgeLabelMovable: (view) => {
         const cell = view.cell;
         return cell.prop('labelDraggable') === true;
@@ -387,6 +455,20 @@ const handleViewOperations = () => {
       graph.value.scaleContentToFit(props.fitViewOptions);
     }
   });
+};
+
+// 右键菜单点击处理
+const handleContextMenuClick = (item) => {
+  // 调用标准交互中的菜单点击处理
+  if (standardInteractions?.handleMenuClick) {
+    standardInteractions.handleMenuClick(item);
+  } else {
+    // 降级处理：直接执行菜单项的动作
+    console.log('Context menu item clicked:', item);
+    if (item && typeof item.action === 'function') {
+      item.action();
+    }
+  }
 };
 
 onMounted(async () => {

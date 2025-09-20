@@ -5,40 +5,42 @@
 
 import { Keyboard } from '@antv/x6-plugin-keyboard';
 import { Selection } from '@antv/x6-plugin-selection';
+import { useDeviceSupport } from '../composables/useDeviceSupport.js';
 
-// 默认快捷键配置（参考大厂标准）
-export const DEFAULT_KEYBOARD_CONFIG = {
-  // 选择操作
-  'meta+a': 'select-all',           // Cmd+A 全选（Mac）
-  'ctrl+a': 'select-all',           // Ctrl+A 全选（Windows/Linux）
+// 生成基于设备的快捷键配置
+export function createKeyboardConfig() {
+  const { isMacOs } = useDeviceSupport();
+  const ctrlKey = isMacOs ? 'meta' : 'ctrl';
   
-  // 历史操作
-  'meta+z': 'undo',                 // Cmd+Z 撤销
-  'ctrl+z': 'undo',                 // Ctrl+Z 撤销
-  'meta+shift+z': 'redo',           // Cmd+Shift+Z 重做
-  'ctrl+y': 'redo',                 // Ctrl+Y 重做
-  
-  // 剪贴板操作
-  'meta+c': 'copy',                 // Cmd+C 复制
-  'ctrl+c': 'copy',                 // Ctrl+C 复制
-  'meta+v': 'paste',                // Cmd+V 粘贴
-  'ctrl+v': 'paste',                // Ctrl+V 粘贴
-  'meta+x': 'cut',                  // Cmd+X 剪切
-  'ctrl+x': 'cut',                  // Ctrl+X 剪切
-  
-  // 删除操作
-  'delete': 'delete-selected',      // Delete 删除
-  'backspace': 'delete-selected',   // Backspace 删除
-  
-  // 视图操作
-  'meta+0': 'zoom-to-fit',          // Cmd+0 适应画布
-  'ctrl+0': 'zoom-to-fit',          // Ctrl+0 适应画布
-  'meta+1': 'zoom-to-actual',       // Cmd+1 实际大小
-  'ctrl+1': 'zoom-to-actual',       // Ctrl+1 实际大小
-  
-  // 临时拖拽（空格键）
-  'space': 'temp-pan-start',        // 空格键开始临时拖拽
-};
+  return {
+    // 选择操作
+    [`${ctrlKey}+a`]: 'select-all',
+    
+    // 历史操作
+    [`${ctrlKey}+z`]: 'undo',
+    [`${ctrlKey}+shift+z`]: 'redo',
+    ...(isMacOs ? {} : { 'ctrl+y': 'redo' }), // Windows额外支持Ctrl+Y
+    
+    // 剪贴板操作
+    [`${ctrlKey}+c`]: 'copy',
+    [`${ctrlKey}+v`]: 'paste',
+    [`${ctrlKey}+x`]: 'cut',
+    
+    // 删除操作
+    'delete': 'delete-selected',
+    'backspace': 'delete-selected',
+    
+    // 视图操作
+    [`${ctrlKey}+0`]: 'zoom-to-fit',
+    [`${ctrlKey}+1`]: 'zoom-to-actual',
+    
+    // 临时拖拽（空格键）
+    'space': 'temp-pan-start',
+  };
+}
+
+// 默认配置（向后兼容）
+export const DEFAULT_KEYBOARD_CONFIG = createKeyboardConfig();
 
 // 交互模式定义
 export const INTERACTION_MODES = {
@@ -54,9 +56,12 @@ export const INTERACTION_MODES = {
 export class KeyboardManager {
   constructor(graph, options = {}) {
     this.graph = graph;
+    this.deviceSupport = useDeviceSupport();
     this.options = {
-      keyboardConfig: DEFAULT_KEYBOARD_CONFIG,
+      keyboardConfig: createKeyboardConfig(),
       globalKeys: ['space'], // 需要全局监听的键
+      enableStandardInteractions: true, // 启用标准交互
+      enableContextMenu: true, // 启用右键菜单
       ...options,
     };
     
@@ -136,10 +141,16 @@ export class KeyboardManager {
    * 注册默认动作处理器
    */
   registerDefaultActions() {
-    this.registerAction('select-all', () => this.graph.selectAll());
+    // 选择操作
+    this.registerAction('select-all', () => this.selectAll());
+    this.registerAction('clear-selection', () => this.clearSelection());
+    
+    // 删除操作
     this.registerAction('delete-selected', () => this.deleteSelected());
-    this.registerAction('zoom-to-fit', () => this.graph.scaleContentToFit());
-    this.registerAction('zoom-to-actual', () => this.graph.scale(1));
+    
+    // 视图操作
+    this.registerAction('zoom-to-fit', () => this.zoomToFit());
+    this.registerAction('zoom-to-actual', () => this.zoomToActual());
     
     // 剪贴板操作需要外部注入
     this.registerAction('copy', () => this.handleClipboard('copy'));
@@ -149,6 +160,43 @@ export class KeyboardManager {
     // 历史操作需要外部注入
     this.registerAction('undo', () => this.handleHistory('undo'));
     this.registerAction('redo', () => this.handleHistory('redo'));
+  }
+  
+  /**
+   * 选择所有元素
+   */
+  selectAll() {
+    if (this.graph) {
+      this.graph.selectAll();
+    }
+  }
+  
+  /**
+   * 清除选择
+   */
+  clearSelection() {
+    if (this.graph) {
+      this.graph.cleanSelection();
+    }
+  }
+  
+  /**
+   * 适应画布
+   */
+  zoomToFit() {
+    if (this.graph) {
+      this.graph.scaleContentToFit({ padding: 20 });
+    }
+  }
+  
+  /**
+   * 实际大小
+   */
+  zoomToActual() {
+    if (this.graph) {
+      this.graph.scale(1);
+      this.graph.centerContent();
+    }
   }
   
   /**

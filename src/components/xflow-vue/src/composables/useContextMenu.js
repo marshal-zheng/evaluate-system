@@ -1,83 +1,423 @@
-import { getCurrentInstance } from 'vue';
-import { useGraphInstance } from './useGraphInstance';
-import { useGraphEvent } from './useGraphEvent';
+/**
+ * 通用右键菜单组合式函数
+ * 基于企业级最佳实践的上下文菜单管理
+ */
 
-export function useContextMenu() {
-  const graph = useGraphInstance();
-  const instance = getCurrentInstance();
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
+import { useDeviceSupport } from './useDeviceSupport.js';
+
+export function useContextMenu(graph, options = {}) {
+  const { isMacOs, isCtrlKeyPressed } = useDeviceSupport();
   
-  // 显示上下文菜单
-  const showContextMenu = (x, y, menuItems) => {
-    if (instance && instance.appContext.app.config.globalProperties.$contextmenu) {
-      instance.appContext.app.config.globalProperties.$contextmenu({
-        x,
-        y,
-        items: menuItems,
-      });
+  const contextMenu = ref({
+    visible: false,
+    x: 0,
+    y: 0,
+    items: [],
+    target: null,
+    type: 'blank', // 'blank' | 'node' | 'edge'
+  });
+
+  // 右键刚打开菜单后，短时间忽略一次全局 click，防止瞬时关闭
+  let lastOpenAt = 0;
+
+  // 默认配置
+  const defaultOptions = {
+    enabled: true,
+    enableBlankMenu: true,
+    enableNodeMenu: true,
+    enableEdgeMenu: true,
+    customItems: {}, // 自定义菜单项
+  };
+
+  const config = { ...defaultOptions, ...options };
+
+  // 获取剪贴板状态（需要外部注入）
+  let clipboardHandler = null;
+  let historyHandler = null;
+  let selectionHandler = null;
+
+  // 设置处理器
+  const setClipboardHandler = (handler) => {
+    clipboardHandler = handler;
+  };
+
+  const setHistoryHandler = (handler) => {
+    historyHandler = handler;
+  };
+
+  const setSelectionHandler = (handler) => {
+    selectionHandler = handler;
+  };
+
+  // 标准菜单项定义
+  const getBlankMenuItems = () => {
+    const items = [
+      {
+        id: 'select-all',
+        label: '全选',
+        shortcut: isMacOs ? 'Cmd+A' : 'Ctrl+A',
+        icon: 'Select',
+        action: () => selectionHandler?.selectAll(),
+        disabled: !selectionHandler,
+      },
+      {
+        id: 'paste',
+        label: '粘贴',
+        shortcut: isMacOs ? 'Cmd+V' : 'Ctrl+V',
+        icon: 'DocumentCopy',
+        action: () => clipboardHandler?.paste(),
+        disabled: !clipboardHandler || clipboardHandler.isEmpty(),
+      },
+      { type: 'divider' },
+      {
+        id: 'zoom-to-fit',
+        label: '适应画布',
+        shortcut: isMacOs ? 'Cmd+0' : 'Ctrl+0',
+        icon: 'FullScreen',
+        action: () => {
+          const g = graph?.value || graph;
+          g?.scaleContentToFit({ padding: 20 });
+        },
+        disabled: !graph,
+      },
+      {
+        id: 'zoom-to-actual',
+        label: '实际大小',
+        shortcut: isMacOs ? 'Cmd+1' : 'Ctrl+1',
+        icon: 'ZoomIn',
+        action: () => {
+          const g = graph?.value || graph;
+          g?.scale(1);
+          g?.centerContent();
+        },
+        disabled: !graph,
+      },
+      { type: 'divider' },
+      {
+        id: 'clear-canvas',
+        label: '清空画布',
+        icon: 'Delete',
+        action: () => {
+          if (confirm('确定要清空画布吗？')) {
+            const g = graph?.value || graph;
+            g?.clearCells();
+          }
+        },
+        disabled: !graph,
+        danger: true,
+      },
+    ];
+
+    // 合并自定义菜单项
+    if (config.customItems.blank) {
+      items.push({ type: 'divider' });
+      items.push(...config.customItems.blank);
+    }
+
+    return items;
+  };
+
+  const getNodeMenuItems = (node) => {
+    const items = [
+      {
+        id: 'copy',
+        label: '复制',
+        shortcut: isMacOs ? 'Cmd+C' : 'Ctrl+C',
+        icon: 'DocumentCopy',
+        action: () => clipboardHandler?.copy([node]),
+        disabled: !clipboardHandler,
+      },
+      {
+        id: 'delete',
+        label: '删除',
+        shortcut: 'Delete',
+        icon: 'Delete',
+        action: () => {
+          const g = graph?.value || graph;
+          g?.removeCell(node);
+        },
+        disabled: !graph,
+        danger: true,
+      },
+      { type: 'divider' },
+      {
+        id: 'lock',
+        label: node?.prop('locked') ? '解锁' : '锁定',
+        icon: node?.prop('locked') ? 'Unlock' : 'Lock',
+        action: () => toggleNodeLock(node),
+        disabled: !node,
+      },
+    ];
+
+    // 合并自定义菜单项
+    if (config.customItems.node) {
+      items.push({ type: 'divider' });
+      items.push(...config.customItems.node);
+    }
+
+    return items;
+  };
+
+  const getEdgeMenuItems = (edge) => {
+    const items = [
+      {
+        id: 'edit-label',
+        label: '编辑标签',
+        icon: 'Edit',
+        action: () => editEdgeLabel(edge),
+        disabled: !edge,
+      },
+      {
+        id: 'delete',
+        label: '删除连接',
+        shortcut: 'Delete',
+        icon: 'Delete',
+        action: () => {
+          const g = graph?.value || graph;
+          g?.removeCell(edge);
+        },
+        disabled: !graph,
+        danger: true,
+      },
+    ];
+
+    // 合并自定义菜单项
+    if (config.customItems.edge) {
+      items.push({ type: 'divider' });
+      items.push(...config.customItems.edge);
+    }
+
+    return items;
+  };
+
+  // 辅助函数：切换节点锁定状态
+  const toggleNodeLock = (node) => {
+    if (!node) return;
+    
+    const locked = node.prop('locked');
+    node.prop('locked', !locked);
+    node.prop('draggable', locked); // 锁定时不可拖拽
+    
+    // 视觉反馈
+    if (!locked) {
+      node.attr('body/strokeDasharray', '5,5');
+      node.attr('body/opacity', 0.7);
+    } else {
+      node.attr('body/strokeDasharray', '');
+      node.attr('body/opacity', 1);
     }
   };
-  
-  // 设置节点上下文菜单
-  const setupNodeContextMenu = (menuItemsOrFactory) => {
-    useGraphEvent('node:contextmenu', ({ e, node }) => {
-      e.preventDefault();
-      
-      const menuItems = typeof menuItemsOrFactory === 'function' 
-        ? menuItemsOrFactory(node) 
-        : menuItemsOrFactory;
-      
-      showContextMenu(e.clientX, e.clientY, menuItems);
+
+  // 辅助函数：编辑边标签
+  const editEdgeLabel = (edge) => {
+    if (!edge) return;
+    
+    const currentLabel = getEdgeLabelText(edge);
+    const newLabel = prompt('请输入边的标签:', currentLabel);
+    
+    if (newLabel !== null) {
+      if (newLabel === '') {
+        edge.setLabels([]);
+      } else {
+        edge.setLabels([{
+          attrs: {
+            label: { text: newLabel },
+          },
+        }]);
+      }
+    }
+  };
+
+  // 获取边标签文本
+  const getEdgeLabelText = (edge) => {
+    if (!edge) return '';
+    if (typeof edge.getLabelAt === 'function') {
+      const label = edge.getLabelAt(0);
+      if (!label) return '';
+      if (typeof label === 'string') return label;
+      if (label?.attrs?.label?.text != null) return label.attrs.label.text;
+      if (label?.attrs?.text?.text != null) return label.attrs.text.text;
+      if (typeof label?.text === 'string') return label.text;
+    }
+    return '';
+  };
+
+  // 显示右键菜单
+  const showContextMenu = (x, y, type, target = null) => {
+    console.log('showContextMenu called:', { x, y, type, target, enabled: config.enabled });
+    
+    if (!config.enabled) return;
+
+    let items = [];
+    
+    switch (type) {
+      case 'blank':
+        if (!config.enableBlankMenu) return;
+        items = getBlankMenuItems();
+        break;
+      case 'node':
+        if (!config.enableNodeMenu) return;
+        items = getNodeMenuItems(target);
+        break;
+      case 'edge':
+        if (!config.enableEdgeMenu) return;
+        items = getEdgeMenuItems(target);
+        break;
+      default:
+        return;
+    }
+
+    // 过滤掉被禁用且不显示的项目
+    items = items.filter(item => {
+      if (item.type === 'divider') return true;
+      return item.hidden !== true;
+    });
+
+    contextMenu.value = {
+      visible: true,
+      x,
+      y,
+      items,
+      target,
+      type,
+    };
+
+    console.log('contextMenu.value set to:', contextMenu.value);
+
+    // 标记本次打开时间，用于抖动保护
+    lastOpenAt = Date.now();
+
+    // 防止菜单超出屏幕
+    nextTick(() => {
+      adjustMenuPosition();
     });
   };
-  
-  // 设置边上下文菜单
-  const setupEdgeContextMenu = (menuItemsOrFactory) => {
-    useGraphEvent('edge:contextmenu', ({ e, edge }) => {
+
+  // 隐藏右键菜单
+  const hideContextMenu = () => {
+    contextMenu.value.visible = false;
+  };
+
+  // 调整菜单位置防止超出屏幕
+  const adjustMenuPosition = () => {
+    if (!contextMenu.value.visible) return;
+
+    const menuEl = document.querySelector('.xflow-context-menu');
+    if (!menuEl) return;
+
+    const menuRect = menuEl.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    let { x, y } = contextMenu.value;
+
+    // 防止右侧超出
+    if (x + menuRect.width > viewportWidth) {
+      x = viewportWidth - menuRect.width - 10;
+    }
+
+    // 防止底部超出
+    if (y + menuRect.height > viewportHeight) {
+      y = viewportHeight - menuRect.height - 10;
+    }
+
+    // 防止左侧和顶部超出
+    x = Math.max(10, x);
+    y = Math.max(10, y);
+
+    contextMenu.value.x = x;
+    contextMenu.value.y = y;
+  };
+
+  // 处理菜单项点击
+  const handleMenuClick = (item) => {
+    if (item.disabled || item.type === 'divider') return;
+
+    hideContextMenu();
+    
+    if (typeof item.action === 'function') {
+      try {
+        item.action();
+      } catch (error) {
+        console.error('Context menu action error:', error);
+      }
+    }
+  };
+
+  // 设置图形事件监听
+  const setupGraphEvents = (graphInstance = null) => {
+    const g = graphInstance || graph?.value || graph;
+    if (!g || typeof g.on !== 'function') {
+      console.warn('Graph instance is not ready for context menu setup');
+      return;
+    }
+
+    // 节点右键
+    g.on('node:contextmenu', ({ e, node }) => {
+      console.log('node:contextmenu triggered', { e, node });
       e.preventDefault();
-      
-      const menuItems = typeof menuItemsOrFactory === 'function' 
-        ? menuItemsOrFactory(edge) 
-        : menuItemsOrFactory;
-      
-      showContextMenu(e.clientX, e.clientY, menuItems);
+      showContextMenu(e.clientX, e.clientY, 'node', node);
+    });
+
+    // 边右键
+    g.on('edge:contextmenu', ({ e, edge }) => {
+      console.log('edge:contextmenu triggered', { e, edge });
+      e.preventDefault();
+      showContextMenu(e.clientX, e.clientY, 'edge', edge);
+    });
+
+    // 空白区域右键
+    g.on('blank:contextmenu', ({ e }) => {
+      console.log('blank:contextmenu triggered', { e });
+      e.preventDefault();
+      showContextMenu(e.clientX, e.clientY, 'blank');
+    });
+
+    // 点击空白/节点/边时隐藏菜单（忽略右键点击，避免刚打开就被关闭）
+    g.on('blank:click', ({ e }) => {
+      if (e && e.button === 2) return;
+      hideContextMenu();
+    });
+    g.on('node:click', ({ e }) => {
+      if (e && e.button === 2) return;
+      hideContextMenu();
+    });
+    g.on('edge:click', ({ e }) => {
+      if (e && e.button === 2) return;
+      hideContextMenu();
     });
   };
-  
-  // 设置空白区域上下文菜单
-  const setupBlankContextMenu = (menuItemsOrFactory) => {
-    useGraphEvent('blank:contextmenu', ({ e }) => {
-      e.preventDefault();
-      
-      const menuItems = typeof menuItemsOrFactory === 'function' 
-        ? menuItemsOrFactory() 
-        : menuItemsOrFactory;
-      
-      showContextMenu(e.clientX, e.clientY, menuItems);
-    });
+
+  // 全局点击事件监听
+  const handleGlobalClick = (e) => {
+    // 右键（contextmenu）不触发隐藏，仅在左键单击空白处隐藏
+    if (e.button === 2) return;
+    // 打开菜单后的第一次 click（常在右键后立即发生）忽略
+    if (lastOpenAt && Date.now() - lastOpenAt < 200) return;
+    const menuEl = document.querySelector('.xflow-context-menu');
+    if (menuEl && menuEl.contains(e.target)) return;
+    hideContextMenu();
   };
-  
-  // 创建标准菜单项
-  const createMenuItem = (label, action, options = {}) => ({
-    label,
-    action,
-    disabled: options.disabled || false,
-    divided: options.divided || false,
-    icon: options.icon,
-    children: options.children,
-    ...options,
+
+  // 初始化
+  onMounted(() => {
+    document.addEventListener('click', handleGlobalClick);
   });
-  
-  // 创建分隔线
-  const createDivider = () => ({
-    divided: true,
+
+  // 清理
+  onUnmounted(() => {
+    document.removeEventListener('click', handleGlobalClick);
   });
-  
+
   return {
+    contextMenu: computed(() => contextMenu.value),
     showContextMenu,
-    setupNodeContextMenu,
-    setupEdgeContextMenu,
-    setupBlankContextMenu,
-    createMenuItem,
-    createDivider,
+    hideContextMenu,
+    handleMenuClick,
+    setClipboardHandler,
+    setHistoryHandler,
+    setSelectionHandler,
+    setupGraphEvents, // 允许手动设置事件
   };
 }
