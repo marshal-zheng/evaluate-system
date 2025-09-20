@@ -174,6 +174,28 @@ let clipboardActions = null;
 const nodeCount = computed(() => graph?.getCells().filter(cell => cell.isNode()).length || 0);
 const edgeCount = computed(() => graph?.getCells().filter(cell => cell.isEdge()).length || 0);
 
+const getEdgeLabelText = (edge) => {
+  if (!edge) return '';
+  if (typeof edge.getLabelAt === 'function') {
+    const label = edge.getLabelAt(0);
+    if (!label) return '';
+    if (typeof label === 'string') return label;
+    if (label?.attrs?.label?.text != null) return label.attrs.label.text;
+    if (label?.attrs?.text?.text != null) return label.attrs.text.text;
+    if (typeof label?.text === 'string') return label.text;
+  }
+  const direct = edge?.prop?.('labels/0/attrs/label/text');
+  return typeof direct === 'string' ? direct : '';
+};
+
+const selectAllCells = () => {
+  if (!graph) return;
+  const cells = graph.getCells();
+  if (cells.length) {
+    graph.resetSelection(cells);
+  }
+};
+
 // 图形准备就绪回调
 const onGraphReady = (g) => {
   graph = g;
@@ -449,10 +471,15 @@ const handleMenuClick = (item) => {
       addCustomNode();
       break;
     case 'paste':
-      clipboardActions?.paste();
+      {
+        const cells = clipboardActions?.paste();
+        if (cells?.length) {
+          graph.resetSelection(cells);
+        }
+      }
       break;
     case 'select-all':
-      graph.selectAll();
+      selectAllCells();
       break;
     case 'clear':
       clearGraph();
@@ -470,10 +497,20 @@ const editNode = (node) => {
 
 // 编辑边标签
 const editEdgeLabel = (edge) => {
-  const currentLabel = edge.getLabel() || '';
+  const currentLabel = getEdgeLabelText(edge);
   const newLabel = prompt('请输入边的标签:', currentLabel);
   if (newLabel !== null) {
-    edge.setLabel(newLabel);
+    if (newLabel === '') {
+      edge.setLabels([]);
+    } else {
+      edge.setLabels([
+        {
+          attrs: {
+            label: { text: newLabel },
+          },
+        },
+      ]);
+    }
   }
 };
 
@@ -637,4 +674,3 @@ onMounted(() => {
   background-color: #e8e8e8;
 }
 </style>
-

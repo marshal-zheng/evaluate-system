@@ -200,6 +200,14 @@ const edgeCount = computed(() => graphStore?.edges?.length || 0);
 const canUndoValue = computed(() => historyActions?.canUndo() || false);
 const canRedoValue = computed(() => historyActions?.canRedo() || false);
 
+const selectAllCells = () => {
+  if (!graph) return;
+  const cells = graph.getCells();
+  if (cells.length) {
+    graph.resetSelection(cells);
+  }
+};
+
 // 图形事件监听
 const setupGraphEvents = () => {
   if (!graph) return;
@@ -245,7 +253,7 @@ const setupGraphEvents = () => {
   });
   
   graph.bindKey(['ctrl+a', 'cmd+a'], () => {
-    graph.selectAll();
+    selectAllCells();
   });
 };
 
@@ -346,8 +354,8 @@ const copy = () => {
 const paste = () => {
   if (clipboardActions) {
     const cells = clipboardActions.paste({ offset: 20 });
-    if (cells.length > 0) {
-      graph.select(cells);
+    if (cells?.length) {
+      graph.resetSelection(cells);
     }
   }
 };
