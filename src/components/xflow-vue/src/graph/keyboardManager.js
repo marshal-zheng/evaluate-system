@@ -62,6 +62,8 @@ export class KeyboardManager {
       globalKeys: ['space'], // 需要全局监听的键
       enableStandardInteractions: true, // 启用标准交互
       enableContextMenu: true, // 启用右键菜单
+      // 是否允许边被选择/框选（与图层配置保持一致）
+      allowEdgeSelection: false,
       ...options,
     };
     
@@ -167,7 +169,13 @@ export class KeyboardManager {
    */
   selectAll() {
     if (this.graph) {
-      this.graph.selectAll();
+      // X6 无内置 selectAll 方法；这里按配置选择节点（可选边）
+      const cells = this.options.allowEdgeSelection
+        ? (this.graph.getCells ? this.graph.getCells() : [])
+        : (this.graph.getNodes ? this.graph.getNodes() : []);
+      if (cells && cells.length > 0) {
+        this.graph.select(cells);
+      }
     }
   }
   
@@ -262,8 +270,14 @@ export class KeyboardManager {
       enabled: true,
       multiple: true,
       showNodeSelectionBox: true,
-      showEdgeSelectionBox: true,
+      showEdgeSelectionBox: this.options.allowEdgeSelection === true,
       modifiers: ['meta', 'ctrl'], // 支持 Cmd/Ctrl 多选
+      // 只允许选择节点；当允许边选择时再放开
+      filter: (cell) => {
+        if (cell.isNode && cell.isNode()) return true;
+        if (cell.isEdge && cell.isEdge()) return this.options.allowEdgeSelection === true;
+        return true;
+      },
       ...options,
     }));
     

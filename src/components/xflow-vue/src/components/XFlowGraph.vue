@@ -338,6 +338,8 @@ const initGraph = async () => {
 
   // 初始化键盘管理器
   const keyboardMgr = initKeyboardManager();
+  // 将边选择开关同步给 keyboardManager
+  keyboardMgr.options.allowEdgeSelection = props.selectOptions?.showEdgeSelectionBox === true || props.selectOptions?.allowEdgeSelection === true;
   
   // 初始化标准交互（在键盘管理器之后）
   if (standardInteractions) {
