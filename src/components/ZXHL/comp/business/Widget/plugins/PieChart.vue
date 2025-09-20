@@ -19,7 +19,7 @@
       ref="chartRef"
       :options="currentOption"
       v-bind="chartAttrs"
-      @ready="handleChartReady"
+      @ready="emit('ready', $event)"
       @click="emit('click', $event)"
       @dblclick="emit('dblclick', $event)"
       @mouseover="emit('mouseover', $event)"
@@ -29,8 +29,9 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, readonly, useAttrs, nextTick, onBeforeUnmount } from 'vue'
+import { ref, computed, watch, readonly, useAttrs } from 'vue'
 import ZxChart from '@/components/ZXHL/comp/pure/ZxChart/index.vue'
+import ZxSelect from '@/components/ZXHL/comp/pure/ZxSelect/index.vue'
 
 const props = defineProps({
   // 支持单个option对象或options数组
@@ -56,7 +57,6 @@ const emit = defineEmits(['ready', 'click', 'dblclick', 'mouseover', 'mouseout',
 const chartRef = ref(null)
 const selectedIndex = ref(0)
 const attrs = useAttrs()
-const isChartReady = ref(false)
 
 // 计算选择器选项
 const selectOptions = computed(() => {
@@ -89,25 +89,34 @@ const currentOption = computed(() => {
 })
 
 // 验证和修复 legend 配置的辅助函数
-const deepClone = (value) => {
+const deepClone = (value, cache = new WeakMap()) => {
   if (value === null || typeof value !== 'object') {
     return value
   }
 
-  if (typeof globalThis.structuredClone === 'function') {
-    try {
-      return globalThis.structuredClone(value)
-    } catch (error) {
-      console.warn('[PieChart] structuredClone failed, fallback to JSON clone:', error)
-    }
+  if (cache.has(value)) {
+    return cache.get(value)
   }
 
-  try {
-    return JSON.parse(JSON.stringify(value))
-  } catch (error) {
-    console.warn('[PieChart] JSON clone failed:', error)
-    return value
+  if (Array.isArray(value)) {
+    const clonedArray = value.map(item => deepClone(item, cache))
+    cache.set(value, clonedArray)
+    return clonedArray
   }
+
+  if (value instanceof Date) {
+    return new Date(value.getTime())
+  }
+
+  const clonedObject = {}
+  cache.set(value, clonedObject)
+
+  Object.keys(value).forEach((key) => {
+    const item = value[key]
+    clonedObject[key] = typeof item === 'function' ? item : deepClone(item, cache)
+  })
+
+  return clonedObject
 }
 
 const normalizeLegendEntry = (legendEntry, legendData) => {
@@ -142,32 +151,31 @@ const validateAndFixLegend = (option) => {
   const seriesList = Array.isArray(fixedOption.series) ? fixedOption.series : []
   const seriesNames = new Set()
 
-  seriesList.forEach((series, index) => {
+  seriesList.forEach(series => {
     if (!series || typeof series !== 'object') return
-
-    // 让 ECharts 能感知是同一个系列，从而启用更新动画
-    if (!series.id) {
-      series.id = series.name || `pie-series-${index}`
-    }
-
-    if (!series.animation) {
-      series.animation = true
-    }
-
-    series.animationTypeUpdate = series.animationTypeUpdate || 'expansion'
-    series.animationDurationUpdate = series.animationDurationUpdate || 520
-    series.animationEasingUpdate = series.animationEasingUpdate || 'cubicOut'
-
-    if (!series.universalTransition) {
-      series.universalTransition = {
-        enabled: true,
-        delay: (idx) => idx * 30,
-        duration: 520
-      }
-    }
 
     if (series.name) {
       seriesNames.add(series.name)
+    }
+
+    if (series.type === 'pie') {
+      if (!series.label) series.label = {}
+      series.label.show = true
+      series.label.position = 'outside'
+      series.label.formatter = '{b}: {c} ({d}%)'
+      series.label.fontSize = series.label.fontSize || 12
+      series.label.align = series.label.align || 'left'
+
+      if (!series.labelLine) series.labelLine = {}
+      series.labelLine.show = true
+      series.labelLine.length = series.labelLine.length ?? 18
+      series.labelLine.length2 = series.labelLine.length2 ?? 12
+      series.labelLine.smooth = series.labelLine.smooth ?? true
+
+      if (!series.emphasis) series.emphasis = {}
+      if (!series.emphasis.label) series.emphasis.label = {}
+      series.emphasis.label.show = true
+      series.emphasis.label.fontWeight = series.emphasis.label.fontWeight || 'bold'
     }
 
     if (Array.isArray(series.data)) {
@@ -191,10 +199,6 @@ const validateAndFixLegend = (option) => {
 
   const legendData = Array.from(seriesNames)
   const legendConfig = fixedOption.legend
-
-  if (fixedOption.animation === false) {
-    fixedOption.animation = true
-  }
 
   if (Array.isArray(legendConfig)) {
     fixedOption.legend = legendConfig.map(entry => normalizeLegendEntry(entry, legendData))
@@ -221,72 +225,6 @@ const handleSelectionChange = (index) => {
   })
 }
 
-let previewFrame = 0
-let hideTipTimer = 0
-const PREVIEW_TIP_DURATION = 1200
-
-const triggerSlicePreview = () => {
-  if (previewFrame) {
-    cancelAnimationFrame(previewFrame)
-  }
-
-  if (hideTipTimer) {
-    clearTimeout(hideTipTimer)
-    hideTipTimer = 0
-  }
-
-  previewFrame = requestAnimationFrame(async () => {
-    previewFrame = 0
-
-    if (!isChartReady.value) return
-
-    await nextTick()
-
-    const chart = chartRef.value?.getChart()
-    const option = currentOption.value
-
-    if (!chart || !option?.series || !Array.isArray(option.series) || option.series.length === 0) {
-      return
-    }
-
-    const primarySeries = option.series[0]
-    const seriesData = Array.isArray(primarySeries.data) ? primarySeries.data : []
-
-    if (seriesData.length === 0) {
-      chart.dispatchAction({ type: 'hideTip' })
-      return
-    }
-
-    let targetIndex = 0
-    if (seriesData.length > 1) {
-      targetIndex = seriesData.reduce((maxIndex, item, idx) => {
-        const currentValue = typeof item === 'object' ? Number(item?.value ?? 0) : Number(item)
-        const maxValue = typeof seriesData[maxIndex] === 'object'
-          ? Number(seriesData[maxIndex]?.value ?? 0)
-          : Number(seriesData[maxIndex])
-        return currentValue > maxValue ? idx : maxIndex
-      }, 0)
-    }
-
-    chart.dispatchAction({ type: 'downplay', seriesIndex: 0 })
-    chart.dispatchAction({ type: 'showTip', seriesIndex: 0, dataIndex: targetIndex })
-
-    if (typeof window !== 'undefined') {
-      hideTipTimer = window.setTimeout(() => {
-        chart.dispatchAction({ type: 'hideTip' })
-        chart.dispatchAction({ type: 'downplay', seriesIndex: 0 })
-        hideTipTimer = 0
-      }, PREVIEW_TIP_DURATION)
-    }
-  })
-}
-
-const handleChartReady = (chartInstance) => {
-  isChartReady.value = true
-  emit('ready', chartInstance)
-  triggerSlicePreview()
-}
-
 // 监听option变化，重置选择
 watch(() => props.options, (newOption) => {
   if (Array.isArray(newOption) && newOption.length > 0) {
@@ -294,29 +232,8 @@ watch(() => props.options, (newOption) => {
     if (selectedIndex.value >= newOption.length) {
       selectedIndex.value = 0
     }
-    triggerSlicePreview()
   }
-}, { immediate: true, flush: 'post' })
-
-watch(selectedIndex, () => {
-  triggerSlicePreview()
-}, { flush: 'post' })
-
-watch(currentOption, () => {
-  triggerSlicePreview()
-}, { flush: 'post' })
-
-onBeforeUnmount(() => {
-  if (previewFrame) {
-    cancelAnimationFrame(previewFrame)
-    previewFrame = 0
-  }
-
-  if (hideTipTimer) {
-    clearTimeout(hideTipTimer)
-    hideTipTimer = 0
-  }
-})
+}, { immediate: true })
 
 // 暴露的方法
 const getInstance = () => chartRef.value?.getChart()
