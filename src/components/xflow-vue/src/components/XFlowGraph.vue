@@ -13,7 +13,7 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue';
-import { Graph, Options } from '@antv/x6';
+import { Graph, Options, Shape } from '@antv/x6';
 import { Keyboard } from '@antv/x6-plugin-keyboard';
 import { Scroller } from '@antv/x6-plugin-scroller';
 import { Selection } from '@antv/x6-plugin-selection';
@@ -171,19 +171,71 @@ const initGraph = async () => {
     },
     connecting: {
       ...props.connectionOptions,
+      allowBlank: false,
+      allowLoop: false,
+      allowEdge: false,
+      highlight: true,
+      snap: true,
+      validateConnection({ sourceMagnet, targetMagnet }) {
+        return !!(sourceMagnet && targetMagnet);
+      },
       createEdge() {
-        return this.createEdge({
-          shape: 'edge',
+        return new Shape.Edge({
+          shape: 'basic-edge',
           ...props.connectionEdgeOptions,
         });
       },
     },
     highlighting: {
-      default: props.defaultHighlightOptions,
-      embedding: props.embedHighlightOptions,
-      nodeAvailable: props.nodeAvailableHighlightOptions,
-      magnetAvailable: props.magnetAvailableHighlightOptions,
-      magnetAdsorbed: props.magnetAdsorbedHighlightOptions,
+      default: {
+        name: 'stroke',
+        args: {
+          padding: 3,
+          attrs: {
+            strokeWidth: 3,
+            stroke: '#1890ff',
+          },
+        },
+        ...props.defaultHighlightOptions,
+      },
+      embedding: {
+        name: 'stroke',
+        args: {
+          padding: 3,
+          attrs: {
+            strokeWidth: 3,
+            stroke: '#52c41a',
+          },
+        },
+        ...props.embedHighlightOptions,
+      },
+      nodeAvailable: {
+        name: 'className',
+        args: {
+          className: 'available',
+        },
+        ...props.nodeAvailableHighlightOptions,
+      },
+      magnetAvailable: {
+        name: 'stroke',
+        args: {
+          attrs: {
+            fill: '#1890ff',
+            stroke: '#1890ff',
+          },
+        },
+        ...props.magnetAvailableHighlightOptions,
+      },
+      magnetAdsorbed: {
+        name: 'stroke',
+        args: {
+          attrs: {
+            fill: '#52c41a',
+            stroke: '#52c41a',
+          },
+        },
+        ...props.magnetAdsorbedHighlightOptions,
+      },
     },
     onPortRendered: props.onPortRendered,
     onEdgeLabelRendered: props.onEdgeLabelRendered,
