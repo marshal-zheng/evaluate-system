@@ -86,14 +86,21 @@ const setupGraphEvents = () => {
   graph.on('selection:changed', ({ selected }) => {
     selectedCells.value = selected
   })
+  
   // 监听历史变化，推动撤销/重做按钮刷新
   const bumpHistory = () => {
-    historyVersion.value += 1
+    // 使用 nextTick 确保历史状态已更新
+    setTimeout(() => {
+      historyVersion.value += 1
+    }, 10)
   }
+  
+  // 监听历史操作事件
   graph.on('history:undo', bumpHistory)
   graph.on('history:redo', bumpHistory)
   graph.on('history:change', bumpHistory)
-  // 兜底：节点/边增删改也刷新一次
+  
+  // 监听图变化事件（这些操作会被记录到历史中）
   graph.on('cell:added', bumpHistory)
   graph.on('cell:removed', bumpHistory)
   graph.on('cell:changed', bumpHistory)
@@ -115,19 +122,43 @@ const onGraphReady = (g) => {
 }
 
 // 操作
-const undo = () => historyActions && historyActions.undo()
-const redo = () => historyActions && historyActions.redo()
-const copy = () => {
-  clipboardActions && clipboardActions.copy()
-  updateClipboardStatus()
-  historyVersion.value += 1
+const undo = () => {
+  if (historyActions) {
+    historyActions.undo()
+    // 手动触发状态更新
+    setTimeout(() => {
+      historyVersion.value += 1
+    }, 10)
+  }
 }
+
+const redo = () => {
+  if (historyActions) {
+    historyActions.redo()
+    // 手动触发状态更新
+    setTimeout(() => {
+      historyVersion.value += 1
+    }, 10)
+  }
+}
+
+const copy = () => {
+  if (clipboardActions) {
+    clipboardActions.copy()
+    updateClipboardStatus()
+  }
+}
+
 const paste = () => {
   if (!clipboardActions) return
-  const cells = clipboardActions.paste({ offset: 20 })
-  if (cells?.length) graph.select(cells)
-  // 粘贴会新增单元，推动历史状态刷新
-  historyVersion.value += 1
+  const cells = clipboardActions.paste()
+  if (cells?.length) {
+    if (graph) {
+      graph.cleanSelection()
+      graph.select(cells)
+    }
+  }
+  updateClipboardStatus()
 }
 const updateClipboardStatus = () => {
   clipboardEmpty.value = clipboardActions ? clipboardActions.isEmpty() : true
