@@ -24,7 +24,12 @@ export function useClipboard(graphInstance = null) {
     if (g) {
       const clipboard = g.getPlugin('clipboard');
       if (clipboard) {
-        return clipboard.paste(options);
+        // 默认配置确保粘贴的节点有新的ID
+        const defaultOptions = {
+          offset: 20,
+          ...options
+        };
+        return clipboard.paste(defaultOptions);
       }
     }
     return [];
