@@ -43,6 +43,7 @@
             >
               <XFlowHistory />
               <XFlowClipboard />
+              <XFlowExport />
               <XFlowSnapline />
               <XFlowBackground :color="'#fafafa'" />
               <XFlowGrid :size="20" type="dot" />
@@ -72,6 +73,7 @@ import {
   XFlowGraph,
   XFlowHistory,
   XFlowClipboard,
+  XFlowExport,
   XFlowBackground,
   XFlowGrid,
   XFlowSnapline,
@@ -79,7 +81,7 @@ import {
 } from '../xflow-vue/src/components/index.js'
 
 // 组合式
-import { useDnd, useExport } from '../xflow-vue/src/composables/index.js'
+import { useDnd, useExport, useClipboard, useHistory } from '../xflow-vue/src/composables/index.js'
 import { registerBasicShapes } from '../xflow-vue/src/shapes/register.js'
 
 // 画布与选择
@@ -132,10 +134,50 @@ const startDragNode = (shape, e) => {
   dnd.startDrag(data, e)
 }
 
-// 导出：同样传入函数，避免上下文未就绪
-const { exportPNG: doExportPNG, exportSVG: doExportSVG } = useExport(() => graph)
-const exportPNG = () => doExportPNG({ filename: 'demo7.png' })
-const exportSVG = () => doExportSVG({ filename: 'demo7.svg' })
+// 导出：延迟初始化，确保拿到真实 graph 实例
+let exportActions = null
+const ensureExportActions = () => {
+  if (!exportActions && graph) {
+    exportActions = useExport(graph)
+  }
+  return exportActions
+}
+const triggerDownload = (dataUrl, filename) => {
+  try {
+    const a = document.createElement('a')
+    a.href = dataUrl
+    a.download = filename
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+  } catch (e) {
+    console.warn('触发下载失败:', e)
+  }
+}
+const exportPNG = () => {
+  const actions = ensureExportActions()
+  if (!actions) {
+    console.warn('导出插件未就绪')
+    return
+  }
+  const ok = actions.exportPNG('demo7.png')
+  if (!ok && actions.toDataURL) {
+    const url = actions.toDataURL('image/png')
+    if (url) triggerDownload(url, 'demo7.png')
+  }
+}
+const exportSVG = () => {
+  const actions = ensureExportActions()
+  if (!actions) {
+    console.warn('导出插件未就绪')
+    return
+  }
+  const ok = actions.exportSVG('demo7.svg')
+  if (!ok && actions.toDataURL) {
+    const url = actions.toDataURL('image/svg+xml')
+    if (url) triggerDownload(url, 'demo7.svg')
+  }
+}
 
 // 统计
 const nodeCount = computed(() => {
@@ -158,8 +200,44 @@ const selectedCount = computed(() => {
 })
 
 // ready
-const onGraphReady = (g) => {
+const onGraphReady = (g, keyboardMgr) => {
   graph = g
+  exportActions = useExport(graph)
+
+  if (keyboardMgr) {
+    const clipboardActions = useClipboard(g)
+    keyboardMgr.setClipboardHandler((action) => {
+      switch (action) {
+        case 'copy':
+          clipboardActions.copy()
+          break
+        case 'paste': {
+          const cells = clipboardActions.paste({ offset: 20 })
+          if (cells && cells.length) {
+            graph.cleanSelection()
+            graph.select(cells)
+          }
+          break
+        }
+        case 'cut':
+          clipboardActions.cut()
+          break
+      }
+    })
+
+    const historyActions = useHistory(g)
+    keyboardMgr.setHistoryHandler((action) => {
+      switch (action) {
+        case 'undo':
+          historyActions.undo()
+          break
+        case 'redo':
+          historyActions.redo()
+          break
+      }
+    })
+  }
+
   bindGraphEvents()
   seedNodes()
 }
