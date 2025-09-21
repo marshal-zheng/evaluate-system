@@ -407,14 +407,11 @@ const applyInteractions = () => {
     // 全局锁定或自定义锁定逻辑
     try {
       if (props.locked === true) {
-        if (typeof props.isNodeLocked === 'function') {
-          return props.isNodeLocked(cell, view) ? false : true;
-        }
         return false;
-      } else {
-        if (typeof props.isNodeLocked === 'function') {
-          return props.isNodeLocked(cell, view) ? false : true;
-        }
+      }
+
+      if (typeof props.isNodeLocked === 'function') {
+        return props.isNodeLocked(cell, view) ? false : true;
       }
     } catch (e) {
       // 自定义回调异常时，出于安全默认禁止移动
@@ -616,6 +613,43 @@ onUnmounted(() => {
 // 监听属性变化
 watch(() => props.readonly, updateReadonly, { immediate: true });
 watch(() => [props.locked, props.isNodeLocked], () => applyInteractions(), { immediate: true });
+watch(
+  () => props.enableContextMenu,
+  (enabled) => {
+    if (!standardInteractions || typeof standardInteractions.setContextMenuEnabled !== 'function') return;
+    const shouldEnable = props.enableStandardInteractions !== false && enabled !== false;
+    standardInteractions.setContextMenuEnabled(shouldEnable);
+  },
+  { immediate: true },
+);
+watch(
+  () => props.enableDoubleClickFit,
+  (enabled) => {
+    if (!standardInteractions || typeof standardInteractions.setDoubleClickFitEnabled !== 'function') return;
+    const shouldEnable = props.enableStandardInteractions !== false && enabled !== false;
+    standardInteractions.setDoubleClickFitEnabled(shouldEnable);
+  },
+  { immediate: true },
+);
+watch(
+  () => props.enableStandardInteractions,
+  (enabled) => {
+    if (!standardInteractions) return;
+    const menuToggle = typeof standardInteractions.setContextMenuEnabled === 'function'
+      ? standardInteractions.setContextMenuEnabled
+      : null;
+    const dblClickToggle = typeof standardInteractions.setDoubleClickFitEnabled === 'function'
+      ? standardInteractions.setDoubleClickFitEnabled
+      : null;
+
+    const shouldEnableMenu = enabled !== false && props.enableContextMenu !== false;
+    const shouldEnableDoubleClick = enabled !== false && props.enableDoubleClickFit !== false;
+
+    menuToggle?.(shouldEnableMenu);
+    dblClickToggle?.(shouldEnableDoubleClick);
+  },
+  { immediate: true },
+);
 watch(() => [props.zoomable, props.zoomOptions], ([zoomable, zoomOptions]) => {
   updateZoom(zoomable, zoomOptions);
 }, { immediate: true });

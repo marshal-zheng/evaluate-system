@@ -345,6 +345,13 @@ export function useContextMenu(graph, options = {}) {
     }
   };
 
+  const setEnabled = (enabled) => {
+    config.enabled = !!enabled;
+    if (!config.enabled) {
+      hideContextMenu();
+    }
+  };
+
   // 设置图形事件监听
   const setupGraphEvents = (graphInstance = null) => {
     const g = graphInstance || graph?.value || graph;
@@ -415,6 +422,7 @@ export function useContextMenu(graph, options = {}) {
     showContextMenu,
     hideContextMenu,
     handleMenuClick,
+    setEnabled,
     setClipboardHandler,
     setHistoryHandler,
     setSelectionHandler,

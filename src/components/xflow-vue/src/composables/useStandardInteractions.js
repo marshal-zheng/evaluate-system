@@ -28,6 +28,20 @@ export function useStandardInteractions(graph, options = {}) {
     ? useContextMenu(graph, config.contextMenuOptions)
     : null;
 
+  const blankDblclickHandler = () => {
+    const g = getGraphInstance();
+    g?.scaleContentToFit({ padding: 20 });
+  };
+
+  const updateDoubleClickFitListener = (graphInstance = null) => {
+    const g = graphInstance || getGraphInstance();
+    if (!g || typeof g.on !== 'function') return;
+    g.off('blank:dblclick', blankDblclickHandler);
+    if (config.enableDoubleClickFit) {
+      g.on('blank:dblclick', blankDblclickHandler);
+    }
+  };
+
   // 选择状态
   const selectedCells = ref([]);
   // 框选模式状态（Shift+拖拽时为 true）
@@ -114,11 +128,7 @@ export function useStandardInteractions(graph, options = {}) {
     });
 
     // 双击空白区域适应画布
-    if (config.enableDoubleClickFit) {
-      g.on('blank:dblclick', () => {
-        g.scaleContentToFit({ padding: 20 });
-      });
-    }
+    updateDoubleClickFitListener(g);
 
     // 标准选择交互
     if (config.enableStandardSelection) {
@@ -307,5 +317,10 @@ export function useStandardInteractions(graph, options = {}) {
     
     // 事件设置
     setupStandardEvents,
+    setContextMenuEnabled: contextMenuComposable?.setEnabled,
+    setDoubleClickFitEnabled: (enabled) => {
+      config.enableDoubleClickFit = !!enabled;
+      updateDoubleClickFitListener();
+    },
   };
 }

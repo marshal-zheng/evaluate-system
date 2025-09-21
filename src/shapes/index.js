@@ -115,6 +115,21 @@ export function registerBasicBusinessShapes() {
       },
     });
 
+    // 基础连线
+    Graph.registerEdge('basic-edge', {
+      inherit: 'edge',
+      attrs: {
+        line: {
+          stroke: '#d9d9d9',
+          strokeWidth: 2,
+          targetMarker: {
+            name: 'classic',
+            size: 8,
+          },
+        },
+      },
+    });
+
     console.log('基础业务图形注册成功');
     flags.__basic_business_shapes__ = true;
   } catch (e) {
@@ -370,4 +385,3 @@ export function getAvailableShapes() {
     ],
   };
 }
-
