@@ -1,13 +1,14 @@
 import { onMounted, onUnmounted, ref, watch } from 'vue';
 import { useGraphInstance } from './useGraphInstance';
+import { useLatest } from './useLatest';
 
 export function useKeyboard(key, callback, action = 'keydown') {
   const graph = useGraphInstance();
-  const callbackRef = ref(callback);
+  const latestCallback = useLatest(callback);
   
   // 更新回调引用
   const updateCallback = (newCallback) => {
-    callbackRef.value = newCallback;
+    latestCallback.value = newCallback;
   };
   
   const bindKey = () => {
@@ -15,8 +16,8 @@ export function useKeyboard(key, callback, action = 'keydown') {
       graph.value.bindKey(
         key,
         (e) => {
-          if (callbackRef.value) {
-            callbackRef.value(e);
+          if (latestCallback && latestCallback.value) {
+            latestCallback.value(e);
           }
         },
         action

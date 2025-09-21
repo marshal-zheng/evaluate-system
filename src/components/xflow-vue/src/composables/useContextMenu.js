@@ -407,14 +407,23 @@ export function useContextMenu(graph, options = {}) {
     hideContextMenu();
   };
 
+  // 全局按键监听：允许 ESC 取消菜单
+  const handleGlobalKeydown = (e) => {
+    if (e.key === 'Escape') {
+      hideContextMenu();
+    }
+  };
+
   // 初始化
   onMounted(() => {
     document.addEventListener('click', handleGlobalClick);
+    document.addEventListener('keydown', handleGlobalKeydown, true);
   });
 
   // 清理
   onUnmounted(() => {
     document.removeEventListener('click', handleGlobalClick);
+    document.removeEventListener('keydown', handleGlobalKeydown, true);
   });
 
   return {

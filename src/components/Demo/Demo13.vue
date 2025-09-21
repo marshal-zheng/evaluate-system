@@ -571,3 +571,4 @@ onMounted(() => {
   width: 80px;
 }
 </style>
+

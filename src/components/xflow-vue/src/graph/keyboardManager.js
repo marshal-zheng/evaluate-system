@@ -29,7 +29,10 @@ export function createKeyboardConfig() {
     // 删除操作
     'delete': 'delete-selected',
     'backspace': 'delete-selected',
-    
+
+    // 取消当前操作 / 清除选择
+    'esc': 'clear-selection',
+
     // 视图操作
     [`${ctrlKey}+0`]: 'zoom-to-fit',
     [`${ctrlKey}+1`]: 'zoom-to-actual',
