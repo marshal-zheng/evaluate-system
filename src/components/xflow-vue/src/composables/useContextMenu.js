@@ -196,17 +196,28 @@ export function useContextMenu(graph, options = {}) {
     if (!node) return;
     
     const locked = node.prop('locked');
-    node.prop('locked', !locked);
-    node.prop('draggable', locked); // 锁定时不可拖拽
+    const newLocked = !locked;
     
-    // 视觉反馈
-    if (!locked) {
-      node.attr('body/strokeDasharray', '5,5');
-      node.attr('body/opacity', 0.7);
+    // 设置锁定状态
+    node.prop('locked', newLocked);
+    
+    // 设置节点的拖拽状态
+    node.prop('draggable', !newLocked);
+    
+    // 设置节点的锁定视觉状态
+    if (newLocked) {
+      // 设置锁定标记到节点数据和DOM属性
+      node.setData({ ...node.getData(), locked: true });
+      node.attr('body/data-locked', 'true');
     } else {
-      node.attr('body/strokeDasharray', '');
-      node.attr('body/opacity', 1);
+      // 移除锁定标记
+      const data = node.getData();
+      delete data.locked;
+      node.setData(data);
+      node.attr('body/data-locked', null);
     }
+    
+    console.log(`节点 ${node.id} ${newLocked ? '已锁定' : '已解锁'}`);
   };
 
   // 辅助函数：编辑边标签

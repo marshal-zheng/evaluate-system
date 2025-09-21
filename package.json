@@ -10,8 +10,9 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@antv/graphlib": "^2.0.4",
     "@antv/hierarchy": "^0.6.11",
-    "@antv/layout": "^0.2.25",
+    "@antv/layout": "^1.2.14-beta.8",
     "@antv/x6": "^2.18.1",
     "@antv/x6-plugin-clipboard": "^2.1.6",
     "@antv/x6-plugin-dnd": "^2.1.1",

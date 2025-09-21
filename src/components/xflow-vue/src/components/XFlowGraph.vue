@@ -16,12 +16,7 @@
       @menu-click="handleContextMenuClick"
     />
     
-    <!-- Debug: 显示菜单状态 -->
-    <div v-if="true" style="position: fixed; top: 10px; right: 10px; background: white; padding: 10px; z-index: 10000; border: 1px solid red;">
-      Debug: {{ standardInteractions?.contextMenu?.visible ? 'Menu Visible' : 'Menu Hidden' }}<br>
-      HasContextMenu: {{ !!standardInteractions?.contextMenu }}<br>
-      MenuItems: {{ standardInteractions?.contextMenu?.items?.length || 0 }}
-    </div>
+
   </div>
 </template>
 
@@ -32,6 +27,8 @@ import { Keyboard } from '@antv/x6-plugin-keyboard';
 import { Scroller } from '@antv/x6-plugin-scroller';
 import { useGraphInstance } from '../composables/useGraphInstance';
 import { useKeyboardManager } from '../composables/useKeyboardManager';
+import { useClipboard } from '../composables/useClipboard';
+import { useHistory } from '../composables/useHistory';
 import { useStandardInteractions } from '../composables/useStandardInteractions';
 import XFlowContextMenu from './XFlowContextMenu.vue';
 
@@ -262,7 +259,6 @@ const initGraph = async () => {
       },
       createEdge() {
         return new Shape.Edge({
-          shape: 'basic-edge',
           ...props.connectionEdgeOptions,
         });
       },
@@ -361,6 +357,48 @@ const initGraph = async () => {
 
   // 初始化键盘管理器
   const keyboardMgr = initKeyboardManager();
+
+  // 接入剪贴板与历史处理器（用于快捷键与右键菜单）
+  try {
+    const clipboardApi = useClipboard(graph);
+    const historyApi = useHistory(graph);
+
+    setClipboardHandler((action) => {
+      switch (action) {
+        case 'copy':
+          clipboardApi.copy();
+          break;
+        case 'paste':
+          clipboardApi.paste();
+          break;
+        case 'cut':
+          clipboardApi.cut();
+          break;
+        default:
+          break;
+      }
+    });
+
+    setHistoryHandler((action) => {
+      switch (action) {
+        case 'undo':
+          historyApi.undo();
+          break;
+        case 'redo':
+          historyApi.redo();
+          break;
+        default:
+          break;
+      }
+    });
+
+    // 将处理器同步给标准交互（右键菜单）
+    if (standardInteractions && typeof standardInteractions.setupHandlers === 'function') {
+      standardInteractions.setupHandlers(clipboardApi, historyApi);
+    }
+  } catch (e) {
+    // 忽略组合式初始化异常，保持基本交互可用
+  }
   // 将边选择开关同步给 keyboardManager
   keyboardMgr.options.allowEdgeSelection = props.selectOptions?.showEdgeSelectionBox === true || props.selectOptions?.allowEdgeSelection === true;
   
