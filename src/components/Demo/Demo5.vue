@@ -195,7 +195,7 @@ import {
 import { Selection } from '@antv/x6-plugin-selection';
 
 // 导入注册函数
-import { registerBasicShapes } from '../xflow-vue/src/shapes/register.js';
+import { registerBasicShapes } from '../../shapes';
 
 // 导入组合式函数
 import { useClipboard, useHistory } from '../xflow-vue/src/composables/index.js';

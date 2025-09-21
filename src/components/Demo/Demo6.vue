@@ -160,7 +160,7 @@ import {
 import { useDeviceSupport, useClipboard, useHistory } from '../xflow-vue/src/composables/index.js';
 
 // 导入注册函数
-import { registerBasicShapes } from '../xflow-vue/src/shapes/register.js';
+import { registerBasicShapes } from '../../shapes';
 
 // 设备支持检测
 const deviceInfo = useDeviceSupport();

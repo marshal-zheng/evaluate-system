@@ -57,7 +57,7 @@ import {
 
 // 组合式
 import { useGraphStore, useHistory, useClipboard } from '../xflow-vue/src/composables/index.js'
-import { registerBasicShapes } from '../xflow-vue/src/shapes/register.js'
+import { registerBasicShapes } from '../../shapes/index.js'
 
 // 状态
 const selectedCells = ref([])

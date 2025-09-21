@@ -82,7 +82,7 @@ import {
 
 // 组合式
 import { useDnd, useExport, useClipboard, useHistory } from '../xflow-vue/src/composables/index.js'
-import { registerBasicShapes } from '../xflow-vue/src/shapes/register.js'
+import { registerBasicBusinessShapes } from '../../shapes/index.js'
 
 // 画布与选择
 let graph = null
@@ -507,7 +507,7 @@ const layoutCircular = () => {
 }
 
 onMounted(() => {
-  registerBasicShapes()
+  registerBasicBusinessShapes()
 })
 </script>
 

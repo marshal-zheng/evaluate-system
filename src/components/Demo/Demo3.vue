@@ -156,7 +156,7 @@ import {
 } from '../xflow-vue/src/composables/index.js';
 
 // 导入节点注册
-import { registerBasicShapes, registerVueShapes } from '../xflow-vue/src/shapes/register.js';
+import { registerBasicShapes, registerVueShapes } from '../../shapes';
 
 // 响应式数据
 const selectedCells = ref([]);

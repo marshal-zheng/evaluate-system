@@ -161,7 +161,7 @@ import {
 } from '../xflow-vue/src/components/index.js';
 
 // 导入注册函数
-import { registerBasicShapes } from '../xflow-vue/src/shapes/register.js';
+import { registerBasicShapes } from '../../shapes';
 
 // 响应式数据
 const graphRef = ref(null);
