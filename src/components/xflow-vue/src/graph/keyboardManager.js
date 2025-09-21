@@ -71,9 +71,20 @@ export class KeyboardManager {
     this.currentMode = INTERACTION_MODES.PAN;
     this.spacePressed = false;
     this.originalPannable = true;
-    
+
     this.actionHandlers = new Map();
     this.globalKeyListeners = new Map();
+    this.selectionOptions = {
+      enabled: true,
+      multiple: true,
+      rubberband: true,
+      modifiers: ['shift'],
+      multipleSelectionModifiers: ['ctrl', 'meta'],
+      showNodeSelectionBox: true,
+      showEdgeSelectionBox: this.options.allowEdgeSelection === true,
+      selectEdgeOnMoveEdge: false,
+      strict: false,
+    };
     
     this.init();
   }
@@ -234,24 +245,22 @@ export class KeyboardManager {
     switch (mode) {
       case INTERACTION_MODES.PAN:
         this.graph.enablePanning();
-        this.updateSelectionPlugin({ 
-          enabled: true,
+        this.updateSelectionPlugin({
+          rubberband: true,
+          modifiers: ['shift'],
           multiple: true,
-          rubberband: false,
-          modifiers: ['meta', 'ctrl'],
         });
         break;
         
       case INTERACTION_MODES.SELECT:
         this.graph.disablePanning();
-        this.updateSelectionPlugin({ 
-          enabled: true,
-          multiple: true,
+        this.updateSelectionPlugin({
           rubberband: true,
-          modifiers: ['meta', 'ctrl'],
+          modifiers: null,
+          multiple: true,
         });
         break;
-        
+
       // 可扩展其他模式
     }
   }
@@ -264,20 +273,19 @@ export class KeyboardManager {
     if (this.graph.getPlugin('selection')) {
       this.graph.disposePlugins('selection');
     }
-    
+
+    this.selectionOptions = {
+      ...this.selectionOptions,
+      showEdgeSelectionBox:
+        this.options.allowEdgeSelection === true,
+      ...options,
+    };
+
     // 重新添加插件，使用新配置
     this.graph.use(new Selection({
-      enabled: true,
-      multiple: true,
-      showNodeSelectionBox: true,
-      // 始终允许显示边的选择框；是否允许被选中由交互层控制
-      showEdgeSelectionBox: true,
-      modifiers: ['meta', 'ctrl'], // 支持 Cmd/Ctrl 多选
-      // 移除 filter 限制，让 Selection 插件正常工作
-      // 边的选择控制交给 useStandardInteractions 处理
-      ...options,
+      ...this.selectionOptions,
     }));
-    
+
     console.log('Selection plugin updated with options:', options);
   }
   

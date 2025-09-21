@@ -30,15 +30,78 @@ export function useStandardInteractions(graph, options = {}) {
 
   // 选择状态
   const selectedCells = ref([]);
-  // 框选模式状态（Shift+拖拽时为true）
+  // 框选模式状态（Shift+拖拽时为 true）
   const isRubberbandMode = ref(false);
+  // Shift 键按压状态，用于在框选模式下禁用画布拖拽
+  const isShiftPressed = ref(false);
+  // 避免橡皮筋结束后被 blank:click 立即清除选择
+  const skipNextBlankClick = ref(false);
+  let wasPannableBeforeShift = null;
+
+  const getGraphInstance = () => graph?.value || graph;
+
+  const handleShiftKeyDown = (event) => {
+    if (
+      event.key !== 'Shift' ||
+      event.repeat ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.altKey
+    ) {
+      return;
+    }
+    isShiftPressed.value = true;
+    const g = getGraphInstance();
+    if (!g || typeof g.disablePanning !== 'function') return;
+    wasPannableBeforeShift = g.isPannable?.() ?? null;
+    if (wasPannableBeforeShift) {
+      g.disablePanning();
+    }
+  };
+
+  const handleShiftKeyUp = (event) => {
+    if (event.key !== 'Shift') return;
+    isShiftPressed.value = false;
+    const g = getGraphInstance();
+    if (g && wasPannableBeforeShift) {
+      g.enablePanning?.();
+    }
+    wasPannableBeforeShift = null;
+  };
+
+  onMounted(() => {
+    window.addEventListener('keydown', handleShiftKeyDown, true);
+    window.addEventListener('keyup', handleShiftKeyUp, true);
+  });
+
+  onUnmounted(() => {
+    window.removeEventListener('keydown', handleShiftKeyDown, true);
+    window.removeEventListener('keyup', handleShiftKeyUp, true);
+    if (isShiftPressed.value) {
+      const g = getGraphInstance();
+      if (g && wasPannableBeforeShift) {
+        g.enablePanning?.();
+      }
+    }
+    isShiftPressed.value = false;
+    wasPannableBeforeShift = null;
+  });
 
   // 设置标准交互事件
   const setupStandardEvents = (graphInstance = null) => {
-    const g = graphInstance || graph?.value || graph;
+    const g = graphInstance || getGraphInstance();
     if (!g || typeof g.on !== 'function') {
       console.warn('Graph instance is not ready for event setup');
       return;
+    }
+
+    if (isShiftPressed.value && typeof g.disablePanning === 'function') {
+      if (wasPannableBeforeShift == null) {
+        wasPannableBeforeShift = g.isPannable?.() ?? null;
+      }
+      if (wasPannableBeforeShift) {
+        g.disablePanning();
+      }
     }
 
     // 选择变化监听
@@ -83,10 +146,18 @@ export function useStandardInteractions(graph, options = {}) {
 
     g.on('selection:rubberband:end', () => {
       isRubberbandMode.value = false;
+      skipNextBlankClick.value = true;
     });
 
     // 点击空白区域：在未按住修饰键时清除选择
     g.on('blank:click', ({ e }) => {
+      if (skipNextBlankClick.value) {
+        skipNextBlankClick.value = false;
+        return;
+      }
+      if (e.shiftKey || isRubberbandMode.value) {
+        return;
+      }
       if (!isCtrlKeyPressed(e)) {
         g.cleanSelection();
       }

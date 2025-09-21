@@ -301,8 +301,8 @@ const createInitialNodes = () => {
     { x: 450, y: 120, label: 'F', shape: 'rect-node', color: '#fa8c16' },
   ];
   
-  nodes.forEach(nodeData => {
-    graph.addNode({
+  const createdNodes = nodes.map((nodeData) => {
+    return graph.addNode({
       shape: nodeData.shape,
       x: nodeData.x,
       y: nodeData.y,
@@ -320,6 +320,35 @@ const createInitialNodes = () => {
       }
     });
   });
+
+  if (createdNodes.length >= 2) {
+    graph.addEdge({
+      source: createdNodes[0],
+      target: createdNodes[1],
+      attrs: {
+        line: {
+          stroke: '#1890ff',
+          strokeWidth: 2,
+          targetMarker: 'classic',
+        },
+      },
+    });
+  }
+
+  if (createdNodes.length >= 4) {
+    graph.addEdge({
+      source: createdNodes[2],
+      target: createdNodes[3],
+      attrs: {
+        line: {
+          stroke: '#52c41a',
+          strokeWidth: 2,
+          strokeDasharray: '4 2',
+          targetMarker: 'classic',
+        },
+      },
+    });
+  }
 };
 
 // 更新对齐线设置
@@ -344,10 +373,10 @@ const updateInteractionMode = () => {
     
     if (interactionMode.value === 'pan') {
       graph.enablePanning();
-      updateSelectionPlugin({ rubberband: false });
+      updateSelectionPlugin({ rubberband: true, modifiers: ['shift'] });
     } else {
       graph.disablePanning();
-      updateSelectionPlugin({ rubberband: true });
+      updateSelectionPlugin({ rubberband: true, modifiers: null });
     }
   }
   
@@ -355,7 +384,7 @@ const updateInteractionMode = () => {
 };
 
 // 辅助方法：更新选择插件
-const updateSelectionPlugin = (options) => {
+const updateSelectionPlugin = (options = {}) => {
   if (!graph) return;
   
   if (graph.getPlugin('selection')) {
@@ -366,10 +395,12 @@ const updateSelectionPlugin = (options) => {
     new Selection({
       enabled: true,
       multiple: multipleSelection.value,
+      rubberband: true,
       strict: strictSelection.value,
       showNodeSelectionBox: true,
       showEdgeSelectionBox: true,
-      modifiers: ['meta', 'ctrl'], // 支持 Cmd/Ctrl 修饰键
+      modifiers: interactionMode.value === 'select' ? null : ['shift'],
+      multipleSelectionModifiers: ['ctrl', 'meta'],
       ...options,
     })
   );
@@ -381,13 +412,9 @@ const updateSelection = () => {
   if (keyboardMgr && interactionMode.value === 'select') {
     // 通过键盘管理器更新选择插件配置
     keyboardMgr.updateSelectionPlugin({
-      enabled: true,
       multiple: multipleSelection.value,
       rubberband: true,
       strict: strictSelection.value,
-      showNodeSelectionBox: true,
-      showEdgeSelectionBox: true,
-      modifiers: ['meta', 'ctrl'],
     });
   } else if (!keyboardMgr && graph && interactionMode.value === 'select') {
     // 降级处理：直接操作 graph
@@ -403,7 +430,8 @@ const updateSelection = () => {
         strict: strictSelection.value,
         showNodeSelectionBox: true,
         showEdgeSelectionBox: true,
-        modifiers: ['meta', 'ctrl'],
+        modifiers: null,
+        multipleSelectionModifiers: ['ctrl', 'meta'],
       })
     );
   }

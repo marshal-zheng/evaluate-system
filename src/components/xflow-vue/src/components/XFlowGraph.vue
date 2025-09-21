@@ -30,7 +30,6 @@ import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue';
 import { Graph, Options, Shape } from '@antv/x6';
 import { Keyboard } from '@antv/x6-plugin-keyboard';
 import { Scroller } from '@antv/x6-plugin-scroller';
-import { Selection } from '@antv/x6-plugin-selection';
 import { useGraphInstance } from '../composables/useGraphInstance';
 import { useKeyboardManager } from '../composables/useKeyboardManager';
 import { useStandardInteractions } from '../composables/useStandardInteractions';
@@ -296,21 +295,9 @@ const initGraph = async () => {
     createCellView: props.createCellView,
   });
 
-  // 添加插件：启用 Selection 作为基础能力（支持多选/框选/Shift 触发）
-  g.use(new Selection({
-    enabled: true,
-    multiple: true,
-    rubberband: true,
-    rubberbandModifiers: ['shift'],
-    showNodeSelectionBox: true,
-    // 始终允许显示边的选择框（用于 Cmd/Ctrl + 点击边时显示）
-    showEdgeSelectionBox: true,
-    selectEdgeOnMoveEdge: false,
-    modifiers: ['meta', 'ctrl'],
-    // 移除 filter 限制，让边的选择控制完全交给 useStandardInteractions 处理
-    // 这样可以支持 Cmd/Ctrl + 点击边的临时选择功能
-    ...(props.selectOptions || {}),
-  }));
+  // 使用内置 selecting（替代有已知问题的 selection 插件）
+  // 详见 https://github.com/antvis/X6/issues/2110
+  // selecting 相关配置在 Graph 构造器中指定
   g.use(new Keyboard({ enabled: true, ...props.keyboardOptions }));
 
   if (props.scroller) {
