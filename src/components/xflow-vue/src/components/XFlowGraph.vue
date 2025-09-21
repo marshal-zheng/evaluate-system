@@ -182,6 +182,16 @@ const props = defineProps({
     type: Object,
     default: () => ({}),
   },
+  // 锁定模式：节点不可拖拽移动
+  locked: {
+    type: Boolean,
+    default: false,
+  },
+  // 自定义节点锁定判断：返回 true 表示该节点锁定（不可拖拽）
+  isNodeLocked: {
+    type: Function,
+    default: null,
+  },
 });
 
 const containerRef = ref(null);
@@ -341,26 +351,55 @@ const destroyGraph = () => {
   }
 };
 
-// 更新只读模式
-const updateReadonly = (readonly) => {
+// 统一应用交互策略（只读/锁定/默认）
+const applyInteractions = () => {
   if (!graph || !graph.value) return;
   
-  if (readonly) {
+  if (props.readonly) {
     graph.value.options.interacting = false;
-  } else {
-    graph.value.options.interacting = {
-      nodeMovable: (view) => {
-        const cell = view.cell;
-        return cell.prop('draggable') !== false;
-      },
-      // 禁用边的拖拽移动，避免出现可拖拽但无法移动的选框
-      edgeMovable: false,
-      edgeLabelMovable: (view) => {
-        const cell = view.cell;
-        return cell.prop('labelDraggable') === true;
-      },
-    };
+    return;
   }
+  
+  const nodeMovable = (view) => {
+    const cell = view.cell;
+    // 基础可拖拽检查：节点自身显式禁用拖拽则不可移动
+    const draggableAllowed = cell.prop('draggable') !== false;
+    if (!draggableAllowed) return false;
+    
+    // 全局锁定或自定义锁定逻辑
+    try {
+      if (props.locked === true) {
+        if (typeof props.isNodeLocked === 'function') {
+          return props.isNodeLocked(cell, view) ? false : true;
+        }
+        return false;
+      } else {
+        if (typeof props.isNodeLocked === 'function') {
+          return props.isNodeLocked(cell, view) ? false : true;
+        }
+      }
+    } catch (e) {
+      // 自定义回调异常时，出于安全默认禁止移动
+      return false;
+    }
+    
+    return true;
+  };
+  
+  graph.value.options.interacting = {
+    nodeMovable,
+    // 禁用边的拖拽移动，避免出现可拖拽但无法移动的选框
+    edgeMovable: false,
+    edgeLabelMovable: (view) => {
+      const cell = view.cell;
+      return cell.prop('labelDraggable') === true;
+    },
+  };
+};
+
+// 保持原有 API，内部改为调用统一方法
+const updateReadonly = () => {
+  applyInteractions();
 };
 
 // 更新缩放设置
@@ -464,6 +503,7 @@ onUnmounted(() => {
 
 // 监听属性变化
 watch(() => props.readonly, updateReadonly, { immediate: true });
+watch(() => [props.locked, props.isNodeLocked], () => applyInteractions(), { immediate: true });
 watch(() => [props.zoomable, props.zoomOptions], ([zoomable, zoomOptions]) => {
   updateZoom(zoomable, zoomOptions);
 }, { immediate: true });

@@ -31,6 +31,11 @@
             <h4>标准交互控制</h4>
             <el-space direction="vertical" size="small">
               <el-switch 
+                v-model="locked" 
+                active-text="锁定模式（节点不可拖拽）" 
+                inactive-text="解锁（节点可拖拽）"
+              />
+              <el-switch 
                 v-model="enableStandardInteractions" 
                 active-text="启用标准交互" 
                 @change="recreateGraph"
@@ -74,6 +79,8 @@
           :zoomable="true"
           :pannable="true"
           :scroller="false"
+          :locked="locked"
+          :is-node-locked="customIsNodeLocked"
           :enable-standard-interactions="enableStandardInteractions"
           :enable-context-menu="enableContextMenu"
           :enable-double-click-fit="enableDoubleClickFit"
@@ -163,6 +170,7 @@ const graphRef = ref(null);
 const enableStandardInteractions = ref(true);
 const enableContextMenu = ref(true);
 const enableDoubleClickFit = ref(true);
+const locked = ref(false);
 
 // Graph 实例和相关
 let graph = null;
@@ -177,6 +185,23 @@ const nodeCount = computed(() => {
 const selectedCount = computed(() => {
   return standardInteractions?.selectedCells?.length || 0;
 });
+
+// 自定义锁定逻辑：示例 - 名称以“节点A”开头的节点强制锁定
+const customIsNodeLocked = (cell) => {
+  try {
+    if (!cell || !cell.isNode || !cell.isNode()) return false;
+    const label = typeof cell.getLabel === 'function' ? cell.getLabel() : '';
+    if (typeof label === 'string' && label.startsWith('节点A')) {
+      return true;
+    }
+    // 也支持通过 data.locked 或 attrs.body.locked 控制
+    const dataLocked = cell.getData && cell.getData()?.locked === true;
+    const propLocked = cell.prop && cell.prop('locked') === true;
+    return dataLocked || propLocked || false;
+  } catch (e) {
+    return true; // 兜底：异常时按锁定处理，避免意外拖拽
+  }
+};
 
 // 图形准备就绪回调
 const onGraphReady = (g, keyboardMgr, standardInter) => {
