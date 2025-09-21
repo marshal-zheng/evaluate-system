@@ -270,14 +270,11 @@ export class KeyboardManager {
       enabled: true,
       multiple: true,
       showNodeSelectionBox: true,
-      showEdgeSelectionBox: this.options.allowEdgeSelection === true,
+      // 始终允许显示边的选择框；是否允许被选中由交互层控制
+      showEdgeSelectionBox: true,
       modifiers: ['meta', 'ctrl'], // 支持 Cmd/Ctrl 多选
-      // 只允许选择节点；当允许边选择时再放开
-      filter: (cell) => {
-        if (cell.isNode && cell.isNode()) return true;
-        if (cell.isEdge && cell.isEdge()) return this.options.allowEdgeSelection === true;
-        return true;
-      },
+      // 移除 filter 限制，让 Selection 插件正常工作
+      // 边的选择控制交给 useStandardInteractions 处理
       ...options,
     }));
     

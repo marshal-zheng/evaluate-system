@@ -30,6 +30,8 @@ export function useStandardInteractions(graph, options = {}) {
 
   // 选择状态
   const selectedCells = ref([]);
+  // 框选模式状态（Shift+拖拽时为true）
+  const isRubberbandMode = ref(false);
 
   // 设置标准交互事件
   const setupStandardEvents = (graphInstance = null) => {
@@ -41,19 +43,10 @@ export function useStandardInteractions(graph, options = {}) {
 
     // 选择变化监听
     g.on('selection:changed', ({ selected }) => {
-      // 如果不允许边选择，则过滤掉边
-      if (!config.allowEdgeSelection && Array.isArray(selected)) {
-        const filtered = selected.filter((cell) => !cell.isEdge());
-        // 如果存在边被选中，立即移除
-        if (filtered.length !== selected.length) {
-          g.cleanSelection();
-          if (filtered.length > 0) g.select(filtered);
-          selectedCells.value = filtered;
-          return;
-        }
-        selectedCells.value = filtered;
-        return;
-      }
+      // 按照新逻辑：
+      // 1. 框选模式（Shift+拖拽）：允许选择所有元素
+      // 2. 正常模式：只允许选择节点，但 Cmd/Ctrl + 点击边例外
+      // 3. 不过滤已经通过 Cmd/Ctrl + 点击选中的边
       selectedCells.value = selected;
     });
 
@@ -80,6 +73,18 @@ export function useStandardInteractions(graph, options = {}) {
     const g = graphInstance || graph?.value || graph;
     if (!g || typeof g.on !== 'function') return;
 
+    // 监听框选开始和结束
+    g.on('selection:rubberband:start', ({ e }) => {
+      // 只有按住 Shift 键才进入框选模式
+      if (e.shiftKey) {
+        isRubberbandMode.value = true;
+      }
+    });
+
+    g.on('selection:rubberband:end', () => {
+      isRubberbandMode.value = false;
+    });
+
     // 点击空白区域：在未按住修饰键时清除选择
     g.on('blank:click', ({ e }) => {
       if (!isCtrlKeyPressed(e)) {
@@ -90,33 +95,41 @@ export function useStandardInteractions(graph, options = {}) {
     // 节点点击选择逻辑
     g.on('node:click', ({ e, node }) => {
       if (isCtrlKeyPressed(e)) {
-        // Ctrl/Cmd + 点击：切换选择状态
-        if (g.isSelected(node)) {
-          g.unselect(node);
-        } else {
-          g.select(node, { silent: false });
-        }
-      } else {
-        // 普通点击：单选
-        g.cleanSelection();
-        g.select(node);
+        // 交给 Selection 插件处理多选/反选逻辑
+        return;
       }
+      // 普通点击：单选
+      g.cleanSelection();
+      g.select(node);
     });
 
-    // 边点击选择逻辑
+    // 边点击选择逻辑 - 按照新需求：正常模式下边不可被点击选中，但 Cmd/Ctrl + 点击可以选中
     g.on('edge:click', ({ e, edge }) => {
-      // 如果不允许边选择，直接返回，不做任何选择操作
-      if (!config.allowEdgeSelection) return;
       if (isCtrlKeyPressed(e)) {
+        // Cmd/Ctrl + 点击边：允许选中并显示选择框
         if (g.isSelected(edge)) {
           g.unselect(edge);
         } else {
-          g.select(edge, { silent: false });
+          // 增量加入当前选择集合，避免覆盖已有选中
+          if (typeof g.addToSelection === 'function') {
+            g.addToSelection(edge);
+          } else {
+            // 兜底：获取已选 + 当次边，重新设置选择
+            const current = (g.getSelectedCells && g.getSelectedCells()) || [];
+            g.select([...current, edge], { silent: false });
+          }
         }
-      } else {
-        g.cleanSelection();
-        g.select(edge);
+        return;
       }
+      
+      // 正常点击：只有在明确允许边选择时才能选中
+      if (!config.allowEdgeSelection) {
+        return; // 边有hover态但不被选中
+      }
+      
+      // 普通点击：单选
+      g.cleanSelection();
+      g.select(edge);
     });
   };
 

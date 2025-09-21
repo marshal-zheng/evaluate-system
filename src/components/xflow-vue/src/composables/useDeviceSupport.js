@@ -24,11 +24,12 @@ export function useDeviceSupport() {
 
 	const controlKeyCode = ref(isMacOs.value ? 'Meta' : 'Control');
 
-	function isCtrlKeyPressed(e) {
+	function isCtrlKeyPressed(e = {}) {
+		const { metaKey = false, ctrlKey = false } = e;
 		if (isMacOs.value) {
-			return e.metaKey;
+			return metaKey || ctrlKey;
 		}
-		return e.ctrlKey;
+		return ctrlKey || metaKey;
 	}
 
 	return {

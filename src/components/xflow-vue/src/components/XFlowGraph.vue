@@ -303,19 +303,12 @@ const initGraph = async () => {
     rubberband: true,
     rubberbandModifiers: ['shift'],
     showNodeSelectionBox: true,
-    // 根据配置决定是否显示边的选择框
-    showEdgeSelectionBox: props.selectOptions?.showEdgeSelectionBox ?? false,
+    // 始终允许显示边的选择框（用于 Cmd/Ctrl + 点击边时显示）
+    showEdgeSelectionBox: true,
     selectEdgeOnMoveEdge: false,
     modifiers: ['meta', 'ctrl'],
-    // 动态过滤器：根据是否显示边选择框来决定是否允许选择边
-    filter: (cell) => {
-      if (cell.isNode()) return true;
-      if (cell.isEdge()) {
-        // 只有在显示边选择框时才允许选择边
-        return props.selectOptions?.showEdgeSelectionBox ?? false;
-      }
-      return true;
-    },
+    // 移除 filter 限制，让边的选择控制完全交给 useStandardInteractions 处理
+    // 这样可以支持 Cmd/Ctrl + 点击边的临时选择功能
     ...(props.selectOptions || {}),
   }));
   g.use(new Keyboard({ enabled: true, ...props.keyboardOptions }));
