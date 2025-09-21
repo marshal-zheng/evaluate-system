@@ -287,7 +287,12 @@ const groupSelected = () => {
         text: '分组', 
         fill: '#8c8c8c',
         fontSize: 14,
-        fontWeight: 'bold'
+        fontWeight: 'bold',
+        refX: 0.5,
+        refY: 0,
+        refY2: -12,
+        textAnchor: 'middle',
+        textVerticalAnchor: 'bottom'
       },
     },
     // 标记为分组容器
@@ -339,6 +344,35 @@ const groupSelected = () => {
   console.log('分组完成，选中分组容器')
 }
 
+const detachGroupChildren = (groupNode) => {
+  if (!groupNode || typeof groupNode.getChildren !== 'function') return
+
+  const children = groupNode.getChildren() || []
+  if (!children.length) return
+
+  children.forEach((child) => {
+    try {
+      if (typeof groupNode.removeChild === 'function') {
+        groupNode.removeChild(child)
+      }
+      if (typeof child.setParent === 'function') {
+        child.setParent(null)
+      }
+      const childData = child.getData?.() || {}
+      if (Array.isArray(childData.parents)) {
+        child.setData({ ...childData, parents: [] })
+      }
+    } catch (e) {
+      console.warn('解除分组子节点关系失败:', child?.id, e)
+    }
+  })
+
+  const data = groupNode.getData?.()
+  if (data) {
+    groupNode.setData({ ...data, children: [] })
+  }
+}
+
 const ungroupSelected = () => {
   const selectedCells = graph.getSelectedCells()
   console.log('取消分组操作:', selectedCells.length)
@@ -354,9 +388,9 @@ const ungroupSelected = () => {
         console.log(`节点 ${cell.id} 是否为分组:`, isGroup)
         
         // 将所有子节点从分组中移出
+        detachGroupChildren(cell)
         children.forEach((child) => {
           console.log(`移除子节点 ${child.id} 的父子关系`)
-          child.setParent(null)
           child.setZIndex(0) // 重置层级
         })
         
@@ -435,4 +469,3 @@ onMounted(() => {
 .canvas { border: 1px solid #e5e6eb; border-radius: 8px; overflow: hidden; background: #fff; }
 .status { font-size: 12px; color: #666; }
 </style>
-

@@ -192,6 +192,21 @@ const props = defineProps({
     type: Function,
     default: null,
   },
+  // 分组子元素是否可拖拽（有父节点时），默认 true
+  groupChildDraggable: {
+    type: Boolean,
+    default: true,
+  },
+  // 分组边界是否随子元素拖拽自适应，默认 true
+  groupAutoResize: {
+    type: Boolean,
+    default: true,
+  },
+  // 分组内边距（用于自适应与边界限制），默认 16
+  groupPadding: {
+    type: Number,
+    default: 16,
+  },
 });
 
 const containerRef = ref(null);
@@ -381,6 +396,14 @@ const applyInteractions = () => {
     const draggableAllowed = cell.prop('draggable') !== false;
     if (!draggableAllowed) return false;
     
+    // 分组子元素拖拽开关：当节点有父节点时生效
+    try {
+      const parent = cell.getParent && cell.getParent();
+      if (parent && props.groupChildDraggable === false) {
+        return false;
+      }
+    } catch (e) {}
+
     // 全局锁定或自定义锁定逻辑
     try {
       if (props.locked === true) {
@@ -510,6 +533,80 @@ const handleContextMenuClick = (item) => {
 onMounted(async () => {
   await initGraph();
   handleViewOperations();
+  // 注册分组拖拽行为处理
+  if (graph && graph.value) {
+    const g = graph.value;
+    const padding = () => Number(props.groupPadding || 0);
+    
+    const resizeParentToFitChildren = (parent) => {
+      try {
+        const children = parent.getChildren ? (parent.getChildren() || []) : [];
+        if (!children.length) return;
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        children.forEach((child) => {
+          const b = child.getBBox();
+          minX = Math.min(minX, b.x);
+          minY = Math.min(minY, b.y);
+          maxX = Math.max(maxX, b.x + b.width);
+          maxY = Math.max(maxY, b.y + b.height);
+        });
+        const pad = padding();
+        const width = Math.max(0, maxX - minX) + pad * 2;
+        const height = Math.max(0, maxY - minY) + pad * 2;
+        parent.position(minX - pad, minY - pad);
+        parent.resize(width, height);
+      } catch (e) {}
+    };
+
+    g.on('node:change:position', ({ node, previous, current }) => {
+      // 仅处理子节点（非分组容器）
+      if (!node || node.getData?.()?.type === 'group') return;
+      const parent = node.getParent && node.getParent();
+      if (!parent) return;
+      
+      if (props.groupChildDraggable === false) {
+        // 回退到原位置，禁用分组内元素移动
+        if (previous && typeof previous.x === 'number' && typeof previous.y === 'number') {
+          node.position(previous.x, previous.y);
+        }
+        return;
+      }
+      
+      const parentBox = parent.getBBox();
+      const childBox = node.getBBox();
+      const pad = padding();
+      
+      if (props.groupAutoResize === true) {
+        // 若子节点越界，则自适应扩展父容器
+        const childRight = childBox.x + childBox.width;
+        const childBottom = childBox.y + childBox.height;
+        let needResize = false;
+        let minX = parentBox.x, minY = parentBox.y, maxX = parentBox.x + parentBox.width, maxY = parentBox.y + parentBox.height;
+        if (childBox.x < parentBox.x + pad) { minX = Math.min(minX, childBox.x - pad); needResize = true; }
+        if (childBox.y < parentBox.y + pad) { minY = Math.min(minY, childBox.y - pad); needResize = true; }
+        if (childRight > parentBox.x + parentBox.width - pad) { maxX = Math.max(maxX, childRight + pad); needResize = true; }
+        if (childBottom > parentBox.y + parentBox.height - pad) { maxY = Math.max(maxY, childBottom + pad); needResize = true; }
+        if (needResize) {
+          parent.position(minX, minY);
+          parent.resize(maxX - minX, maxY - minY);
+        }
+        return;
+      }
+      
+      // 不自适应：对子节点进行边界夹紧，禁止拖出
+      const minAllowedX = parentBox.x + pad;
+      const minAllowedY = parentBox.y + pad;
+      const maxAllowedX = parentBox.x + parentBox.width - pad - childBox.width;
+      const maxAllowedY = parentBox.y + parentBox.height - pad - childBox.height;
+      const desiredX = current && typeof current.x === 'number' ? current.x : childBox.x;
+      const desiredY = current && typeof current.y === 'number' ? current.y : childBox.y;
+      const clampedX = Math.min(Math.max(desiredX, minAllowedX), maxAllowedX);
+      const clampedY = Math.min(Math.max(desiredY, minAllowedY), maxAllowedY);
+      if (clampedX !== desiredX || clampedY !== desiredY) {
+        node.position(clampedX, clampedY);
+      }
+    });
+  }
 });
 
 onUnmounted(() => {
