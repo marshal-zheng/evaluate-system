@@ -249,6 +249,21 @@ const initGraph = async () => {
         });
       },
     },
+    // 关键：开启嵌入与吸附支持
+    embedding: {
+      enabled: true,
+      findParent({ node }) {
+        // 允许所有节点作为父容器
+        const bbox = node.getBBox();
+        const candidates = g.getNodes();
+        return candidates.filter((candidate) => {
+          if (candidate === node) return false;
+          if (node.getAncestors()?.includes(candidate)) return false;
+          const cb = candidate.getBBox();
+          return cb.containsRect(bbox);
+        });
+      },
+    },
     highlighting: {
       default: {
         name: 'stroke',

@@ -23,7 +23,8 @@ export function provideGraphInstance() {
 
 // 使用 Graph 实例
 export function useGraphInstance() {
-  const context = inject(GRAPH_INSTANCE_KEY);
+  // 传入默认值以避免 Vue 在注入缺失时输出控制台告警
+  const context = inject(GRAPH_INSTANCE_KEY, null);
   
   if (!context) {
     throw new Error('useGraphInstance must be used within XFlow component');

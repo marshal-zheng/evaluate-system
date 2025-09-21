@@ -5,8 +5,9 @@
       <Demo2 />
       <Demo3 />
       <Demo4 /> -->
-      <Demo5 />
-      <Demo6 />
+      <!-- <Demo5 />
+      <Demo6 /> -->
+      <Demo7 />
     </main>
   </div>
 </template>
@@ -18,6 +19,7 @@ import Demo3 from './Demo3.vue'
 import Demo4 from './Demo4.vue'
 import Demo5 from './Demo5.vue'
 import Demo6 from './Demo6.vue'
+import Demo7 from './Demo7.vue'
 </script>
 
 <style scoped>
