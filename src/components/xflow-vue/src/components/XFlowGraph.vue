@@ -254,6 +254,9 @@ const initGraph = async () => {
       allowEdge: false,
       highlight: true,
       snap: true,
+        // 关键：使用端口锚点作为连接点，避免在 normal 路由下出现箭头与连线偏移
+        anchor: 'center',
+        connectionPoint: 'anchor',
       validateConnection({ sourceMagnet, targetMagnet }) {
         return !!(sourceMagnet && targetMagnet);
       },
