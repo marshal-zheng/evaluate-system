@@ -221,6 +221,14 @@ export const componentRoutes = [
         component: () => import('@/components/ZXHL/comp/business/DashboardGrid/example/index.vue')
       },
       {
+        path: 'xflow-vue',
+        name: 'XFlowVueDemo',
+        meta: { 
+          title: 'XFlow Vue 图编辑器'
+        },
+        component: () => import('@/components/ZXHL/comp/business/xflow-vue/examples/BasicExample.vue')
+      },
+      {
         path: 'zx-confirm-input',
         name: 'ZxConfirmInputDemo',
         meta: { 

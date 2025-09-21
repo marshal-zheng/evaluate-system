@@ -1,4 +1,5 @@
 import { createApp } from 'vue'
+import { createPinia } from 'pinia'
 import './style.css'
 import './assets/css/element-plus-theme.css'
 import './assets/icon-font/iconfont.css'
@@ -20,6 +21,12 @@ import { initTheme } from './utils/theme.js'
 
 // Create app
 const app = createApp(App)
+
+// Create pinia instance
+const pinia = createPinia()
+
+// Setup Pinia
+app.use(pinia)
 
 // Setup Element Plus
 setupElementPlus(app)

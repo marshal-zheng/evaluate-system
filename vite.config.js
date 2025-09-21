@@ -51,6 +51,7 @@ export default defineConfig({
       'stores': fileURLToPath(new URL('./src/stores', import.meta.url)),
       'utils': fileURLToPath(new URL('./src/utils', import.meta.url)),
       'http': fileURLToPath(new URL('./src/http', import.meta.url)),
+      'lodash': 'lodash-es',
     }
   },
   css: {

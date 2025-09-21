@@ -124,7 +124,7 @@ const showAbout = () => {
 }
 </script>
 
-<style scoped>
+<style>
 .main-content {
   overflow-y: scroll;
   flex: 1;

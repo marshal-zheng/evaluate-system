@@ -1,7 +1,7 @@
-import Component from './index.vue'
+import ZxChartNew from './index.vue'
 
-Component.install = function (app) {
-  app.component('ZxChart', Component)
+ZxChartNew.install = function (app) {
+  app.component('ZxChartNew', ZxChartNew)
 }
 
-export default Component
+export default ZxChartNew

@@ -69,6 +69,87 @@
     dagre-compound "^0.0.11"
     ml-matrix "^6.5.0"
 
+"@antv/x6-common@^2.0.16":
+  version "2.0.17"
+  resolved "https://registry.npmmirror.com/@antv/x6-common/-/x6-common-2.0.17.tgz#a40a0920859faadf567452dea81132783a19aaa4"
+  integrity sha512-37g7vmRkNdYzZPdwjaMSZEGv/MMH0S4r70/Jwoab1mioycmuIBN73iyziX8m56BvJSDucZ3J/6DU07otWqzS6A==
+  dependencies:
+    lodash-es "^4.17.15"
+    utility-types "^3.10.0"
+
+"@antv/x6-geometry@^2.0.5":
+  version "2.0.5"
+  resolved "https://registry.npmmirror.com/@antv/x6-geometry/-/x6-geometry-2.0.5.tgz#c158317d74135bedd78c2fdeb76f9c7cfa0ef0aa"
+  integrity sha512-MId6riEQkxphBpVeTcL4ZNXL4lScyvDEPLyIafvWMcWNTGK0jgkK7N20XSzqt8ltJb0mGUso5s56mrk8ysHu2A==
+
+"@antv/x6-plugin-clipboard@^2.1.6":
+  version "2.1.6"
+  resolved "https://registry.npmmirror.com/@antv/x6-plugin-clipboard/-/x6-plugin-clipboard-2.1.6.tgz#98886d5b16a175b67f142ef66c75907de7c1b069"
+  integrity sha512-roZPLnZx6PK8MBvee0QMo90fz/TXeF0WNe4EGin2NBq5M1I5XTWrYvA6N2XVIiWAAI67gjQeEE8TpkL7f8QdqA==
+
+"@antv/x6-plugin-dnd@^2.1.1":
+  version "2.1.1"
+  resolved "https://registry.npmmirror.com/@antv/x6-plugin-dnd/-/x6-plugin-dnd-2.1.1.tgz#4d9afed8e8105e01e31cdf526068fa686fb6b4aa"
+  integrity sha512-v0szzik1RkadPDn4Qi5mOSaB2AeI78D40/YuCYbPVzplG+HydGsHwO3MLTgJPQ+R5n0eM0W5F850p1VfTOHR7g==
+
+"@antv/x6-plugin-export@^2.1.6":
+  version "2.1.6"
+  resolved "https://registry.npmmirror.com/@antv/x6-plugin-export/-/x6-plugin-export-2.1.6.tgz#f8cedab3707c43728baaf0f0bfb1e75ec4a61a30"
+  integrity sha512-m0ukMmZhrFE5n7uCR43DVQBdiUfpjGN+vm1mc+6RTZdHK8pa6Mxr0RZztaxPy34YA4tli+bGY3ePslsNPfh6PQ==
+
+"@antv/x6-plugin-history@^2.2.4":
+  version "2.2.4"
+  resolved "https://registry.npmmirror.com/@antv/x6-plugin-history/-/x6-plugin-history-2.2.4.tgz#c4a543b8a2b6ae8b6934ec69067688459cae6c48"
+  integrity sha512-9gHHvEW4Fla+1hxUV49zNgJyIMoV9CjVM52MrFgAJcvyRn1Kvxz4MfxiKlG+DEZUs+/zvfjl9pS6gJOd8laRkg==
+
+"@antv/x6-plugin-keyboard@^2.2.3":
+  version "2.2.3"
+  resolved "https://registry.npmmirror.com/@antv/x6-plugin-keyboard/-/x6-plugin-keyboard-2.2.3.tgz#4f774ad27527596400ba85ce8597cf8ad7e65ff8"
+  integrity sha512-pnCIC+mDyKKfkcDyLePfGxKVIqXBcldTgannITkHC1kc0IafRS1GMvzpvuDGrM5haRYd6Nwz8kjkJyHkJE4GPA==
+  dependencies:
+    mousetrap "^1.6.5"
+
+"@antv/x6-plugin-minimap@^2.0.7":
+  version "2.0.7"
+  resolved "https://registry.npmmirror.com/@antv/x6-plugin-minimap/-/x6-plugin-minimap-2.0.7.tgz#1f319ac04de7d05ca895ea6e2784489efe068791"
+  integrity sha512-8zzESCx0jguFPCOKCA0gPFb6JmRgq81CXXtgJYe34XhySdZ6PB23I5Po062lNsEuTjTjnzli4lju8vvU+jzlGw==
+
+"@antv/x6-plugin-scroller@^2.0.10":
+  version "2.0.10"
+  resolved "https://registry.npmmirror.com/@antv/x6-plugin-scroller/-/x6-plugin-scroller-2.0.10.tgz#bdd39d3530e469bbe72c5feca3b6787512232a3d"
+  integrity sha512-CrC5zCbtPe7LJEKK8ucLcDN+9lMtTJNApFmFObAiR/y2LO1QFCHz8GGLVeNOZaIEmJbR/Z/etpJkvc1LE7WhTg==
+
+"@antv/x6-plugin-selection@^2.2.2":
+  version "2.2.2"
+  resolved "https://registry.npmmirror.com/@antv/x6-plugin-selection/-/x6-plugin-selection-2.2.2.tgz#681c843124c2150af51594e8e1fc947b5e95e858"
+  integrity sha512-s2gtR9Onlhr7HOHqyqg0d+4sG76JCcQEbvrZZ64XmSChlvieIPlC3YtH4dg1KMNhYIuBmBmpSum6S0eVTEiPQw==
+
+"@antv/x6-plugin-snapline@^2.1.7":
+  version "2.1.7"
+  resolved "https://registry.npmmirror.com/@antv/x6-plugin-snapline/-/x6-plugin-snapline-2.1.7.tgz#1b4e3be0a281ba324117b7ac7b9b8c39e484cce2"
+  integrity sha512-AsysoCb9vES0U2USNhEpYuO/W8I0aYfkhlbee5Kt4NYiMfQfZKQyqW/YjDVaS2pm38C1NKu1LdPVk/BBr4CasA==
+
+"@antv/x6-plugin-transform@^2.1.8":
+  version "2.1.8"
+  resolved "https://registry.npmmirror.com/@antv/x6-plugin-transform/-/x6-plugin-transform-2.1.8.tgz#0a40cf63f1a0a882b08c800e37319973ba12e4c1"
+  integrity sha512-GvJuiJ4BKp0H7+qx3R1I+Vzbw5gXp9+oByXo/WyVxE3urOC7LC5sqnaDfIjyYMN6ROLPYPZraLSeSyYBgMgcDw==
+
+"@antv/x6-vue-shape@^2.1.2":
+  version "2.1.2"
+  resolved "https://registry.npmmirror.com/@antv/x6-vue-shape/-/x6-vue-shape-2.1.2.tgz#880abc2842f47f668c3de97cbacd1618bee1427a"
+  integrity sha512-lfLNJ2ztK8NP2JBAWTD6m5Wol0u6tOqj2KdOhWZoT8EtEw9rMmAdxsr8uTi9MRJO9pDMM0nbsR3cidnMh7VeDQ==
+  dependencies:
+    vue-demi latest
+
+"@antv/x6@^2.18.1":
+  version "2.18.1"
+  resolved "https://registry.npmmirror.com/@antv/x6/-/x6-2.18.1.tgz#4f3fab8c24119ca5f83583188657fc243cc5a0bc"
+  integrity sha512-FkWdbLOpN9J7dfJ+kiBxzowSx2N6syBily13NMVdMs+wqC6Eo5sLXWCZjQHateTFWgFw7ZGi2y9o3Pmdov1sXw==
+  dependencies:
+    "@antv/x6-common" "^2.0.16"
+    "@antv/x6-geometry" "^2.0.5"
+    utility-types "^3.10.0"
+
 "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.12.13", "@babel/code-frame@^7.27.1":
   version "7.27.1"
   resolved "https://registry.npmmirror.com/@babel/code-frame/-/code-frame-7.27.1.tgz"
@@ -2650,7 +2731,7 @@ class-utils@^0.3.5:
 
 classnames@^2.5.1:
   version "2.5.1"
-  resolved "https://registry.npmmirror.com/classnames/-/classnames-2.5.1.tgz"
+  resolved "https://registry.npmmirror.com/classnames/-/classnames-2.5.1.tgz#ba774c614be0f016da105c858e7159eae8e7687b"
   integrity sha512-saHYOzhIQs6wy2sVxTM6bUDsQO4F50V9RQ22qBpEdCW+I+/Wmke2HOl6lS6dTpdxVhb88/I6+Hs+438c3lfUow==
 
 cliui@^7.0.2:
@@ -3157,13 +3238,12 @@ dunder-proto@^1.0.0, dunder-proto@^1.0.1:
     es-errors "^1.3.0"
     gopd "^1.2.0"
 
-echarts@^5.4.2:
-  version "5.6.0"
-  resolved "https://registry.npmmirror.com/echarts/-/echarts-5.6.0.tgz"
-  integrity sha512-oTbVTsXfKuEhxftHqL5xprgLoc0k7uScAwtryCgWF6hPYFLRwOUHiFmHGCBKP5NPFNkDVopOieyUqYGH8Fa3kA==
+echarts@^4.9.0:
+  version "4.9.0"
+  resolved "https://registry.npmmirror.com/echarts/-/echarts-4.9.0.tgz#a9b9baa03f03a2a731e6340c55befb57a9e1347d"
+  integrity sha512-+ugizgtJ+KmsJyyDPxaw2Br5FqzuBnyOWwcxPKO6y0gc5caYcfnEUIlNStx02necw8jmKmTafmpHhGo4XDtEIA==
   dependencies:
-    tslib "2.3.0"
-    zrender "5.6.1"
+    zrender "4.3.2"
 
 ee-first@1.1.1:
   version "1.1.1"
@@ -4215,6 +4295,11 @@ image-size@^0.5.1:
   version "0.5.5"
   resolved "https://registry.npmmirror.com/image-size/-/image-size-0.5.5.tgz"
   integrity sha512-6TDAlDPZxUFCv+fuOkIoXT/V/f3Qbq8e37p+YOiYrUv3v9cc3/6x78VdfPgFVaB9dZYeLUfKgHRebpkm/oP2VQ==
+
+immer@^10.1.3:
+  version "10.1.3"
+  resolved "https://registry.npmmirror.com/immer/-/immer-10.1.3.tgz#e38a0b97db59949d31d9b381b04c2e441b1c3747"
+  integrity sha512-tmjF/k8QDKydUlm3mZU+tjM6zeq9/fFpPqH9SzWmBnVVKsPBg/V66qsMwb3/Bo90cgUN+ghdVBess+hPsxUyRw==
 
 immer@^9.0.6:
   version "9.0.21"
@@ -5278,7 +5363,7 @@ locate-path@^6.0.0:
   dependencies:
     p-locate "^5.0.0"
 
-lodash-es@^4.17.21:
+lodash-es@^4.17.15, lodash-es@^4.17.21:
   version "4.17.21"
   resolved "https://registry.npmmirror.com/lodash-es/-/lodash-es-4.17.21.tgz"
   integrity sha512-mKnC+QJ9pWVzv+C4/U3rRsHapFfHvQFoFB92e52xeyGMcX6/OlIl78je1u8vePzYZSkkogMPJ2yjxxsb89cxyw==
@@ -5328,7 +5413,12 @@ lodash.toarray@^4.4.0:
   resolved "https://registry.npmmirror.com/lodash.toarray/-/lodash.toarray-4.4.0.tgz"
   integrity sha512-QyffEA3i5dma5q2490+SgCvDN0pXLmRGSyAANuVi0HQ01Pkfr9fuoKQW8wm1wGBnJITs/mS7wQvS6VshUEBFCw==
 
-lodash@^4.17.21, lodash@^4.7.0:
+lodash@4.17.15:
+  version "4.17.15"
+  resolved "https://registry.npmmirror.com/lodash/-/lodash-4.17.15.tgz#b447f6670a0455bbfeedd11392eff330ea097548"
+  integrity sha512-8xOcRHvCjnocdS5cpwXQXVzmmh5e5+saE2QGoeQmbKmRS6J3VQppPOIt0MnmE+4xlZoumy0GPG0D0MVIQbNA1A==
+
+lodash@^4.17.15, lodash@^4.17.21, lodash@^4.7.0:
   version "4.17.21"
   resolved "https://registry.npmmirror.com/lodash/-/lodash-4.17.21.tgz"
   integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
@@ -6213,6 +6303,11 @@ requires-port@^1.0.0:
   resolved "https://registry.npmmirror.com/requires-port/-/requires-port-1.0.0.tgz"
   integrity sha512-KigOCHcocU3XODJxsu8i/j8T9tzT4adHiecwORRQ0ZZFcp7ahwXuRU1m+yuO90C5ZUyGeGfocHDI14M3L3yDAQ==
 
+resize-detector@^0.1.10:
+  version "0.1.10"
+  resolved "https://registry.npmmirror.com/resize-detector/-/resize-detector-0.1.10.tgz#1da3f961aa5f914ccbcfd3752d52fd45beeb692c"
+  integrity sha512-iLcXC8A6Fb0DfA+TRiywrK/0A22bFqkhntjMJMEzXDA4XkcEkfwpNbv7W8iewUiD0xYIaeiXOfiEehTqGKsUFw==
+
 resize-observer-polyfill@^1.5.0, resize-observer-polyfill@^1.5.1:
   version "1.5.1"
   resolved "https://registry.npmmirror.com/resize-observer-polyfill/-/resize-observer-polyfill-1.5.1.tgz"
@@ -6948,7 +7043,7 @@ traverse@^0.6.6:
     typedarray.prototype.slice "^1.0.5"
     which-typed-array "^1.1.18"
 
-tslib@2.3.0, tslib@^2.1.0:
+tslib@^2.1.0:
   version "2.3.0"
   resolved "https://registry.npmmirror.com/tslib/-/tslib-2.3.0.tgz"
   integrity sha512-N82ooyxVNm6h1riLCoyS9e3fuJ3AMG2zIZs2Gd1ATcSFjSA23Q0fzjjZeh0jbJvWVDZ0cJT8yaNNaaXHzueNjg==
@@ -7232,6 +7327,11 @@ util-deprecate@^1.0.1, util-deprecate@^1.0.2:
   resolved "https://registry.npmmirror.com/util-deprecate/-/util-deprecate-1.0.2.tgz"
   integrity sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==
 
+utility-types@^3.10.0:
+  version "3.11.0"
+  resolved "https://registry.npmmirror.com/utility-types/-/utility-types-3.11.0.tgz#607c40edb4f258915e901ea7995607fdf319424c"
+  integrity sha512-6Z7Ma2aVEWisaL6TvBCy7P8rm2LQoPv6dJ7ecIaIixHcwfbJ0x7mWdbcwlIM5IGQxPZSFYeqRCqlOOeKoJYMkw==
+
 utils-merge@1.0.1:
   version "1.0.1"
   resolved "https://registry.npmmirror.com/utils-merge/-/utils-merge-1.0.1.tgz"
@@ -7294,15 +7394,10 @@ vite@^4.4.6:
   optionalDependencies:
     fsevents "~2.3.2"
 
-vue-demi@*, vue-demi@^0.14.10:
+vue-demi@*, vue-demi@^0.14.10, vue-demi@latest:
   version "0.14.10"
-  resolved "https://registry.npmmirror.com/vue-demi/-/vue-demi-0.14.10.tgz"
+  resolved "https://registry.npmmirror.com/vue-demi/-/vue-demi-0.14.10.tgz#afc78de3d6f9e11bf78c55e8510ee12814522f04"
   integrity sha512-nMZBOwuzabUO0nLgIcc6rycZEebF6eeUfaiQx9+WSk8e29IbLvPU9feI6tqW4kTo3hvoYAJkMh8n8D0fuISphg==
-
-vue-demi@^0.13.11:
-  version "0.13.11"
-  resolved "https://registry.npmmirror.com/vue-demi/-/vue-demi-0.13.11.tgz"
-  integrity sha512-IR8HoEEGM65YY3ZJYAjMlKygDQn25D5ajNFNoKh9RSDMQtlzCxtfQjdQgv9jjK+m3377SsJXY8ysq8kLCZL25A==
 
 vue-draggable-plus@^0.6.0:
   version "0.6.0"
@@ -7311,12 +7406,13 @@ vue-draggable-plus@^0.6.0:
   dependencies:
     "@types/sortablejs" "^1.15.8"
 
-vue-echarts@^7.0.3:
-  version "7.0.3"
-  resolved "https://registry.npmmirror.com/vue-echarts/-/vue-echarts-7.0.3.tgz"
-  integrity sha512-/jSxNwOsw5+dYAUcwSfkLwKPuzTQ0Cepz1LxCOpj2QcHrrmUa/Ql0eQqMmc1rTPQVrh2JQ29n2dhq75ZcHvRDw==
+vue-echarts@^4.1.0:
+  version "4.1.0"
+  resolved "https://registry.npmmirror.com/vue-echarts/-/vue-echarts-4.1.0.tgz#ff4828aaa599e7aaaac95e35297d964192a3af0d"
+  integrity sha512-am2vsAjEYGz3JqqMaSqIR35HIxr/TjxYPoKWTorgi10rzwl7+f+uBvpj7AkCJ6HVL8zR3exYpyo881aG+24Rfg==
   dependencies:
-    vue-demi "^0.13.11"
+    lodash "^4.17.15"
+    resize-detector "^0.1.10"
 
 vue-eslint-parser@^9.4.3:
   version "9.4.3"
@@ -7566,9 +7662,7 @@ yocto-queue@^0.1.0:
   resolved "https://registry.npmmirror.com/yocto-queue/-/yocto-queue-0.1.0.tgz"
   integrity sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==
 
-zrender@5.6.1:
-  version "5.6.1"
-  resolved "https://registry.npmmirror.com/zrender/-/zrender-5.6.1.tgz"
-  integrity sha512-OFXkDJKcrlx5su2XbzJvj/34Q3m6PvyCZkVPHGYpcCJ52ek4U/ymZyfuV1nKE23AyBJ51E/6Yr0mhZ7xGTO4ag==
-  dependencies:
-    tslib "2.3.0"
+zrender@4.3.2:
+  version "4.3.2"
+  resolved "https://registry.npmmirror.com/zrender/-/zrender-4.3.2.tgz#ec7432f9415c82c73584b6b7b8c47e1b016209c6"
+  integrity sha512-bIusJLS8c4DkIcdiK+s13HiQ/zjQQVgpNohtd8d94Y2DnJqgM1yjh/jpDb8DoL6hd7r8Awagw8e3qK/oLaWr3g==

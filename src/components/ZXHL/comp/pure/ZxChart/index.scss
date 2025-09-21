@@ -1,34 +1,58 @@
-// ZxChart 图表组件样式
+// ZxChartNew 图表组件样式
 // 纯净组件样式，充分利用 Element Plus 的品牌色 CSS3 变量
+// 增强自适应功能和 ResizeObserver 支持
 
 // 导入变量定义
 @import './var.scss';
 
-// 所有样式包装在 zx-chart-wrapper 下
-.zx-chart-wrapper {
+// 所有样式包装在 zx-chart-new-wrapper 下
+.zx-chart-new-wrapper {
   position: relative;
-  background-color: var(--cmp-chart-background);
-  border: var(--cmp-chart-border-width) solid var(--cmp-chart-border-color);
-  border-radius: var(--cmp-chart-border-radius);
-  padding: var(--cmp-chart-padding);
-  margin: var(--cmp-chart-margin);
-  box-shadow: var(--cmp-chart-box-shadow);
-  min-height: var(--cmp-chart-min-height);
-  min-width: var(--cmp-chart-min-width);
+  background-color: var(--cmp-chart-new-background);
+  border: var(--cmp-chart-new-border-width) solid var(--cmp-chart-new-border-color);
+  border-radius: var(--cmp-chart-new-border-radius);
+  padding: var(--cmp-chart-new-padding);
+  margin: var(--cmp-chart-new-margin);
+  box-shadow: var(--cmp-chart-new-box-shadow);
+  min-height: var(--cmp-chart-new-min-height);
+  min-width: var(--cmp-chart-new-min-width);
   overflow: hidden;
-  transition: var(--cmp-chart-transition);
+  transition: var(--cmp-chart-new-transition);
   
   // 确保图表容器占满父容器
   .echarts {
     width: 100% !important;
     height: 100% !important;
-    color: var(--cmp-chart-text-color-primary);
+    color: var(--cmp-chart-new-text-color-primary);
+    position: relative;
+  }
+  
+  // 自适应状态指示器（开发调试用）
+  &.resize-active {
+    &::before {
+      content: '';
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: var(--cmp-chart-new-resize-indicator-size);
+      height: var(--cmp-chart-new-resize-indicator-size);
+      background-color: var(--cmp-chart-new-resize-indicator-color);
+      border-radius: 50%;
+      z-index: 1000;
+      opacity: 0.8;
+      animation: resize-pulse 1s ease-in-out infinite;
+    }
+  }
+  
+  // 防抖状态指示器
+  &.resize-debouncing {
+    background-color: var(--cmp-chart-new-resize-debounce-indicator);
   }
   
   // 悬停效果
-  // &:hover {
-  //   box-shadow: var(--cmp-chart-box-shadow-hover);
-  // }
+  &:hover {
+    box-shadow: var(--cmp-chart-new-box-shadow-hover);
+  }
   
   // 加载状态样式
   &.loading {
@@ -39,7 +63,7 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background-color: var(--cmp-chart-loading-background);
+      background-color: var(--cmp-chart-new-loading-background);
       z-index: 1000;
     }
     
@@ -49,8 +73,8 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      color: var(--cmp-chart-loading-text-color);
-      font-size: var(--cmp-chart-loading-font-size);
+      color: var(--cmp-chart-new-loading-text-color);
+      font-size: var(--cmp-chart-new-loading-font-size);
       z-index: 1001;
     }
   }
@@ -85,76 +109,112 @@
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   }
   
+  // 自适应增强样式
+  &.auto-resize-enhanced {
+    // 更平滑的过渡效果
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    // 容器尺寸变化时的视觉反馈
+    &.resizing {
+      border-color: var(--cmp-chart-new-resize-indicator-color);
+      box-shadow: 0 0 0 2px var(--cmp-chart-new-resize-debounce-indicator);
+    }
+  }
+  
   // 响应式设计
   @media (max-width: 768px) {
-    padding: var(--cmp-chart-mobile-padding);
-    min-height: var(--cmp-chart-mobile-min-height);
+    padding: var(--cmp-chart-new-mobile-padding);
+    min-height: var(--cmp-chart-new-mobile-min-height);
     
     .echarts {
-      font-size: var(--cmp-chart-mobile-font-size);
+      font-size: var(--cmp-chart-new-mobile-font-size);
     }
   }
   
   @media (max-width: 480px) {
-    padding: var(--cmp-chart-small-padding);
-    min-height: var(--cmp-chart-small-min-height);
+    padding: var(--cmp-chart-new-small-padding);
+    min-height: var(--cmp-chart-new-small-min-height);
     
     .echarts {
-      font-size: var(--cmp-chart-small-font-size);
+      font-size: var(--cmp-chart-new-small-font-size);
     }
-  }
-}
-
-// 深度样式 - 图表工具提示样式增强
-:deep(.echarts-tooltip) {
-  background-color: var(--cmp-chart-tooltip-background) !important;
-  border: 1px solid var(--cmp-chart-tooltip-border-color) !important;
-  border-radius: var(--cmp-chart-border-radius) !important;
-  box-shadow: var(--cmp-chart-tooltip-shadow) !important;
-  color: var(--cmp-chart-tooltip-text-color) !important;
-}
-
-// 深度样式 - 图表图例样式增强
-:deep(.echarts-legend) {
-  .echarts-legend-item {
-    margin-right: 16px;
-    color: var(--cmp-chart-legend-text-color) !important;
-    
-    &:last-child {
-      margin-right: 0;
-    }
-    
-    &.echarts-legend-inactive {
-      color: var(--cmp-chart-legend-inactive-color) !important;
-    }
-  }
-}
-
-// 深度样式 - 数据缩放组件样式
-:deep(.echarts-datazoom) {
-  background-color: var(--cmp-chart-datazoom-background) !important;
-  border-color: var(--cmp-chart-datazoom-border-color) !important;
-  
-  .echarts-datazoom-handle {
-    border-radius: 2px;
-    background-color: var(--cmp-chart-datazoom-handle-color) !important;
-  }
-}
-
-// 深度样式 - 坐标轴样式
-:deep(.echarts-axis) {
-  .echarts-axis-line {
-    stroke: var(--cmp-chart-axis-line-color) !important;
   }
   
-  .echarts-axis-label {
-    fill: var(--cmp-chart-axis-label-color) !important;
+  // 高分辨率屏幕优化
+  @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .echarts {
+      // 高分辨率屏幕下的优化
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: crisp-edges;
+    }
+  }
+  
+  // 打印样式
+  @media print {
+    box-shadow: none;
+    border: 1px solid #000;
+    background-color: #fff;
+    
+    .echarts {
+      color: #000;
+    }
+  }
+  
+  // 深色主题适配
+  @media (prefers-color-scheme: dark) {
+    &:not([data-theme]) {
+      --cmp-chart-new-background: #1a1a1a;
+      --cmp-chart-new-border-color: #404040;
+      --cmp-chart-new-text-color-primary: #ffffff;
+      --cmp-chart-new-text-color-regular: #cccccc;
+    }
+  }
+  
+  // 减少动画偏好设置
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+    
+    &.resize-active::before {
+      animation: none;
+    }
   }
 }
 
-// 深度样式 - 网格线样式
-:deep(.echarts-grid) {
-  .echarts-grid-line {
-    stroke: var(--cmp-chart-grid-line-color) !important;
+// 自适应状态动画
+@keyframes resize-pulse {
+  0%, 100% {
+    opacity: 0.8;
+    transform: scale(1);
   }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+// 图表容器的全局样式增强
+.zx-chart-new-wrapper .echarts {
+  // 确保 ECharts 实例正确渲染
+  canvas {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+  }
+  
+  // SVG 渲染器支持
+  svg {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+  }
+}
+
+// 工具提示样式增强
+.zx-chart-new-tooltip {
+  background-color: var(--cmp-chart-new-tooltip-background) !important;
+  border: 1px solid var(--cmp-chart-new-tooltip-border-color) !important;
+  color: var(--cmp-chart-new-tooltip-text-color) !important;
+  box-shadow: var(--cmp-chart-new-tooltip-shadow) !important;
+  border-radius: var(--cmp-chart-new-border-radius) !important;
+  font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif !important;
 }

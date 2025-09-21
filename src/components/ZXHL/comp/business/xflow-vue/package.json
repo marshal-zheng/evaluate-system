@@ -1,0 +1,55 @@
+{
+  "name": "xflow-vue",
+  "version": "1.0.0",
+  "description": "XFlow Vue 3 图编辑器组件库",
+  "main": "index.js",
+  "module": "index.js",
+  "files": [
+    "components",
+    "composables", 
+    "stores",
+    "utils",
+    "types",
+    "styles",
+    "examples",
+    "index.js",
+    "README.md"
+  ],
+  "keywords": [
+    "vue3",
+    "x6",
+    "graph",
+    "diagram",
+    "editor",
+    "xflow",
+    "antv"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "peerDependencies": {
+    "vue": "^3.3.0",
+    "pinia": "^2.1.0",
+    "@antv/x6": "^2.15.0",
+    "@antv/x6-plugin-clipboard": "^2.1.6",
+    "@antv/x6-plugin-dnd": "^2.1.1",
+    "@antv/x6-plugin-export": "^2.1.6",
+    "@antv/x6-plugin-history": "^2.2.4",
+    "@antv/x6-plugin-keyboard": "^2.2.1",
+    "@antv/x6-plugin-minimap": "^2.0.6",
+    "@antv/x6-plugin-scroller": "^2.0.10",
+    "@antv/x6-plugin-selection": "^2.2.1",
+    "@antv/x6-plugin-snapline": "^2.1.7",
+    "@antv/x6-plugin-transform": "^2.1.8",
+    "@antv/x6-vue3-shape": "^2.1.2",
+    "immer": "^10.0.0",
+    "classnames": "^2.3.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/marshal-zheng/evaluate-system.git"
+  },
+  "bugs": {
+    "url": "https://github.com/marshal-zheng/evaluate-system/issues"
+  },
+  "homepage": "https://github.com/marshal-zheng/evaluate-system#readme"
+}

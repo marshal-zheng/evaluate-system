@@ -11,7 +11,22 @@
  * @returns {string} CSS 变量值
  */
 function getCSSVariable(variable, element = document.documentElement) {
-  return getComputedStyle(element).getPropertyValue(variable).trim()
+  // 参数验证：确保 element 是有效的 DOM 元素
+  if (!element || typeof element.getAttribute !== 'function') {
+    element = document.documentElement || document.body
+  }
+  
+  // 如果仍然无效，返回空字符串
+  if (!element || typeof element.getAttribute !== 'function') {
+    return ''
+  }
+  
+  try {
+    return getComputedStyle(element).getPropertyValue(variable).trim()
+  } catch (error) {
+    console.warn('getCSSVariable error:', error)
+    return ''
+  }
 }
 
 /**
@@ -20,7 +35,21 @@ function getCSSVariable(variable, element = document.documentElement) {
  * @param {Element} element - 目标元素，默认为 document.documentElement
  * @returns {Object} 主题信息对象 { name: string, type: string, isDark: boolean }
  */
-function getCurrentTheme(element = document.documentElement) {
+export function getCurrentTheme(element = document.documentElement) {
+  // 参数验证：确保 element 是有效的 DOM 元素
+  if (!element || typeof element.getAttribute !== 'function') {
+    element = document.documentElement || document.body
+  }
+  
+  // 如果仍然无效，返回默认主题
+  if (!element || typeof element.getAttribute !== 'function') {
+    return {
+      name: 'light',
+      type: 'light',
+      isDark: false
+    }
+  }
+  
   // 1. 优先从 data-theme 属性获取主题名称
   const explicitTheme = element.getAttribute('data-theme')
   if (explicitTheme) {
@@ -58,7 +87,17 @@ function getCurrentTheme(element = document.documentElement) {
  * @param {Element} element - 目标元素
  * @returns {boolean} 是否为深色主题
  */
-function detectIsDarkTheme(element = document.documentElement) {
+export function detectIsDarkTheme(element = document.documentElement) {
+  // 参数验证：确保 element 是有效的 DOM 元素
+  if (!element || typeof element.getAttribute !== 'function') {
+    element = document.documentElement || document.body
+  }
+  
+  // 如果仍然无效，返回默认值（浅色主题）
+  if (!element || typeof element.getAttribute !== 'function') {
+    return false
+  }
+  
   // 检测背景色亮度
   const backgroundColor = getCSSVariable('--el-bg-color', element) || '#ffffff'
   const bgBrightness = getColorBrightness(backgroundColor)
@@ -76,7 +115,7 @@ function detectIsDarkTheme(element = document.documentElement) {
  * @param {Element} element - 目标元素
  * @returns {Object} 主题信息
  */
-function detectThemeFromVariables(element = document.documentElement) {
+export function detectThemeFromVariables(element = document.documentElement) {
   const isDark = detectIsDarkTheme(element)
   const themeType = isDark ? 'dark' : 'light'
   
@@ -106,7 +145,7 @@ function detectThemeFromVariables(element = document.documentElement) {
  * @param {string} backgroundColor - 背景色
  * @returns {string} 6位哈希字符串
  */
-function generateColorHash(primaryColor, backgroundColor) {
+export function generateColorHash(primaryColor, backgroundColor) {
   // 简单的颜色哈希算法，生成6位字符标识
   const colorString = `${primaryColor}${backgroundColor}`.replace(/[#\s]/g, '')
   let hash = 0
@@ -144,7 +183,6 @@ function getColorBrightness(color) {
   // 使用标准亮度计算公式
   return Math.round(0.299 * r + 0.587 * g + 0.114 * b)
 }
-
 
 /**
  * 生成基于 CSS3 变量的 ECharts 主题配置
@@ -186,247 +224,475 @@ export function generateEChartsTheme(container = document.documentElement) {
   // 图表专用颜色配置
   const chartColors = {
     // 从 ZxChart 变量中获取图表专用颜色
-    chartBackground: getCSSVariable('--cmp-chart-background', container) || colors.background,
-    chartTextPrimary: getCSSVariable('--cmp-chart-text-color-primary', container) || colors.textPrimary,
-    chartTextRegular: getCSSVariable('--cmp-chart-text-color-regular', container) || colors.textRegular,
-    chartGridLine: getCSSVariable('--cmp-chart-grid-line-color', container) || colors.borderLighter,
-    chartAxisLine: getCSSVariable('--cmp-chart-axis-line-color', container) || colors.borderLight,
-    chartAxisLabel: getCSSVariable('--cmp-chart-axis-label-color', container) || colors.textRegular,
-    chartTooltipBg: getCSSVariable('--cmp-chart-tooltip-background', container) || colors.backgroundOverlay,
-    chartTooltipBorder: getCSSVariable('--cmp-chart-tooltip-border-color', container) || colors.border,
-    chartTooltipText: getCSSVariable('--cmp-chart-tooltip-text-color', container) || colors.textPrimary,
-    chartLegendText: getCSSVariable('--cmp-chart-legend-text-color', container) || colors.textRegular,
-    chartLegendInactive: getCSSVariable('--cmp-chart-legend-inactive-color', container) || colors.textPlaceholder,
+    chartBackground: getCSSVariable('--cmp-chart-new-background', container) || colors.background,
+    chartTextPrimary: getCSSVariable('--cmp-chart-new-text-color-primary', container) || colors.textPrimary,
+    chartTextRegular: getCSSVariable('--cmp-chart-new-text-color-regular', container) || colors.textRegular,
+    chartGridLine: getCSSVariable('--cmp-chart-new-grid-line-color', container) || colors.borderLighter,
+    chartAxisLine: getCSSVariable('--cmp-chart-new-axis-line-color', container) || colors.borderLight,
+    chartAxisLabel: getCSSVariable('--cmp-chart-new-axis-label-color', container) || colors.textRegular,
+    chartTooltipBg: getCSSVariable('--cmp-chart-new-tooltip-background', container) || colors.backgroundOverlay,
+    chartTooltipBorder: getCSSVariable('--cmp-chart-new-tooltip-border-color', container) || colors.border,
+    chartTooltipText: getCSSVariable('--cmp-chart-new-tooltip-text-color', container) || colors.textPrimary,
+    chartLegendText: getCSSVariable('--cmp-chart-new-legend-text-color', container) || colors.textRegular,
+    chartLegendInactive: getCSSVariable('--cmp-chart-new-legend-inactive-color', container) || colors.textPlaceholder,
   }
-  
-  // 生成调色板
+
+  // 生成图表色彩序列
   const colorPalette = [
-    colors.primary,
-    colors.success,
-    colors.warning,
-    colors.danger,
-    colors.info,
-    getCSSVariable('--el-color-primary-light-3', container),
-    getCSSVariable('--el-color-success-light-3', container),
-    getCSSVariable('--el-color-warning-light-3', container),
-    getCSSVariable('--el-color-danger-light-3', container),
-    getCSSVariable('--el-color-info-light-3', container),
-  ].filter(color => color && color !== '')
-  
+    colors.primary || '#409eff',
+    colors.success || '#67c23a',
+    colors.warning || '#e6a23c',
+    colors.danger || '#f56c6c',
+    colors.info || '#909399',
+    '#ff7875',
+    '#ffa940',
+    '#ffec3d',
+    '#bae637',
+    '#73d13d',
+    '#40a9ff',
+    '#b37feb',
+    '#ff85c0'
+  ]
+
   return {
-    // 调色板
     color: colorPalette,
-    
-    // 背景色
     backgroundColor: chartColors.chartBackground,
-    
-    // 文字样式
     textStyle: {
+      fontFamily: 'PingFang SC, Microsoft YaHei, sans-serif',
       color: chartColors.chartTextPrimary,
-      fontFamily: 'PingFang SC, Microsoft YaHei, Arial, sans-serif',
+      fontSize: getResponsiveFontSize(12, container)
     },
-    
-    // 标题
     title: {
       textStyle: {
         color: chartColors.chartTextPrimary,
-        fontSize: 16,
-        fontWeight: 'bold',
+        fontSize: getResponsiveFontSize(16, container),
+        fontWeight: 'bold'
       },
       subtextStyle: {
         color: chartColors.chartTextRegular,
-        fontSize: 12,
-      },
+        fontSize: getResponsiveFontSize(12, container)
+      }
     },
-    
-    // 图例
+    line: {
+      itemStyle: {
+        borderWidth: 1
+      },
+      lineStyle: {
+        width: 2
+      },
+      symbolSize: 4,
+      symbol: 'emptyCircle',
+      smooth: false
+    },
+    radar: {
+      itemStyle: {
+        borderWidth: 1
+      },
+      lineStyle: {
+        width: 2
+      },
+      symbolSize: 4,
+      symbol: 'emptyCircle',
+      smooth: false
+    },
+    bar: {
+      itemStyle: {
+        barBorderWidth: 0,
+        barBorderColor: chartColors.chartAxisLine
+      }
+    },
+    pie: {
+      itemStyle: {
+        borderWidth: 0,
+        borderColor: chartColors.chartAxisLine
+      }
+    },
+    scatter: {
+      itemStyle: {
+        borderWidth: 0,
+        borderColor: chartColors.chartAxisLine
+      }
+    },
+    boxplot: {
+      itemStyle: {
+        borderWidth: 0,
+        borderColor: chartColors.chartAxisLine
+      }
+    },
+    parallel: {
+      itemStyle: {
+        borderWidth: 0,
+        borderColor: chartColors.chartAxisLine
+      }
+    },
+    sankey: {
+      itemStyle: {
+        borderWidth: 0,
+        borderColor: chartColors.chartAxisLine
+      }
+    },
+    funnel: {
+      itemStyle: {
+        borderWidth: 0,
+        borderColor: chartColors.chartAxisLine
+      }
+    },
+    gauge: {
+      itemStyle: {
+        borderWidth: 0,
+        borderColor: chartColors.chartAxisLine
+      }
+    },
+    candlestick: {
+      itemStyle: {
+        color: colors.danger,
+        color0: colors.success,
+        borderColor: colors.danger,
+        borderColor0: colors.success,
+        borderWidth: 1
+      }
+    },
+    graph: {
+      itemStyle: {
+        borderWidth: 0,
+        borderColor: chartColors.chartAxisLine
+      },
+      lineStyle: {
+        width: 1,
+        color: chartColors.chartGridLine
+      },
+      symbolSize: 4,
+      symbol: 'emptyCircle',
+      smooth: false,
+      color: colorPalette,
+      label: {
+        color: chartColors.chartTextRegular
+      }
+    },
+    map: {
+      itemStyle: {
+        areaColor: chartColors.chartBackground,
+        borderColor: chartColors.chartGridLine,
+        borderWidth: 0.5
+      },
+      label: {
+        color: chartColors.chartTextRegular
+      },
+      emphasis: {
+        itemStyle: {
+          areaColor: colors.primary,
+          borderColor: chartColors.chartAxisLine,
+          borderWidth: 1
+        },
+        label: {
+          color: chartColors.chartTextPrimary
+        }
+      }
+    },
+    geo: {
+      itemStyle: {
+        areaColor: chartColors.chartBackground,
+        borderColor: chartColors.chartGridLine,
+        borderWidth: 0.5
+      },
+      label: {
+        color: chartColors.chartTextRegular
+      },
+      emphasis: {
+        itemStyle: {
+          areaColor: colors.primary,
+          borderColor: chartColors.chartAxisLine,
+          borderWidth: 1
+        },
+        label: {
+          color: chartColors.chartTextPrimary
+        }
+      }
+    },
+    categoryAxis: {
+      axisLine: {
+        show: true,
+        lineStyle: {
+          color: chartColors.chartAxisLine
+        }
+      },
+      axisTick: {
+        show: true,
+        lineStyle: {
+          color: chartColors.chartAxisLine
+        }
+      },
+      axisLabel: {
+        show: true,
+        color: chartColors.chartAxisLabel,
+        fontSize: getResponsiveFontSize(11, container)
+      },
+      splitLine: {
+        show: false,
+        lineStyle: {
+          color: [chartColors.chartGridLine]
+        }
+      },
+      splitArea: {
+        show: false,
+        areaStyle: {
+          color: [chartColors.chartBackground]
+        }
+      }
+    },
+    valueAxis: {
+      axisLine: {
+        show: true,
+        lineStyle: {
+          color: chartColors.chartAxisLine
+        }
+      },
+      axisTick: {
+        show: true,
+        lineStyle: {
+          color: chartColors.chartAxisLine
+        }
+      },
+      axisLabel: {
+        show: true,
+        color: chartColors.chartAxisLabel,
+        fontSize: getResponsiveFontSize(11, container)
+      },
+      splitLine: {
+        show: true,
+        lineStyle: {
+          color: [chartColors.chartGridLine]
+        }
+      },
+      splitArea: {
+        show: false,
+        areaStyle: {
+          color: [chartColors.chartBackground]
+        }
+      }
+    },
+    logAxis: {
+      axisLine: {
+        show: true,
+        lineStyle: {
+          color: chartColors.chartAxisLine
+        }
+      },
+      axisTick: {
+        show: true,
+        lineStyle: {
+          color: chartColors.chartAxisLine
+        }
+      },
+      axisLabel: {
+        show: true,
+        color: chartColors.chartAxisLabel,
+        fontSize: getResponsiveFontSize(11, container)
+      },
+      splitLine: {
+        show: true,
+        lineStyle: {
+          color: [chartColors.chartGridLine]
+        }
+      },
+      splitArea: {
+        show: false,
+        areaStyle: {
+          color: [chartColors.chartBackground]
+        }
+      }
+    },
+    timeAxis: {
+      axisLine: {
+        show: true,
+        lineStyle: {
+          color: chartColors.chartAxisLine
+        }
+      },
+      axisTick: {
+        show: true,
+        lineStyle: {
+          color: chartColors.chartAxisLine
+        }
+      },
+      axisLabel: {
+        show: true,
+        color: chartColors.chartAxisLabel,
+        fontSize: getResponsiveFontSize(11, container)
+      },
+      splitLine: {
+        show: true,
+        lineStyle: {
+          color: [chartColors.chartGridLine]
+        }
+      },
+      splitArea: {
+        show: false,
+        areaStyle: {
+          color: [chartColors.chartBackground]
+        }
+      }
+    },
+    toolbox: {
+      iconStyle: {
+        borderColor: chartColors.chartTextRegular
+      },
+      emphasis: {
+        iconStyle: {
+          borderColor: chartColors.chartTextPrimary
+        }
+      }
+    },
     legend: {
       textStyle: {
         color: chartColors.chartLegendText,
-        fontSize: 12,
+        fontSize: getResponsiveFontSize(12, container)
       },
-      inactiveColor: chartColors.chartLegendInactive,
+      inactiveColor: chartColors.chartLegendInactive
     },
-    
-    // 坐标轴
-    categoryAxis: {
-      axisLine: {
-        lineStyle: {
-          color: chartColors.chartAxisLine,
-        },
-      },
-      axisTick: {
-        lineStyle: {
-          color: chartColors.chartAxisLine,
-        },
-      },
-      axisLabel: {
-        color: chartColors.chartAxisLabel,
-        fontSize: 12,
-      },
-      splitLine: {
-        lineStyle: {
-          color: chartColors.chartGridLine,
-          type: 'dashed',
-        },
-      },
-    },
-    
-    valueAxis: {
-      axisLine: {
-        lineStyle: {
-          color: chartColors.chartAxisLine,
-        },
-      },
-      axisTick: {
-        lineStyle: {
-          color: chartColors.chartAxisLine,
-        },
-      },
-      axisLabel: {
-        color: chartColors.chartAxisLabel,
-        fontSize: 12,
-      },
-      splitLine: {
-        lineStyle: {
-          color: chartColors.chartGridLine,
-          type: 'dashed',
-        },
-      },
-    },
-    
-    // 工具提示
     tooltip: {
       backgroundColor: chartColors.chartTooltipBg,
       borderColor: chartColors.chartTooltipBorder,
       borderWidth: 1,
       textStyle: {
         color: chartColors.chartTooltipText,
-        fontSize: 12,
-      },
-      extraCssText: `
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-        border-radius: 4px;
-        backdrop-filter: blur(10px);
-      `,
+        fontSize: getResponsiveFontSize(12, container)
+      }
     },
-    
-    // 数据缩放
-    dataZoom: {
-      backgroundColor: getCSSVariable('--cmp-chart-datazoom-background', container) || colors.fill,
-      borderColor: getCSSVariable('--cmp-chart-datazoom-border-color', container) || colors.border,
-      handleColor: getCSSVariable('--cmp-chart-datazoom-handle-color', container) || colors.primary,
-      textStyle: {
-        color: chartColors.chartTextRegular,
-      },
-    },
-    
-    // 时间轴
     timeline: {
       lineStyle: {
         color: chartColors.chartAxisLine,
+        width: 1
       },
       itemStyle: {
         color: colors.primary,
+        borderWidth: 1
       },
       controlStyle: {
         color: colors.primary,
+        borderColor: colors.primary,
+        borderWidth: 0.5
       },
       checkpointStyle: {
         color: colors.primary,
+        borderColor: chartColors.chartAxisLine
       },
       label: {
         color: chartColors.chartTextRegular,
-      },
-    },
-    
-    // 视觉映射
-    visualMap: {
-      textStyle: {
-        color: chartColors.chartTextRegular,
-      },
-    },
-    
-    // 工具箱
-    toolbox: {
-      iconStyle: {
-        borderColor: chartColors.chartTextRegular,
-      },
-      emphasis: {
-        iconStyle: {
-          borderColor: colors.primary,
-        },
-      },
-    },
-    
-    // 地理坐标系
-    geo: {
-      itemStyle: {
-        areaColor: colors.fill,
-        borderColor: colors.border,
+        fontSize: getResponsiveFontSize(11, container)
       },
       emphasis: {
         itemStyle: {
-          areaColor: colors.fillLight,
+          color: colors.primary
         },
-      },
+        controlStyle: {
+          color: colors.primary,
+          borderColor: colors.primary,
+          borderWidth: 0.5
+        },
+        label: {
+          color: chartColors.chartTextPrimary,
+          fontSize: getResponsiveFontSize(11, container)
+        }
+      }
     },
+    visualMap: {
+      color: [colors.danger, colors.warning, colors.success],
+      textStyle: {
+        color: chartColors.chartTextRegular,
+        fontSize: getResponsiveFontSize(11, container)
+      }
+    },
+    dataZoom: {
+      backgroundColor: 'rgba(47,69,84,0)',
+      dataBackgroundColor: 'rgba(47,69,84,0.3)',
+      fillerColor: 'rgba(167,183,204,0.4)',
+      handleColor: colors.primary,
+      handleSize: '100%',
+      textStyle: {
+        color: chartColors.chartTextRegular,
+        fontSize: getResponsiveFontSize(11, container)
+      }
+    },
+    markPoint: {
+      label: {
+        color: chartColors.chartTextPrimary,
+        fontSize: getResponsiveFontSize(11, container)
+      },
+      emphasis: {
+        label: {
+          color: chartColors.chartTextPrimary,
+          fontSize: getResponsiveFontSize(11, container)
+        }
+      }
+    }
   }
 }
 
 /**
  * 创建主题监听器
- * @param {Function} callback - 主题变化回调函数，接收主题信息对象
- * @returns {Function} 取消监听的函数
+ * @param {Function} callback - 主题变化回调函数
+ * @returns {Function} 清理函数
  */
 export function createThemeWatcher(callback) {
-  let lastThemeInfo = getCurrentTheme()
+  if (typeof callback !== 'function') {
+    console.warn('createThemeWatcher: callback must be a function')
+    return () => {}
+  }
+
+  let currentTheme = getCurrentTheme()
   
-  // CSS变量变化监听器
-  const variableObserver = new MutationObserver(() => {
-    // 延迟检测，确保CSS变量已更新
-    setTimeout(() => {
-      const currentThemeInfo = getCurrentTheme()
-      // 比较主题信息是否发生变化
-      if (JSON.stringify(currentThemeInfo) !== JSON.stringify(lastThemeInfo)) {
-        lastThemeInfo = currentThemeInfo
-        callback(currentThemeInfo)
-      }
-    }, 10)
-  })
+  // 定时检查主题变化
+  const checkThemeChange = () => {
+    const newTheme = getCurrentTheme()
+    
+    // 安全检查：确保主题对象有必要的属性
+    if (!currentTheme || typeof currentTheme !== 'object') {
+      currentTheme = { name: 'light', type: 'light', isDark: false }
+    }
+    if (!newTheme || typeof newTheme !== 'object') {
+      return
+    }
+    
+    // 比较主题是否发生变化
+    if (
+      newTheme.name !== currentTheme.name ||
+      newTheme.type !== currentTheme.type ||
+      newTheme.isDark !== currentTheme.isDark
+    ) {
+      currentTheme = newTheme
+      callback(newTheme)
+    }
+  }
   
-  // 属性变化监听器
-  const attributeObserver = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      if (mutation.type === 'attributes' && 
-          (mutation.attributeName === 'class' || 
-           mutation.attributeName === 'data-theme' ||
-           mutation.attributeName === 'style')) {
-        const currentThemeInfo = getCurrentTheme()
-        if (JSON.stringify(currentThemeInfo) !== JSON.stringify(lastThemeInfo)) {
-          lastThemeInfo = currentThemeInfo
-          callback(currentThemeInfo)
-        }
-      }
-    })
-  })
-  
-  // 监听 html 元素的属性变化
-  attributeObserver.observe(document.documentElement, {
+  // 使用 MutationObserver 监听 DOM 变化
+  const observer = new MutationObserver(checkThemeChange)
+  observer.observe(document.documentElement, {
     attributes: true,
-    attributeFilter: ['class', 'data-theme', 'style'],
+    attributeFilter: ['class', 'data-theme', 'style']
   })
   
-  // 监听 style 标签的变化（检测动态CSS变更）
-  variableObserver.observe(document.head, {
-    childList: true,
-    subtree: true,
-  })
+  // 监听媒体查询变化（系统主题切换）
+  const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+  const handleMediaChange = () => {
+    setTimeout(checkThemeChange, 50) // 延迟检查，确保CSS变量已更新
+  }
   
-  // 返回取消监听的函数
+  if (mediaQuery.addEventListener) {
+    mediaQuery.addEventListener('change', handleMediaChange)
+  } else {
+    // 兼容旧版浏览器
+    mediaQuery.addListener(handleMediaChange)
+  }
+  
+  // 返回清理函数
   return () => {
-    attributeObserver.disconnect()
-    variableObserver.disconnect()
+    observer.disconnect()
+    if (mediaQuery.removeEventListener) {
+      mediaQuery.removeEventListener('change', handleMediaChange)
+    } else {
+      mediaQuery.removeListener(handleMediaChange)
+    }
   }
 }
 
@@ -439,113 +705,144 @@ export function createThemeWatcher(callback) {
 export function getResponsiveFontSize(baseSize = 12, container = document.documentElement) {
   const containerWidth = container.clientWidth || window.innerWidth
   
+  // 响应式字体缩放规则
   if (containerWidth < 768) {
-    // 移动端
-    return Math.max(10, baseSize - 2)
-  } else if (containerWidth < 1200) {
-    // 平板端
-    return Math.max(11, baseSize - 1)
+    return Math.max(baseSize * 0.8, 10) // 移动端缩小
+  } else if (containerWidth > 1920) {
+    return baseSize * 1.1 // 大屏幕放大
   }
   
-  // 桌面端
   return baseSize
 }
 
 /**
- * 应用主题到 ECharts 配置
- * @param {Object} option - ECharts 配置对象
+ * 将主题应用到 ECharts 配置选项
+ * @param {Object} option - ECharts 配置选项
  * @param {Element} container - 图表容器元素
- * @returns {Object} 应用主题后的配置对象
+ * @returns {Object} 应用主题后的配置选项
  */
-export function applyThemeToOption(option, container = document.documentElement) {
-  const theme = generateEChartsTheme(container)
+export function applyThemeToOption(option, themeOrContainer = document.documentElement) {
+  if (!option || typeof option !== 'object') {
+    return option
+  }
   
-  // 深度合并主题配置
+  let theme = null
+  const maybeTheme = themeOrContainer
+  const isDomNode = maybeTheme && typeof maybeTheme === 'object' && (
+    maybeTheme.nodeType === 1 ||
+    maybeTheme.nodeType === 9 ||
+    typeof maybeTheme.tagName === 'string'
+  )
+
+  if (!isDomNode && maybeTheme && typeof maybeTheme === 'object' && (maybeTheme.color || maybeTheme.textStyle)) {
+    theme = maybeTheme
+  } else {
+    const container = isDomNode ? maybeTheme : document.documentElement
+    theme = generateEChartsTheme(container)
+  }
+  
+  // 深度合并配置，优先保留用户配置
   const mergedOption = JSON.parse(JSON.stringify(option))
   
-  // 应用全局文字样式
-  if (!mergedOption.textStyle) {
-    mergedOption.textStyle = theme.textStyle
-  }
-  
-  // 应用背景色
-  if (!mergedOption.backgroundColor) {
-    mergedOption.backgroundColor = theme.backgroundColor
-  }
-  
-  // 应用调色板
-  if (!mergedOption.color) {
+  // 应用主题色彩
+  if (!mergedOption.color && theme.color) {
     mergedOption.color = theme.color
   }
   
+  // 应用背景色
+  if (!mergedOption.backgroundColor && theme.backgroundColor) {
+    mergedOption.backgroundColor = theme.backgroundColor
+  }
+  
+  // 应用文字样式
+  if (!mergedOption.textStyle) {
+    mergedOption.textStyle = theme.textStyle
+  } else {
+    mergedOption.textStyle = { ...theme.textStyle, ...mergedOption.textStyle }
+  }
+  
   // 应用标题样式
-  if (mergedOption.title && typeof mergedOption.title === 'object') {
-    mergedOption.title = {
-      ...theme.title,
-      ...mergedOption.title,
-      textStyle: {
-        ...theme.title.textStyle,
-        ...mergedOption.title.textStyle,
-      },
+  if (mergedOption.title) {
+    if (Array.isArray(mergedOption.title)) {
+      mergedOption.title = mergedOption.title.map(titleItem => ({
+        ...theme.title,
+        ...titleItem,
+        textStyle: { ...theme.title.textStyle, ...(titleItem.textStyle || {}) },
+        subtextStyle: { ...theme.title.subtextStyle, ...(titleItem.subtextStyle || {}) }
+      }))
+    } else {
+      mergedOption.title = {
+        ...theme.title,
+        ...mergedOption.title,
+        textStyle: { ...theme.title.textStyle, ...(mergedOption.title.textStyle || {}) },
+        subtextStyle: { ...theme.title.subtextStyle, ...(mergedOption.title.subtextStyle || {}) }
+      }
     }
   }
   
   // 应用图例样式
-  if (mergedOption.legend && typeof mergedOption.legend === 'object') {
-    mergedOption.legend = {
-      ...theme.legend,
-      ...mergedOption.legend,
-      textStyle: {
-        ...theme.legend.textStyle,
-        ...mergedOption.legend.textStyle,
-      },
+  if (mergedOption.legend) {
+    if (Array.isArray(mergedOption.legend)) {
+      mergedOption.legend = mergedOption.legend.map(legendItem => ({
+        ...theme.legend,
+        ...legendItem,
+        textStyle: { ...theme.legend.textStyle, ...(legendItem.textStyle || {}) }
+      }))
+    } else {
+      mergedOption.legend = {
+        ...theme.legend,
+        ...mergedOption.legend,
+        textStyle: { ...theme.legend.textStyle, ...(mergedOption.legend.textStyle || {}) }
+      }
     }
   }
   
-  // 应用工具提示样式
-  if (mergedOption.tooltip && typeof mergedOption.tooltip === 'object') {
+  // 应用提示框样式
+  if (mergedOption.tooltip) {
     mergedOption.tooltip = {
       ...theme.tooltip,
       ...mergedOption.tooltip,
-      textStyle: {
-        ...theme.tooltip.textStyle,
-        ...mergedOption.tooltip.textStyle,
-      },
+      textStyle: { ...theme.tooltip.textStyle, ...(mergedOption.tooltip.textStyle || {}) }
     }
   }
   
   // 应用坐标轴样式
-  if (mergedOption.xAxis) {
-    const xAxes = Array.isArray(mergedOption.xAxis) ? mergedOption.xAxis : [mergedOption.xAxis]
-    xAxes.forEach((axis, index) => {
-      if (axis && typeof axis === 'object') {
-        mergedOption.xAxis = Array.isArray(mergedOption.xAxis) ? mergedOption.xAxis : mergedOption.xAxis
-        const targetAxis = Array.isArray(mergedOption.xAxis) ? mergedOption.xAxis[index] : mergedOption.xAxis
-        Object.assign(targetAxis, {
-          axisLine: { ...theme.categoryAxis.axisLine, ...targetAxis.axisLine },
-          axisTick: { ...theme.categoryAxis.axisTick, ...targetAxis.axisTick },
-          axisLabel: { ...theme.categoryAxis.axisLabel, ...targetAxis.axisLabel },
-          splitLine: { ...theme.categoryAxis.splitLine, ...targetAxis.splitLine },
+  const axisTypes = ['xAxis', 'yAxis']
+  axisTypes.forEach(axisType => {
+    if (mergedOption[axisType]) {
+      if (Array.isArray(mergedOption[axisType])) {
+        mergedOption[axisType] = mergedOption[axisType].map(axis => {
+          // 安全检查：确保 axis 对象存在且有 type 属性
+          if (!axis || typeof axis !== 'object') {
+            axis = {}
+          }
+          const axisTheme = (axis.type === 'category') ? theme.categoryAxis : theme.valueAxis
+          return {
+            ...axisTheme,
+            ...axis,
+            axisLine: { ...axisTheme.axisLine, ...(axis.axisLine || {}) },
+            axisTick: { ...axisTheme.axisTick, ...(axis.axisTick || {}) },
+            axisLabel: { ...axisTheme.axisLabel, ...(axis.axisLabel || {}) },
+            splitLine: { ...axisTheme.splitLine, ...(axis.splitLine || {}) }
+          }
         })
+      } else {
+        // 安全检查：确保 mergedOption[axisType] 对象存在且有 type 属性
+        if (!mergedOption[axisType] || typeof mergedOption[axisType] !== 'object') {
+          mergedOption[axisType] = {}
+        }
+        const axisTheme = (mergedOption[axisType].type === 'category') ? theme.categoryAxis : theme.valueAxis
+        mergedOption[axisType] = {
+          ...axisTheme,
+          ...mergedOption[axisType],
+          axisLine: { ...axisTheme.axisLine, ...(mergedOption[axisType].axisLine || {}) },
+          axisTick: { ...axisTheme.axisTick, ...(mergedOption[axisType].axisTick || {}) },
+          axisLabel: { ...axisTheme.axisLabel, ...(mergedOption[axisType].axisLabel || {}) },
+          splitLine: { ...axisTheme.splitLine, ...(mergedOption[axisType].splitLine || {}) }
+        }
       }
-    })
-  }
-  
-  if (mergedOption.yAxis) {
-    const yAxes = Array.isArray(mergedOption.yAxis) ? mergedOption.yAxis : [mergedOption.yAxis]
-    yAxes.forEach((axis, index) => {
-      if (axis && typeof axis === 'object') {
-        mergedOption.yAxis = Array.isArray(mergedOption.yAxis) ? mergedOption.yAxis : mergedOption.yAxis
-        const targetAxis = Array.isArray(mergedOption.yAxis) ? mergedOption.yAxis[index] : mergedOption.yAxis
-        Object.assign(targetAxis, {
-          axisLine: { ...theme.valueAxis.axisLine, ...targetAxis.axisLine },
-          axisTick: { ...theme.valueAxis.axisTick, ...targetAxis.axisTick },
-          axisLabel: { ...theme.valueAxis.axisLabel, ...targetAxis.axisLabel },
-          splitLine: { ...theme.valueAxis.splitLine, ...targetAxis.splitLine },
-        })
-      }
-    })
-  }
+    }
+  })
   
   return mergedOption
 }

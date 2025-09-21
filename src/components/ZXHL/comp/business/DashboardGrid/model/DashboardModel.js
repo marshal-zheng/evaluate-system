@@ -1,5 +1,5 @@
 // Libraries
-import _ from 'lodash'
+import { map, maxBy, indexOf, pull } from 'lodash-es'
 
 import {
   EventBusSrv
@@ -17,7 +17,7 @@ export class DashboardModel {
   }
 
   updatePanels (panels) {
-    this.panels = _.map(panels || [], (panelData) => new PanelModel(panelData))
+    this.panels = map(panels || [], (panelData) => new PanelModel(panelData))
     this.sortPanelsByGridPos()
   }
 
@@ -70,8 +70,8 @@ export class DashboardModel {
       return 0
     }
     const rowYPos = rowPanel.gridPos.y
-    const positions = _.map(rowPanel.panels, 'gridPos')
-    const maxPos = _.maxBy(positions, pos => pos.y + pos.h)
+    const positions = map(rowPanel.panels, 'gridPos')
+    const maxPos = maxBy(positions, pos => pos.y + pos.h)
     return maxPos.y + maxPos.h - rowYPos
   }
 
@@ -126,7 +126,7 @@ export class DashboardModel {
   }
 
   toggleRow (row) {
-    const rowIndex = _.indexOf(this.panels, row)
+    const rowIndex = indexOf(this.panels, row)
 
     if (row.collapsed) {
       row.collapsed = false
@@ -172,9 +172,9 @@ export class DashboardModel {
     const rowPanels = this.getRowPanels(rowIndex)
 
     // remove panels
-    _.pull(this.panels, ...rowPanels)
+    pull(this.panels, ...rowPanels)
     // save panel models inside row panel
-    row.panels = _.map(rowPanels, (panel) => panel.getSaveModel())
+    row.panels = map(rowPanels, (panel) => panel.getSaveModel())
     row.collapsed = true
 
     // emit change event

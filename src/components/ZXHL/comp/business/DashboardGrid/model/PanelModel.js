@@ -2,7 +2,7 @@
 /* eslint-disable no-restricted-syntax */
 
 // Libraries
-import _ from 'lodash'
+import { defaultsDeep, cloneDeep, isEqual } from 'lodash-es'
 
 // Utils
 import {
@@ -75,7 +75,7 @@ export class PanelModel {
     }
 
     // 应用默认值
-    _.defaultsDeep(this, _.cloneDeep(defaults))
+    defaultsDeep(this, cloneDeep(defaults))
   }
 
   getSaveModel () {
@@ -86,11 +86,11 @@ export class PanelModel {
         continue
       }
 
-      if (_.isEqual(this[property], defaults[property])) {
+      if (isEqual(this[property], defaults[property])) {
         continue
       }
 
-      model[property] = _.cloneDeep(this[property])
+      model[property] = cloneDeep(this[property])
     }
 
     return model
