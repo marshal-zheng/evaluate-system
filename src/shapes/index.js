@@ -2,6 +2,7 @@
 // 这里定义项目特定的节点和边
 
 import { Graph } from '@antv/x6';
+import { Path } from '@antv/x6-geometry';
 import { register } from '@antv/x6-vue-shape';
 
 // 导入业务组件
@@ -13,6 +14,19 @@ const getFlags = () => {
   return hasWindow
     ? (window.__BUSINESS_SHAPES_FLAGS__ || (window.__BUSINESS_SHAPES_FLAGS__ = {}))
     : {};
+};
+
+const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+
+const normalizeDirection = (direction) => {
+  if (!direction) return null;
+  const dir = String(direction).toUpperCase();
+
+  if (dir === 'H' || dir === 'V') return dir;
+  if (dir === 'L' || dir === 'R') return 'H';
+  if (dir === 'T' || dir === 'B') return 'V';
+
+  return null;
 };
 
 /**
@@ -353,6 +367,96 @@ export function registerVueNodes() {
 }
 
 /**
+ * 注册业务自定义连接器
+ * 为 Demo13 等功能提供曲线连接器支持
+ */
+export function registerBusinessConnectors() {
+  const flags = getFlags();
+  if (flags.__business_connectors__) return;
+
+  Graph.registerConnector(
+    'curve',
+    (sourcePoint, targetPoint, routePoints, options = {}) => {
+      const path = new Path();
+      const normalizedDirection = normalizeDirection(options.direction);
+      const curvature = clamp(options.curvature ?? options.tension ?? 0.5, 0, 1);
+      const points =
+        routePoints && routePoints.length
+          ? [sourcePoint, ...routePoints, targetPoint]
+          : [sourcePoint, targetPoint];
+
+      path.appendSegment(Path.createSegment('M', points[0]));
+
+      for (let i = 0; i < points.length - 1; i += 1) {
+        const start = points[i];
+        const end = points[i + 1];
+
+        if (start.x === end.x && start.y === end.y) {
+          continue;
+        }
+
+        let segmentDirection = normalizedDirection;
+        const deltaX = end.x - start.x;
+        const deltaY = end.y - start.y;
+
+        if (!segmentDirection) {
+          const absX = Math.abs(deltaX);
+          const absY = Math.abs(deltaY);
+          segmentDirection = absX >= absY ? 'H' : 'V';
+        } else if (segmentDirection === 'H' && Math.abs(deltaX) < 1) {
+          segmentDirection = 'V';
+        } else if (segmentDirection === 'V' && Math.abs(deltaY) < 1) {
+          segmentDirection = 'H';
+        }
+
+        if (Math.abs(deltaX) < 1 && Math.abs(deltaY) < 1) {
+          path.appendSegment(Path.createSegment('L', end.x, end.y));
+          continue;
+        }
+
+        if (curvature === 0) {
+          path.appendSegment(Path.createSegment('L', end.x, end.y));
+          continue;
+        }
+
+        if (segmentDirection === 'H') {
+          const offset = deltaX * curvature;
+          path.appendSegment(
+            Path.createSegment(
+              'C',
+              start.x + offset,
+              start.y,
+              end.x - offset,
+              end.y,
+              end.x,
+              end.y,
+            ),
+          );
+        } else {
+          const offset = deltaY * curvature;
+          path.appendSegment(
+            Path.createSegment(
+              'C',
+              start.x,
+              start.y + offset,
+              end.x,
+              end.y - offset,
+              end.x,
+              end.y,
+            ),
+          );
+        }
+      }
+
+      return options.raw ? path : path.serialize();
+    },
+    true,
+  );
+
+  flags.__business_connectors__ = true;
+}
+
+/**
  * 注册所有业务图形
  * 这是对外的主要接口
  */
@@ -360,6 +464,7 @@ export function registerAllBusinessShapes() {
   registerBasicBusinessShapes();
   registerPortNodes();
   registerVueNodes();
+  registerBusinessConnectors();
 }
 
 // 向旧版 API 保持兼容
