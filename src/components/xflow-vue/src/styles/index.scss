@@ -124,6 +124,16 @@
   }
 }
 
+// ====== 动画效果定义 ======
+
+// 1. 边动画：虚线动画（行进蚂蚁）- 与React版本保持一致
+@keyframes animated-line {
+  to {
+    stroke-dashoffset: -1000;
+  }
+}
+
+
 // 连接桩样式
 .x6-port {
   cursor: crosshair;

@@ -2,12 +2,17 @@
   <div class="demo-showcase">
     <main class="demo-content">
       <!-- <Demo1 /> -->
-      <Demo2 />
-      <!-- <Demo3 /> -->
-      <!-- <Demo4 /> -->
-      <!-- <Demo5 />
-      <Demo6 /> -->
-      <Demo7 />
+      <!-- <Demo2 />
+      <Demo3 />
+      <Demo4 />
+      <Demo5 /> -->
+      <Demo6 />
+      <!-- <Demo7 /> -->
+      <!-- <Demo8 /> -->
+        <!-- <Demo9 /> -->
+        <!-- <Demo10 /> -->
+        <!-- <Demo11 /> -->
+        <!-- <Demo12 /> -->
     </main>
   </div>
 </template>
@@ -20,6 +25,11 @@ import Demo4 from './Demo4.vue'
 import Demo5 from './Demo5.vue'
 import Demo6 from './Demo6.vue'
 import Demo7 from './Demo7.vue'
+import Demo8 from './Demo8.vue'
+import Demo9 from './Demo9.vue'
+import Demo10 from './Demo10.vue'
+import Demo11 from './Demo11.vue'
+import Demo12 from './Demo12.vue'
 </script>
 
 <style scoped>

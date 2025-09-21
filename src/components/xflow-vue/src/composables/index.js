@@ -10,3 +10,4 @@ export { useContextMenu } from './useContextMenu';
 export { useStandardInteractions } from './useStandardInteractions';
 export { useDeviceSupport } from './useDeviceSupport';
 export { useKeyboardManager, INTERACTION_MODES } from './useKeyboardManager';
+export { useLoaded } from './useLoaded';

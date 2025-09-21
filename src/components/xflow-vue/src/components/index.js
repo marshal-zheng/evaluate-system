@@ -8,5 +8,6 @@ export { default as XFlowTransform } from './XFlowTransform.vue';
 export { default as XFlowBackground } from './XFlowBackground.vue';
 export { default as XFlowGrid } from './XFlowGrid.vue';
 export { default as XFlowControl } from './XFlowControl.vue';
+export { default as XFlowState } from './XFlowState.vue';
 export { default as XFlowExport } from './XFlowExport.vue';
 export { default as XFlowContextMenu } from './XFlowContextMenu.vue';
