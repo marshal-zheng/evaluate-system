@@ -9,6 +9,9 @@ import router from './router'
 // 导入 SVG icons
 import 'virtual:svg-icons-register'
 
+// Pinia setup
+import { createPinia } from 'pinia'
+
 // Element Plus setup
 import { setupElementPlus } from './plugins/element-plus.js'
 
@@ -20,6 +23,10 @@ import { initTheme } from './utils/theme.js'
 
 // Create app
 const app = createApp(App)
+
+// Create and setup Pinia
+const pinia = createPinia()
+app.use(pinia)
 
 // Setup Element Plus
 setupElementPlus(app)
