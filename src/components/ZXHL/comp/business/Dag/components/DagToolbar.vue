@@ -1,9 +1,5 @@
 <template>
   <el-space>
-    <el-button type="primary" size="small" @click="handleExecute">
-      <el-icon><VideoPlay /></el-icon>
-      全部执行
-    </el-button>
     <el-dropdown trigger="click" @command="(key) => onLayoutDirectionChange(key)">
       <el-button type="primary" size="small">
         布局 {{ layoutLabel }}
@@ -15,13 +11,9 @@
         </el-dropdown-menu>
       </template>
     </el-dropdown>
-    <el-button type="primary" size="small" @click="onCopy">
-      <el-icon><CopyDocument /></el-icon>
-      复制
-    </el-button>
-    <el-button type="primary" size="small" @click="onPaste">
-      <el-icon><DocumentCopy /></el-icon>
-      粘贴
+    <el-button type="success" size="small" @click="onSave">
+      <el-icon><Document /></el-icon>
+      保存
     </el-button>
   </el-space>
 </template>
@@ -29,29 +21,19 @@
 <script setup>
 import { ref } from 'vue';
 import { useGraphInstance } from '../../ZxFlow/composables/useGraphInstance';
-import { useClipboard } from '../../ZxFlow/composables/useClipboard';
-import { useGraphEvent } from '../../ZxFlow/composables/useGraphEvent';
 import { useGraphStore } from '../../ZxFlow/composables/useGraphStore';
 import { useKeyboard } from '../../ZxFlow/composables/useKeyboard';
-import { CopyDocument, DocumentCopy, VideoPlay } from '@element-plus/icons-vue';
+import { Document } from '@element-plus/icons-vue';
 import { dagreLayout } from '../utils/layout.js';
+import { ElMessage } from 'element-plus';
 
-const emit = defineEmits(['layout-change']);
+const emit = defineEmits(['layout-change', 'save']);
 
 const graph = useGraphInstance();
-const clipboard = useClipboard(graph);
 const graphStore = useGraphStore();
 
 const layoutDir = ref('LR');
 const layoutLabel = ref('横向');
-
-const onCopy = () => {
-  clipboard.copy();
-};
-
-const onPaste = () => {
-  clipboard.paste();
-};
 
 const onDelete = (e) => {
   if (e && typeof e.preventDefault === 'function') e.preventDefault();
@@ -63,54 +45,78 @@ const onDelete = (e) => {
   }
 };
 
-useKeyboard('ctrl+c', (e) => { e?.preventDefault?.(); onCopy(); });
-useKeyboard('ctrl+v', (e) => { e?.preventDefault?.(); onPaste(); });
+// 保留删除键盘快捷键
 useKeyboard('backspace', onDelete);
 useKeyboard('delete', onDelete);
 
-useGraphEvent('node:change:data', ({ node }) => {
-  const g = graph?.value;
-  if (!g) return;
-  const edges = g.getIncomingEdges(node) || [];
-  const status = node?.getData?.().status;
-  edges.forEach((edge) => {
-    graphStore.updateEdge(edge.id, {
-      animated: status === 'running',
-    });
-  });
-});
+// 清理节点数据，移除 originalData
+const cleanNodeData = (nodeData) => {
+  if (!nodeData) return nodeData;
+  const cleaned = { ...nodeData };
+  if (cleaned.originalData) {
+    delete cleaned.originalData;
+  }
+  return cleaned;
+};
 
-const handleExecute = () => {
+const onSave = () => {
   const g = graph?.value;
-  if (!g) return;
-  const nodes = g.getNodes();
-  nodes.forEach((node, index) => {
-    const nodeData = node.getData() || {};
-    graphStore.updateNode(node.id, {
-      data: {
-        ...nodeData,
-        status: 'running',
-      },
+  if (!g) {
+    ElMessage.warning('图实例不存在');
+    return;
+  }
+
+  try {
+    // 获取所有节点数据，格式与data.json保持一致
+    const nodes = g.getNodes().map(node => {
+      const position = node.getPosition();
+      const nodeData = cleanNodeData(node.getData()) || {};
+      
+      return {
+        id: node.id,
+        type: nodeData.type || 'leaf-node', // 从节点数据中获取type
+        x: position.x,
+        y: position.y,
+        properties: nodeData.properties || {}
+      };
     });
 
-    window.setTimeout(() => {
-      const outgoing = g.getOutgoingEdges(node) || [];
-      const hasOutgoing = outgoing.length > 0;
-      const numericId = parseInt(String(node.id).replace(/[^0-9]/g, ''), 10);
-      const fallbackStatus = Number.isNaN(numericId) || numericId % 2 !== 0 ? 'success' : 'failed';
-      graphStore.updateNode(node.id, {
-        data: {
-          ...nodeData,
-          status: hasOutgoing ? 'success' : fallbackStatus,
-        },
-      });
-      outgoing.forEach((edge) => {
-        graphStore.updateEdge(edge.id, {
-          animated: false,
-        });
-      });
-    }, 1000 * index + 1);
-  });
+    // 获取所有边数据，格式与data.json保持一致
+    const edges = g.getEdges().map(edge => {
+      const sourcePoint = edge.getSourcePoint();
+      const targetPoint = edge.getTargetPoint();
+      const edgeData = edge.getData() || {};
+      
+      return {
+        id: edge.id,
+        type: "mindmap-edge", // 固定为mindmap-edge
+        sourceNodeId: edge.getSourceCellId(),
+        targetNodeId: edge.getTargetCellId(),
+        startPoint: { x: sourcePoint.x, y: sourcePoint.y },
+        endPoint: { x: targetPoint.x, y: targetPoint.y },
+        properties: edgeData.properties || {},
+        pointsList: edge.getVertices() || []
+      };
+    });
+
+    // 构建完整的图数据，格式与data.json保持一致
+    const graphData = {
+      nodes,
+      edges
+    };
+
+    // 打印图数据到控制台
+    console.log('格式化后的完整图数据:', graphData);
+    console.log(`包含 ${nodes.length} 个节点和 ${edges.length} 条边`);
+
+    // 向外发出保存事件，传递图数据
+    emit('save', graphData);
+
+    ElMessage.success(`图数据已保存，包含 ${nodes.length} 个节点和 ${edges.length} 条边`);
+  } catch (error) {
+    console.error('保存图数据时出错:', error);
+    ElMessage.error('保存图数据失败');
+  }
 };
 
 const onLayoutDirectionChange = async (dir) => {

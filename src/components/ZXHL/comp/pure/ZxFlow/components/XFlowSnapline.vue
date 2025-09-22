@@ -3,7 +3,7 @@
 </template>
 
 <script setup>
-import { onMounted, watch } from 'vue';
+import { onMounted, watch, nextTick } from 'vue';
 import { Snapline } from '@antv/x6-plugin-snapline';
 import { useGraphInstance } from '../composables/useGraphInstance';
 
@@ -30,27 +30,48 @@ const props = defineProps({
 const graph = useGraphInstance();
 
 // 初始化 Snapline 插件
-const initSnapline = () => {
-  if (!graph || !graph.value) return;
+const initSnapline = async () => {
+  await nextTick();
   
-  // 移除已存在的插件
-  if (graph.value.getPlugin('snapline')) {
-    graph.value.disposePlugins('snapline');
+  if (!graph || !graph.value) {
+    console.warn('Graph instance not ready for snapline');
+    return;
   }
   
-  // 添加新插件
-  graph.value.use(
-    new Snapline({
+  try {
+    // 移除已存在的插件
+    if (graph.value.getPlugin('snapline')) {
+      graph.value.disposePlugins('snapline');
+    }
+    
+    // 添加新插件
+    const snaplinePlugin = new Snapline({
       enabled: props.enabled,
       className: props.className,
       tolerance: props.tolerance,
       sharp: props.sharp,
-    })
-  );
+    });
+    
+    graph.value.use(snaplinePlugin);
+    console.log('Snapline plugin initialized:', {
+      enabled: props.enabled,
+      tolerance: props.tolerance,
+      sharp: props.sharp
+    });
+  } catch (error) {
+    console.error('Failed to initialize snapline plugin:', error);
+  }
 };
 
-onMounted(() => {
-  initSnapline();
+// 监听 graph 实例变化
+watch(graph, async (newGraph) => {
+  if (newGraph) {
+    await initSnapline();
+  }
+}, { immediate: true });
+
+onMounted(async () => {
+  await initSnapline();
 });
 
 // 监听属性变化重新初始化插件
@@ -59,7 +80,7 @@ watch(() => [
   props.className,
   props.tolerance,
   props.sharp,
-], () => {
-  initSnapline();
+], async () => {
+  await initSnapline();
 });
 </script>

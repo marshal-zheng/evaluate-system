@@ -23,8 +23,25 @@ export function getIndicatorSystemList(params = {}) {
   })
 }
 
+// 获取计算模型列表
+export function getCalculationModelList(params = {}) {
+  return ZXR.get({
+    url: '/indicator/calculation-model/list',
+    params
+  })
+}
+
+// 获取指标体系结构数据（用于DAG画布）
+export function getIndicatorSystemStructure(id) {
+  return ZXR.get({
+    url: `/indicator/system/${id}/structure`
+  })
+}
+
 export const indicatorApi = {
   getIndicatorSystemOptions,
   getIndicatorSystemById,
-  getIndicatorSystemList
+  getIndicatorSystemList,
+  getCalculationModelList,
+  getIndicatorSystemStructure
 }

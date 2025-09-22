@@ -1,45 +1,77 @@
 <template>
   <XFlow>
-    <div class="zx-dag-page">
+    <div class="zx-dag-page" :class="{ 'readonly': readonly }">
       <div class="dag-container">
-        <div class="dag-left">
+        <div v-if="showSidebar" class="dag-left">
           <div class="dag-left__header">算子组件库</div>
           <DagDnd 
             :operators="operators"
-            :loading="operatorsLoading"
+            :loading="finalOperatorsLoading"
             :title="dndConfig.title"
             :search-placeholder="dndConfig.searchPlaceholder"
             :layout="currentLayout"
             :text-config="dndConfig.textConfig"
+            :readonly="readonly"
           />
         </div>
         <div class="dag-center">
-          <div class="dag-toolbar">
-            <DagToolbar @layout-change="onToolbarLayoutChange" />
+          <div v-if="showToolbar" class="dag-toolbar">
+            <DagToolbar 
+              @layout-change="onToolbarLayoutChange" 
+              @save="onSave" 
+              :readonly="readonly"
+            />
           </div>
-          <div class="dag-graph">
+          <div class="dag-graph" :class="{ 'no-toolbar': !showToolbar }">
+            <!-- 加载状态遮罩 -->
+            <div 
+              v-loading="graphLoading"
+              element-loading-text="正在加载指标体系数据..."
+              element-loading-background="rgba(255, 255, 255, 0.8)"
+              class="dag-graph__loading"
+              :class="{ 'is-loading': graphLoading }"
+            ></div>
+            
             <XFlowGraph
-              pannable
-              :connection-options="connectionOptions"
-              :connection-edge-options="connectionEdgeOptions"
-              :select-options="{ showEdgeSelectionBox: true }"
-              :enable-context-menu="true"
-              :custom-menu-items="wrappedCustomMenuItems"
+              :pannable="!readonly"
+              :connection-options="readonly ? null : connectionOptions"
+              :connection-edge-options="readonly ? null : connectionEdgeOptions"
+              :select-options="readonly ? { enabled: false } : { showEdgeSelectionBox: true }"
+              :enable-context-menu="!readonly"
+              :custom-menu-handler="readonly ? null : customMenuHandler"
               :fit-view="false"
               :zoom-options="zoomOptions"
+              @ready="onGraphReady"
             >
               <XFlowState :edge-animation-duration="30" />
               <XFlowClipboard />
               <XFlowHistory />
-              <DagInitData />
+              <XFlowSnapline 
+                :enabled="snaplineEnabled"
+                :tolerance="snaplineTolerance"
+                :sharp="snaplineSharp"
+              />
+              <DagInitData 
+                :initial-data="initialGraphData"
+                :auto-layout="autoLayout"
+                :layout-direction="currentLayout === 'horizontal' ? 'LR' : 'TB'"
+                @data-updated="onGraphDataUpdated"
+              />
               <DagConnect />
               <XFlowBackground color="#fafafa" />
-              <XFlowGrid :size="20" type="dot" />
+              <XFlowGrid 
+                :size="14" 
+                type="mesh" 
+                :dot-size="2"
+                color="#e6e6e6"
+              />
               <!-- 小地图 -->
               <XFlowMinimap 
+                :key="minimapKey"
                 :width="200" 
                 :height="150" 
                 :simple="true"
+                :padding="24"
                 :style="{ right: '24px', top: '24px' }"
                 class="dag-minimap"
               />
@@ -50,16 +82,14 @@
           </div>
         </div>
       </div>
-      <DagConfigDrawer />
     </div>
   </XFlow>
 </template>
 
 <script>
-import { defineComponent, toRefs, ref, onMounted, computed } from 'vue';
+import { defineComponent, toRefs, ref, onMounted, watch, computed } from 'vue';
 import { willCreateCycle } from './utils/graphConstraints.js';
-import { XFlow, XFlowGraph, XFlowClipboard, XFlowState, XFlowHistory, XFlowGrid, XFlowBackground, XFlowMinimap, XFlowContextMenu } from '../ZxFlow/components';
-import DagConfigDrawer from './components/DagConfigDrawer.vue';
+import { XFlow, XFlowGraph, XFlowClipboard, XFlowState, XFlowHistory, XFlowGrid, XFlowBackground, XFlowMinimap, XFlowContextMenu, XFlowSnapline } from '../ZxFlow/components';
 import DagConnect from './components/DagConnect.vue';
 import DagDnd from './components/DagDnd.vue';
 import DagGraphControl from './components/DagGraphControl.vue';
@@ -78,19 +108,19 @@ const connectionEdgeOptions = {
       targetMarker: null,
     },
   },
-  router: 'manhattan',
-  connector: 'rounded',
+  router: 'normal', // 使用直线路由，配合贝塞尔连接器
+  connector: 'smooth', // 贝塞尔曲线连接器
 };
 
 const DAGPage = defineComponent({
   name: 'DAGPage',
   props: {
     /**
-     * 算子数据列表
-     * @type {Array<{key: string, title: string, shortDesc?: string, category?: string, ports?: Array}>}
+     * 算子数据列表，支持静态数据、Promise或函数
+     * @type {Array<{key: string, title: string, shortDesc?: string, category?: string, ports?: Array}> | Promise | Function}
      */
     operators: {
-      type: Array,
+      type: [Array, Promise, Function],
       default: () => []
     },
     /**
@@ -118,11 +148,64 @@ const DAGPage = defineComponent({
       default: 'horizontal'
     },
     /**
-     * 自定义右键菜单项
+     * 自定义菜单处理器
      */
-    customMenuItems: {
+    customMenuHandler: {
+      type: Function,
+      default: null
+    },
+    /**
+     * 对齐线配置
+     */
+    snaplineConfig: {
       type: Object,
-      default: () => ({})
+      default: () => ({
+        enabled: true,
+        tolerance: 15, // 增加容差，更容易触发对齐
+        sharp: false
+      })
+    },
+    /**
+     * 初始图数据，支持静态数据、Promise或函数
+     */
+    initialGraphData: {
+      type: [Object, Promise, Function],
+      default: null
+    },
+    /**
+     * 图数据加载状态
+     */
+    graphLoading: {
+      type: Boolean,
+      default: false
+    },
+    /**
+     * 是否自动布局
+     */
+    autoLayout: {
+      type: Boolean,
+      default: true
+    },
+    /**
+     * 是否显示左侧指标库
+     */
+    showSidebar: {
+      type: Boolean,
+      default: true
+    },
+    /**
+     * 是否为只读模式
+     */
+    readonly: {
+      type: Boolean,
+      default: false
+    },
+    /**
+     * 是否显示工具栏
+     */
+    showToolbar: {
+      type: Boolean,
+      default: true
     }
   },
   components: {
@@ -135,18 +218,23 @@ const DAGPage = defineComponent({
     XFlowBackground,
     XFlowMinimap,
     XFlowContextMenu,
-    DagConfigDrawer,
+    XFlowSnapline,
     DagConnect,
     DagDnd,
     DagGraphControl,
     DagInitData,
     DagToolbar,
   },
-  emits: ['edit-node', 'delete-node', 'copy-node', 'add-node'],
-  setup(props, { emit }) {
+  emits: ['edit-node', 'delete-node', 'copy-node', 'add-node', 'save', 'ready'],
+  setup(props, { emit, expose }) {
     const currentLayout = ref(props.layout === 'vertical' ? 'vertical' : 'horizontal');
+    const minimapKey = ref(0);
+    const graphInstance = ref(null);
 
-    
+    // 对齐线配置
+    const snaplineEnabled = ref(props.snaplineConfig.enabled);
+    const snaplineTolerance = ref(props.snaplineConfig.tolerance);
+    const snaplineSharp = ref(props.snaplineConfig.sharp);
 
     // 缩放配置 - 调慢缩放步进
     const zoomOptions = {
@@ -181,42 +269,175 @@ const DAGPage = defineComponent({
     };
 
     // 保持对 props 的响应式引用，避免值拷贝导致后续更新丢失
-    const { operators, operatorsLoading, dndConfig, layout, customMenuItems } = toRefs(props);
+    const { 
+      operators: operatorsProp, 
+      operatorsLoading, 
+      dndConfig, 
+      layout, 
+      customMenuHandler,
+      initialGraphData,
+      graphLoading,
+      autoLayout,
+      showSidebar,
+      readonly,
+      showToolbar
+    } = toRefs(props);
 
-    // 包装自定义菜单项，添加事件发射功能
-    const wrappedCustomMenuItems = computed(() => {
-      const wrapped = {};
-      const items = customMenuItems.value || {};
-      
-      Object.keys(items).forEach(type => {
-        wrapped[type] = items[type].map(item => ({
-          ...item,
-          action: (target) => {
-            // 执行原始action
-            if (typeof item.action === 'function') {
-              item.action(target);
-            }
-            
-            // 根据ID发射对应的事件
-            if (item.id === 'edit-indicator') {
-              emit('edit-node', target);
-            } else if (item.id === 'delete-indicator') {
-              emit('delete-node', target);
-            } else if (item.id === 'copy-indicator') {
-              emit('copy-node', target);
-            } else if (item.id === 'add-indicator') {
-              emit('add-node', target);
-            }
-          }
-        }));
-      });
-      return wrapped;
+    // 处理 operators 数据，支持 Promise 和静态数据
+    const operators = ref([]);
+    const internalOperatorsLoading = ref(false);
+
+    // 加载 operators 数据的函数
+    const loadOperatorsData = async (dataSource) => {
+      try {
+        let data;
+        
+        // 如果是函数，调用函数获取数据
+        if (typeof dataSource === 'function') {
+          data = await dataSource();
+        }
+        // 如果是Promise，等待解析
+        else if (dataSource && typeof dataSource.then === 'function') {
+          data = await dataSource;
+        } else if (Array.isArray(dataSource)) {
+          data = dataSource;
+        } else {
+          data = [];
+        }
+        
+        operators.value = data || [];
+        
+      } catch (error) {
+        console.error('加载算子数据失败:', error);
+        operators.value = [];
+      } finally {
+        internalOperatorsLoading.value = false;
+      }
+    };
+
+    // 监听 operators prop 变化
+    watch(operatorsProp, (newOperators) => {
+      if (newOperators) {
+        internalOperatorsLoading.value = true;
+        loadOperatorsData(newOperators);
+      }
+    }, { immediate: true });
+
+    // 合并加载状态 - 外部传入的 loading 状态 或 内部处理 Promise 的 loading 状态
+    const finalOperatorsLoading = computed(() => {
+      return operatorsLoading.value || internalOperatorsLoading.value;
     });
 
     const onToolbarLayoutChange = (dir) => {
       currentLayout.value = dir === 'LR' ? 'horizontal' : 'vertical';
+      // 布局切换后强制重建小地图，避免插件偶发不同步/空白
+      minimapKey.value += 1;
     };
 
+    // 数据加载/布局完成后，强制重建小地图
+    const onGraphDataUpdated = () => {
+      minimapKey.value += 1;
+    };
+
+    // 保存数据处理
+    const onSave = (graphData) => {
+      emit('save', graphData);
+    };
+
+    // 暴露方法供外部调用
+    const getSaveData = () => {
+      // 这里直接调用 DagToolbar 的保存逻辑
+      const g = graphInstance.value;
+      if (!g) {
+        console.warn('图实例不存在');
+        return null;
+      }
+
+      try {
+        // 清理节点数据，移除 originalData
+        const cleanNodeData = (nodeData) => {
+          if (!nodeData) return nodeData;
+          const cleaned = { ...nodeData };
+          if (cleaned.originalData) {
+            delete cleaned.originalData;
+          }
+          return cleaned;
+        };
+
+        // 获取所有节点数据，格式与data.json保持一致
+        const nodes = g.getNodes().map(node => {
+          const position = node.getPosition();
+          const nodeData = cleanNodeData(node.getData()) || {};
+          
+          return {
+            id: node.id,
+            type: nodeData.type || 'leaf-node', // 从节点数据中获取type
+            x: position.x,
+            y: position.y,
+            properties: nodeData.properties || {}
+          };
+        });
+
+        // 获取所有边数据，格式与data.json保持一致
+        const edges = g.getEdges().map(edge => {
+          const sourceNode = edge.getSourceNode();
+          const targetNode = edge.getTargetNode();
+          const sourcePoint = edge.getSourcePoint();
+          const targetPoint = edge.getTargetPoint();
+          const edgeData = edge.getData() || {};
+          
+          return {
+            id: edge.id,
+            type: "mindmap-edge", // 固定为mindmap-edge
+            sourceNodeId: edge.getSourceCellId(),
+            targetNodeId: edge.getTargetCellId(),
+            startPoint: { x: sourcePoint.x, y: sourcePoint.y },
+            endPoint: { x: targetPoint.x, y: targetPoint.y },
+            properties: edgeData.properties || {},
+            pointsList: edge.getVertices() || []
+          };
+        });
+
+        // 构建完整的图数据，格式与data.json保持一致
+        const graphData = {
+          nodes,
+          edges
+        };
+
+        console.log('格式化后的图数据:', graphData);
+        return graphData;
+      } catch (error) {
+        console.error('获取图数据时出错:', error);
+        return null;
+      }
+    };
+
+    expose({ getSaveData });
+
+    // 处理XFlowGraph的ready事件，确保standardInteractions正确初始化
+    const onGraphReady = (graph, keyboardMgr, standardInteractions) => {
+      // 保存图实例引用
+      graphInstance.value = graph;
+      
+      // 检查对齐线插件是否正确加载
+      setTimeout(() => {
+        const snaplinePlugin = graph.getPlugin('snapline');
+        if (snaplinePlugin) {
+          console.log('✅ Snapline plugin loaded successfully:', snaplinePlugin);
+          console.log('Snapline config:', {
+            enabled: snaplineEnabled.value,
+            tolerance: snaplineTolerance.value,
+            sharp: snaplineSharp.value
+          });
+        } else {
+          console.warn('❌ Snapline plugin not found');
+        }
+      }, 1000);
+      
+      // 这里可以添加额外的图形初始化逻辑
+      // standardInteractions已经在XFlowGraph中正确设置了selectionHandler
+      console.log('DAG Graph ready:', { graph, keyboardMgr, standardInteractions });
+    };
 
     return { 
       connectionOptions, 
@@ -228,10 +449,25 @@ const DAGPage = defineComponent({
       dndConfig,
       layout,
       currentLayout,
+      minimapKey,
       onToolbarLayoutChange,
+      onGraphDataUpdated,
+      onGraphReady,
+      onSave,
       // 新增的处理器相关
-      customMenuItems,
-      wrappedCustomMenuItems,
+      customMenuHandler,
+      // 对齐线相关
+      snaplineEnabled,
+      snaplineTolerance,
+      snaplineSharp,
+      // 图数据相关
+      initialGraphData,
+      graphLoading,
+      autoLayout,
+      // 新增的显示控制属性
+      showSidebar,
+      readonly,
+      showToolbar,
     };
   },
 });
@@ -297,6 +533,28 @@ export { DAGPage };
       position: relative;
       width: 100%;
       height: calc(100% - 42px);
+      
+      &.no-toolbar {
+        height: 100%;
+      }
+
+      &__loading {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 100;
+        
+        &.is-loading {
+          pointer-events: all;
+        }
+        
+        &:not(.is-loading) {
+          pointer-events: none;
+          display: none;
+        }
+      }
 
       &__control {
         position: absolute;
@@ -389,6 +647,16 @@ export { DAGPage };
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
 }
 
+/* 小地图视窗边框增强：确保初始就能看清 */
+:deep(.xflow-minimap) {
+  .x6-widget-minimap-viewport {
+    stroke: #1890ff !important;
+    stroke-width: 2px !important;
+    fill: rgba(24, 144, 255, 0.08) !important;
+    shape-rendering: crispEdges;
+  }
+}
+
 /* 端口连接点控制 */
 .zx-dag-page .x6-port-body {
   opacity: 0;
@@ -417,5 +685,75 @@ export { DAGPage };
   opacity: 1;
   fill: #52c41a !important;
   stroke: #52c41a !important;
+}
+
+/* 对齐线样式 - 增强可见性 */
+:deep(.x6-widget-snapline) {
+  opacity: 0.9 !important;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+:deep(.x6-widget-snapline-horizontal) {
+  stroke: #ff4d4f !important;
+  stroke-width: 2 !important;
+  stroke-dasharray: 8,4 !important;
+  opacity: 0.9 !important;
+}
+
+:deep(.x6-widget-snapline-vertical) {
+  stroke: #ff4d4f !important;
+  stroke-width: 2 !important;
+  stroke-dasharray: 8,4 !important;
+  opacity: 0.9 !important;
+}
+
+/* 对齐线动画效果 */
+:deep(.x6-widget-snapline-horizontal),
+:deep(.x6-widget-snapline-vertical) {
+  animation: snapline-pulse 1s ease-in-out infinite alternate;
+}
+
+@keyframes snapline-pulse {
+  from {
+    opacity: 0.7;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 只读模式样式 */
+.zx-dag-page.readonly {
+  .dag-left {
+    opacity: 0.8;
+    pointer-events: none;
+  }
+  
+  .dag-toolbar {
+    opacity: 0.8;
+  }
+  
+  .x6-node {
+    cursor: default !important;
+  }
+  
+  .x6-port-body {
+    display: none !important;
+  }
+  
+  &::after {
+    content: '只读模式';
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(255, 77, 79, 0.9);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+  }
 }
 </style>

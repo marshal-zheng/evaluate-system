@@ -64,6 +64,7 @@ import {
 import { useDnd } from '../../ZxFlow/composables/useDnd';
 import { DAG_NODE, registerDagShapes } from '../shapes/registerDagShapes';
 import { useUserOperators } from '../composables/useUserOperators';
+import { generateNodeId, generateContentId } from '../utils/nodeDataUtils';
 
 registerDagShapes();
 
@@ -146,8 +147,7 @@ const displayOperators = computed(() => {
 });
 
 const createNodeId = () => {
-  idSeed.value += 1;
-  return idSeed.value.toString();
+  return generateNodeId();
 };
 
 const handleMouseDown = (event, item) => {
@@ -181,11 +181,29 @@ const handleMouseDown = (event, item) => {
       width: 200,
       height: 40,
       data: {
+        // 新的数据结构
+        type: 'leaf-node', // 新拖入的节点默认为叶子节点
+        properties: {
+          content: {
+            id: generateContentId(),
+            label: item.title
+          },
+          weight: 50,
+          otherData: {}, // 空的计算模型数据
+          parentNodeId: null, // 稍后会在连线时更新
+          customType: '',
+          customProperties: '',
+          unit: '',
+          priority: '',
+          defaultValue: '',
+          notes: '',
+          level: 1 // 稍后会根据实际位置更新
+        },
+        // 兼容旧结构
         id,
         label: item.title,
         status: 'default',
         description: item.shortDesc || item.value,
-        // 保留原始用户数据
         originalData: item.originalData || { name: item.title, value: item.shortDesc }
       },
       // 创建时确保只包含标准四向端口

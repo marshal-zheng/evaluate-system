@@ -22,91 +22,133 @@
         ref="formRef"
         :model="formData"
         :rules="formRules"
-        label-width="100px"
-        label-position="left"
+        label-position="top"
         size="default"
       >
-        <!-- 上级指标 -->
-        <el-form-item label="上级指标" prop="parentIndicator">
-          <div class="form-item-with-tag">
-            <el-input
-              v-model="formData.parentIndicator"
-              placeholder="请输入上级指标"
-              :disabled="disabledMenu.includes('parentIndicator') || isReadOnly"
-            />
-            <el-tag v-if="formData.parentIndicator" type="info" size="small" class="indicator-tag">
-              指标点
-            </el-tag>
+        <!-- 上级指标 - 只有当存在上级指标时才显示 -->
+        <el-form-item 
+          v-if="formData.parentIndicator" 
+          label="上级指标" 
+          prop="parentIndicator"
+        >
+          <div class="parent-indicator-display">
+            <ZxTag 
+              type="info" 
+              theme="light"
+              size="default"
+              :tooltip-disabled="false"
+              :max-width="'100%'"
+              class="parent-indicator-tag"
+            >
+              {{ formData.parentIndicator }}
+            </ZxTag>
           </div>
         </el-form-item>
 
         <!-- 指标名称 -->
         <el-form-item label="指标名称" prop="indicatorName">
-          <el-input
+          <ZxInput
             v-model="formData.indicatorName"
             placeholder="请输入指标名称"
             maxlength="50"
             show-word-limit
             :disabled="disabledMenu.includes('indicatorName') || isReadOnly"
+            :tooltip="'指标名称是用于标识和描述该指标的唯一名称，应简洁明了且具有代表性'"
+            tooltip-placement="right"
           />
         </el-form-item>
 
-        <!-- 支撑说明 -->
         <el-form-item label="支撑说明" prop="supportDescription">
-          <el-input-number
-            v-model="formData.supportDescription"
-            placeholder="0"
-            :min="0"
-            :max="100"
-            :precision="0"
-            :disabled="disabledMenu.includes('supportDescription') || isReadOnly"
-            class="support-input"
-          />
-          <span class="percent-symbol">%</span>
+          <div class="support-description-field">
+            <el-input-number
+              v-model="formData.supportDescription"
+              placeholder="0"
+              :min="0"
+              :max="100"
+              :precision="0"
+              :disabled="disabledMenu.includes('supportDescription') || isReadOnly"
+              class="support-input"
+            />
+            <span class="percent-symbol">%</span>
+          </div>
         </el-form-item>
 
-        <!-- 计算模型 -->
-        <el-form-item label="计算模型" prop="calculationModel">
+        <!-- 计算模型：仅叶子节点显示 -->
+        <el-form-item v-if="isLeafNode" label="计算模型" prop="calculationModel">
           <div class="calculation-model-field">
-            <el-input
-              v-model="formData.calculationModelName"
-              placeholder="请选择计算模型"
-              readonly
-              :disabled="disabledMenu.includes('calculationModel') || isReadOnly"
-              style="flex: 1;"
-            />
-            <el-button
-              type="primary"
-              :disabled="disabledMenu.includes('calculationModel') || isReadOnly"
-              @click="openModelSelectDialog"
-              style="margin-left: 8px;"
-            >
-              选择
-            </el-button>
+            <!-- 当有选择的计算模型时，使用ZxTag展示 -->
+            <div v-if="formData.calculationModelName" class="calculation-model-display">
+              <ZxTag 
+                type="primary" 
+                size="default"
+                :tooltip="formData.calculationModelName"
+                :tooltip-placement="'top'"
+                class="calculation-model-tag"
+              >
+                <span class="model-name-text">{{ formData.calculationModelName }}</span>
+              </ZxTag>
+              <el-button
+                type="primary"
+                size="small"
+                :disabled="disabledMenu.includes('calculationModel') || isReadOnly"
+                @click="openModelSelectDialog"
+                style="margin-left: 8px;"
+              >
+                更换
+              </el-button>
+            </div>
+            
+            <!-- 当没有选择计算模型时，显示选择按钮 -->
+            <div v-else class="calculation-model-empty">
+              <span class="empty-text">未选择计算模型</span>
+              <el-button
+                type="primary"
+                :disabled="disabledMenu.includes('calculationModel') || isReadOnly"
+                @click="openModelSelectDialog"
+                style="margin-left: 8px;"
+              >
+                选择
+              </el-button>
+            </div>
           </div>
         </el-form-item>
 
         <!-- 类型 -->
-        <el-form-item label="类型" prop="type">
-          <el-input
-            v-model="formData.type"
+        <el-form-item label="类型" prop="customType">
+          <ZxInput
+            v-model="formData.customType"
             placeholder="请输入类型"
-            :disabled="disabledMenu.includes('type') || isReadOnly"
+            :disabled="disabledMenu.includes('customType') || isReadOnly"
+            :tooltip="'指标类型用于分类管理指标，如：定量指标、定性指标、过程指标、结果指标等'"
+            tooltip-placement="right"
           />
         </el-form-item>
 
         <!-- 属性 -->
-        <el-form-item label="属性" prop="attribute">
-          <el-input
-            v-model="formData.attribute"
+        <el-form-item label="属性" prop="customProperties">
+          <ZxInput
+            v-model="formData.customProperties"
             placeholder="请输入属性"
-            :disabled="disabledMenu.includes('attribute') || isReadOnly"
+            :disabled="disabledMenu.includes('customProperties') || isReadOnly"
+            :tooltip="'指标属性描述指标的特征和性质，如：正向指标、反向指标、适度指标等'"
+            tooltip-placement="right"
+          />
+        </el-form-item>
+
+        <!-- 单位 -->
+        <el-form-item label="单位" prop="unit">
+          <ZxInput
+            v-model="formData.unit"
+            placeholder="请输入单位"
+            :disabled="disabledMenu.includes('unit') || isReadOnly"
+            :tooltip="'指标的计量单位，如：个、%、元、天、次等，用于明确指标的度量标准'"
+            tooltip-placement="right"
           />
         </el-form-item>
 
         <!-- 优先级 -->
         <el-form-item label="优先级" prop="priority">
-          <el-input
+          <ZxInput
             v-model="formData.priority"
             placeholder="请输入优先级"
             :disabled="disabledMenu.includes('priority') || isReadOnly"
@@ -115,7 +157,7 @@
 
         <!-- 默认值 -->
         <el-form-item label="默认值" prop="defaultValue">
-          <el-input
+          <ZxInput
             v-model="formData.defaultValue"
             placeholder="请输入默认值"
             :disabled="disabledMenu.includes('defaultValue') || isReadOnly"
@@ -124,7 +166,7 @@
 
         <!-- 备注 -->
         <el-form-item label="备注" prop="notes">
-          <el-input
+          <ZxInput
             v-model="formData.notes"
             type="textarea"
             :rows="3"
@@ -148,6 +190,9 @@
 <script setup>
 import { ref, reactive, computed, watch } from 'vue'
 import ZxDrawer from '@/components/ZXHL/comp/pure/ZxDrawer'
+import ZxTag from '@/components/ZXHL/comp/pure/ZxTag'
+import ZxIcon from '@/components/ZXHL/comp/pure/ZxIcon'
+import ZxInput from '@/components/ZXHL/comp/pure/ZxInput'
 import ModelSelectDialog from './ModelSelectDialog.vue'
 
 // Props 定义
@@ -183,26 +228,28 @@ const visible = computed({
 
 // 表单数据
 const formData = reactive({
+  isLeafNode: true,
   parentIndicator: '',
   indicatorName: '',
   supportDescription: 0,
   calculationModel: '', // 存储模型ID
   calculationModelName: '', // 存储模型名称用于显示
-  type: '',
-  attribute: '',
+  customType: '',
+  customProperties: '',
+  unit: '', // 添加单位字段
   priority: '',
   defaultValue: '',
   notes: ''
 })
+
+// 计算属性
+const isLeafNode = computed(() => formData.isLeafNode)
 
 // 表单验证规则
 const formRules = {
   indicatorName: [
     { required: true, message: '请输入指标名称', trigger: 'blur' },
     { max: 50, message: '指标名称不能超过50个字符', trigger: 'blur' }
-  ],
-  calculationModel: [
-    { required: true, message: '请选择计算模型', trigger: 'change' }
   ],
   supportDescription: [
     { type: 'number', min: 0, max: 100, message: '支撑说明必须在0-100之间', trigger: 'blur' }
@@ -213,19 +260,34 @@ const formRules = {
 watch(
   () => props.indicatorData,
   (newData) => {
+    console.log('IndicatorDetailFormDrawer - 接收到新数据:', newData)
     if (newData && Object.keys(newData).length > 0) {
+      // 直接克隆整个数据对象，避免手动映射
       Object.assign(formData, {
-        parentIndicator: newData.parentIndicator || '',
-        indicatorName: newData.indicatorName || '',
-        supportDescription: newData.supportDescription || 0,
-        calculationModel: newData.calculationModel || '',
-        calculationModelName: newData.calculationModelName || '',
-        type: newData.type || '',
-        attribute: newData.attribute || '',
-        priority: newData.priority || '',
-        defaultValue: newData.defaultValue || '',
-        notes: newData.notes || ''
+        // 设置默认值，确保必要字段存在
+        isLeafNode: true,
+        parentIndicator: '',
+        indicatorName: '',
+        supportDescription: 0,
+        calculationModel: '',
+        calculationModelName: '',
+        customType: '',
+        customProperties: '',
+        unit: '',
+        priority: '',
+        defaultValue: '',
+        notes: '',
+        // 用新数据覆盖默认值
+        ...newData
       })
+      
+      // 非叶子节点强制清空模型字段
+      if (!formData.isLeafNode) {
+        formData.calculationModel = ''
+        formData.calculationModelName = ''
+      }
+      
+      console.log('IndicatorDetailFormDrawer - 表单数据已更新:', formData)
     }
   },
   { immediate: true, deep: true }
@@ -278,18 +340,22 @@ const resetForm = () => {
   if (formRef.value) {
     formRef.value.resetFields()
   }
-  Object.assign(formData, {
+  // 重置为默认值
+  const defaultData = {
+    isLeafNode: true,
     parentIndicator: '',
     indicatorName: '',
     supportDescription: 0,
     calculationModel: '',
     calculationModelName: '',
-    type: '',
-    attribute: '',
+    customType: '',
+    customProperties: '',
+    unit: '',
     priority: '',
     defaultValue: '',
     notes: ''
-  })
+  }
+  Object.assign(formData, defaultData)
 }
 
 // 暴露方法
@@ -303,35 +369,87 @@ defineExpose({
 .indicator-detail-form {
   padding: 20px;
   
-  .form-item-with-tag {
-    position: relative;
+  .parent-indicator-display {
     display: flex;
     align-items: center;
-    gap: 8px;
     
-    .el-input {
+    .parent-indicator-tag {
+      width: 100%;
+      
+      :deep(.zx-tag-content) {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        width: 100%;
+        
+        .zx-tag-icon {
+          flex-shrink: 0;
+          display: flex;
+          align-items: center;
+        }
+        
+        .zx-tag-text {
+          flex: 1;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+      }
+    }
+  }
+  
+  .support-description-field {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    
+    .support-input {
       flex: 1;
     }
     
-    .indicator-tag {
+    .percent-symbol {
+      margin-left: 8px;
+      color: var(--el-text-color-regular);
+      font-size: 14px;
       flex-shrink: 0;
     }
-  }
-  
-  .support-input {
-    width: calc(100% - 20px);
-  }
-  
-  .percent-symbol {
-    margin-left: 8px;
-    color: var(--el-text-color-regular);
-    font-size: 14px;
   }
   
   .calculation-model-field {
     display: flex;
     align-items: center;
     width: 100%;
+    
+    .calculation-model-display {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      
+      .calculation-model-tag {
+        max-width: 300px;
+        
+        .model-name-text {
+          display: inline-block;
+          max-width: 200px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          vertical-align: middle;
+        }
+      }
+    }
+    
+    .calculation-model-empty {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      
+      .empty-text {
+        color: var(--el-text-color-placeholder);
+        font-size: 14px;
+        flex: 1;
+      }
+    }
   }
   
   :deep(.el-form-item) {

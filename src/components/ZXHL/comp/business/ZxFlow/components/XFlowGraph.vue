@@ -179,10 +179,15 @@ const props = defineProps({
     type: Object,
     default: () => ({}),
   },
-  // 自定义右键菜单项
+  // 自定义右键菜单项（向后兼容）
   customMenuItems: {
     type: Object,
     default: () => ({}),
+  },
+  // 自定义菜单处理器（新方式）
+  customMenuHandler: {
+    type: Function,
+    default: null,
   },
   // 锁定模式：节点不可拖拽移动
   locked: {
@@ -232,6 +237,7 @@ const standardInteractions = props.enableStandardInteractions
       contextMenuOptions: {
         ...props.contextMenuOptions,
         customItems: props.customMenuItems,
+        customMenuHandler: props.customMenuHandler,
       },
       // 当未开启边的选择框时，不允许边被选中/框选
       allowEdgeSelection: props.selectOptions?.showEdgeSelectionBox === true || props.selectOptions?.allowEdgeSelection === true,
@@ -251,6 +257,16 @@ const initGraph = async () => {
     scaling: {
       min: props.minScale,
       max: props.maxScale,
+    },
+    // 启用内置选择功能
+    selecting: {
+      enabled: true,
+      multiple: true,
+      rubberband: true,
+      movable: true,
+      showNodeSelectionBox: true,
+      showEdgeSelectionBox: props.selectOptions?.showEdgeSelectionBox === true,
+      ...props.selectOptions,
     },
     connecting: {
       ...props.connectionOptions,

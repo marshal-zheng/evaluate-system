@@ -128,5 +128,372 @@ export default [
 				}
 			}
 		}
+	},
+
+	// 获取指标体系结构数据（用于DAG画布）
+	{
+		url: '/api/indicator/system/:id/structure',
+		method: 'get',
+		response: ({ params }) => {
+			// 返回与data.json一致的结构数据
+			return {
+				code: 200,
+				message: '获取成功',
+				data: {
+					nodes: [
+						{
+							id: "1663477489012345678",
+							type: "root-node",
+							x: 836,
+							y: 120,
+							properties: {
+								content: {
+									id: "1663477489012345679",
+									label: "根节点"
+								},
+								weight: 50,
+								otherData: {},
+								parentNodeId: null,
+								customType: "",
+								customProperties: "",
+								unit: "",
+								priority: "",
+								defaultValue: "",
+								notes: "",
+								level: 1
+							}
+						},
+						{
+							id: "1663477489012345680",
+							type: "sub-node",
+							x: 724,
+							y: 240,
+							properties: {
+								content: {
+									id: "1663477489012345681",
+									label: "二级指标"
+								},
+								weight: 50,
+								otherData: {
+									state: null,
+									flag: 1,
+									createId: null,
+									modifyId: null,
+									createTime: "2025-09-10 21:07:20",
+									modifyTime: "2025-09-10 21:13:57",
+									id: "1965764024555020290",
+									oprModelName: "测试模型",
+									oprModelDesc: "测试模型",
+									oprModelPath: "1965764024555020290.ktr",
+									sqlContent: null,
+									index: 1,
+									title: "测试模型",
+									desc: "测试模型",
+									label: "测试模型"
+								},
+								parentNodeId: "1663477489012345678",
+								customType: "1",
+								customProperties: "2",
+								unit: "3",
+								priority: "4",
+								defaultValue: "5",
+								notes: "6",
+								level: 2
+							}
+						},
+						{
+							id: "1663477489012345682",
+							type: "leaf-node",
+							x: 686,
+							y: 440,
+							properties: {
+								content: {
+									id: "1663477489012345683",
+									label: "三级指标"
+								},
+								weight: 50,
+								otherData: {},
+								parentNodeId: "1663477489012345680",
+								customType: "1",
+								customProperties: "2",
+								unit: "3",
+								priority: "4",
+								defaultValue: "5",
+								notes: "6",
+								level: 3
+							}
+						},
+						{
+							id: "1663477489012345684",
+							type: "leaf-node",
+							x: 761,
+							y: 440,
+							properties: {
+								content: {
+									id: "1663477489012345685",
+									label: "三级指标2"
+								},
+								weight: 50,
+								otherData: {
+									state: null,
+									flag: 1,
+									createId: null,
+									modifyId: null,
+									createTime: "2025-09-10 21:07:20",
+									modifyTime: "2025-09-10 21:13:57",
+									id: "1965764024555020290",
+									oprModelName: "测试模型",
+									oprModelDesc: "测试模型",
+									oprModelPath: "1965764024555020290.ktr",
+									sqlContent: null,
+									index: 1,
+									title: "测试模型",
+									desc: "测试模型",
+									label: "测试模型"
+								},
+								parentNodeId: "1663477489012345680",
+								customType: "1",
+								customProperties: "2",
+								unit: "3",
+								priority: "4",
+								defaultValue: "5",
+								notes: "6",
+								level: 3
+							}
+						},
+						{
+							id: "1663477489012345686",
+							type: "sub-node",
+							x: 949,
+							y: 240,
+							properties: {
+								content: {
+									id: "1663477489012345687",
+									label: "二级指标2"
+								},
+								weight: 50,
+								otherData: {},
+								parentNodeId: "1663477489012345678",
+								customType: "",
+								customProperties: "",
+								unit: "",
+								priority: "",
+								defaultValue: "",
+								notes: "",
+								level: 2
+							}
+						}
+					],
+					edges: [
+						{
+							id: "1663477489012345688",
+							type: "mindmap-edge",
+							sourceNodeId: "1663477489012345680",
+							targetNodeId: "1663477489012345682",
+							startPoint: { x: 723.5, y: 240 },
+							endPoint: { x: 686, y: 362 },
+							properties: {},
+							pointsList: [
+								{ x: 723.5, y: 240 },
+								{ x: 723.5, y: 320 },
+								{ x: 686, y: 320 },
+								{ x: 686, y: 362 }
+							]
+						},
+						{
+							id: "1663477489012345689",
+							type: "mindmap-edge",
+							sourceNodeId: "1663477489012345680",
+							targetNodeId: "1663477489012345684",
+							startPoint: { x: 723.5, y: 240 },
+							endPoint: { x: 761, y: 362 },
+							properties: {},
+							pointsList: [
+								{ x: 723.5, y: 240 },
+								{ x: 723.5, y: 320 },
+								{ x: 761, y: 320 },
+								{ x: 761, y: 362 }
+							]
+						},
+						{
+							id: "1663477489012345690",
+							type: "mindmap-edge",
+							sourceNodeId: "1663477489012345678",
+							targetNodeId: "1663477489012345680",
+							startPoint: { x: 836, y: 120 },
+							endPoint: { x: 723.5, y: 202 },
+							properties: {},
+							pointsList: [
+								{ x: 836, y: 120 },
+								{ x: 836, y: 167.75 },
+								{ x: 723.5, y: 167.75 },
+								{ x: 723.5, y: 202 }
+							]
+						},
+						{
+							id: "1663477489012345691",
+							type: "mindmap-edge",
+							sourceNodeId: "1663477489012345678",
+							targetNodeId: "1663477489012345686",
+							startPoint: { x: 836, y: 120 },
+							endPoint: { x: 948.5, y: 202 },
+							properties: {},
+							pointsList: [
+								{ x: 836, y: 120 },
+								{ x: 836, y: 167.75 },
+								{ x: 948.5, y: 167.75 },
+								{ x: 948.5, y: 202 }
+							]
+						}
+					]
+				}
+			}
+		}
+	},
+
+	// 获取计算模型列表
+	{
+		url: '/api/indicator/calculation-model/list',
+		method: 'get',
+		response: ({ query }) => {
+			console.log('Mock API - /api/indicator/calculation-model/list 接收到的查询参数:', query)
+			
+			const pageNumber = parseInt(query.pageNumber || 1)
+			const pageSize = parseInt(query.pageSize || 10)
+			const keyword = query.keyword || ''
+			
+			console.log('Mock API - 解析后的分页参数:', { pageNumber, pageSize, keyword })
+			
+			// 模拟计算模型数据
+			let allModels = [
+				{
+					id: 1,
+					name: '线性回归模型',
+					description: '基于线性回归算法的计算模型，适用于连续数值预测',
+					type: 'regression',
+					algorithm: 'linear_regression',
+					createTime: '2024-01-15 10:30:00',
+					updateTime: '2024-01-20 14:20:00',
+					status: 'active'
+				},
+				{
+					id: 2,
+					name: '决策树模型',
+					description: '基于决策树算法的分类模型，适用于分类预测任务',
+					type: 'classification',
+					algorithm: 'decision_tree',
+					createTime: '2024-01-16 09:15:00',
+					updateTime: '2024-01-22 16:45:00',
+					status: 'active'
+				},
+				{
+					id: 3,
+					name: '神经网络模型',
+					description: '深度学习神经网络模型，适用于复杂模式识别',
+					type: 'deep_learning',
+					algorithm: 'neural_network',
+					createTime: '2024-01-18 11:20:00',
+					updateTime: '2024-01-25 13:30:00',
+					status: 'active'
+				},
+				{
+					id: 4,
+					name: '随机森林模型',
+					description: '集成学习随机森林算法，提高预测准确性',
+					type: 'ensemble',
+					algorithm: 'random_forest',
+					createTime: '2024-01-20 08:45:00',
+					updateTime: '2024-01-26 10:15:00',
+					status: 'active'
+				},
+				{
+					id: 5,
+					name: '支持向量机模型',
+					description: 'SVM算法模型，适用于高维数据分类和回归',
+					type: 'svm',
+					algorithm: 'support_vector_machine',
+					createTime: '2024-01-22 14:30:00',
+					updateTime: '2024-01-28 09:20:00',
+					status: 'active'
+				},
+				{
+					id: 6,
+					name: '聚类分析模型',
+					description: 'K-means聚类算法，用于数据分组和模式发现',
+					type: 'clustering',
+					algorithm: 'kmeans',
+					createTime: '2024-01-25 16:10:00',
+					updateTime: '2024-01-30 11:40:00',
+					status: 'active'
+				},
+				{
+					id: 7,
+					name: '时间序列预测模型',
+					description: 'ARIMA时间序列分析模型，适用于时序数据预测',
+					type: 'time_series',
+					algorithm: 'arima',
+					createTime: '2024-01-28 12:25:00',
+					updateTime: '2024-02-02 15:50:00',
+					status: 'active'
+				},
+				{
+					id: 8,
+					name: '贝叶斯分类模型',
+					description: '朴素贝叶斯算法，基于概率的分类模型',
+					type: 'classification',
+					algorithm: 'naive_bayes',
+					createTime: '2024-01-30 10:15:00',
+					updateTime: '2024-02-05 14:30:00',
+					status: 'active'
+				},
+				{
+					id: 9,
+					name: '梯度提升模型',
+					description: 'XGBoost梯度提升算法，高性能机器学习模型',
+					type: 'ensemble',
+					algorithm: 'xgboost',
+					createTime: '2024-02-01 09:40:00',
+					updateTime: '2024-02-07 16:20:00',
+					status: 'active'
+				},
+				{
+					id: 10,
+					name: '关联规则模型',
+					description: 'Apriori关联规则挖掘算法，发现数据间的关联性',
+					type: 'association',
+					algorithm: 'apriori',
+					createTime: '2024-02-03 13:55:00',
+					updateTime: '2024-02-08 12:10:00',
+					status: 'active'
+				}
+			]
+			
+			// 根据关键词过滤
+			if (keyword) {
+				allModels = allModels.filter(model => 
+					model.name.toLowerCase().includes(keyword.toLowerCase()) ||
+					model.description.toLowerCase().includes(keyword.toLowerCase()) ||
+					model.type.toLowerCase().includes(keyword.toLowerCase())
+				)
+			}
+			
+			// 分页处理
+			const total = allModels.length
+			const startIndex = (pageNumber - 1) * pageSize
+			const endIndex = startIndex + pageSize
+			const records = allModels.slice(startIndex, endIndex)
+			
+			return {
+				code: 200,
+				message: '获取成功',
+				data: {
+					records,
+					total,
+					pageNumber,
+					pageSize,
+					totalPages: Math.ceil(total / pageSize)
+				}
+			}
+		}
 	}
 ]

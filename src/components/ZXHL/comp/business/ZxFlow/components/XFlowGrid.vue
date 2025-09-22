@@ -11,11 +11,24 @@ const props = defineProps({
   size: {
     type: Number,
     default: 10,
+    description: '网格间距（点与点之间的距离）'
   },
   type: {
     type: String,
     default: 'dot', // 'dot' | 'fixedDot' | 'mesh'
     validator: (value) => ['dot', 'fixedDot', 'mesh'].includes(value),
+  },
+  // 新增：点的大小配置
+  dotSize: {
+    type: Number,
+    default: 1,
+    description: 'dot 类型网格中点的大小（直径）'
+  },
+  // 网格颜色
+  color: {
+    type: String,
+    default: '#ddd',
+    description: '网格颜色'
   },
   args: {
     type: Object,
@@ -41,13 +54,37 @@ const updateGrid = async () => {
     graph.value.clearGrid();
 
     if (props.visible) {
-      graph.value.drawGrid({
+      // 根据 X6 API，不同类型的网格参数传递方式不同
+      let gridOptions = {
         type: props.type,
-        args: {
-          size: props.size,
+      };
+
+      if (props.type === 'dot' || props.type === 'fixedDot') {
+        // dot 类型网格：size 作为顶级参数，点大小和颜色在 args 中
+        gridOptions.size = props.size;
+        gridOptions.args = {
+          color: props.color,
+          thickness: props.dotSize,
           ...props.args,
-        },
-      });
+        };
+      } else if (props.type === 'mesh') {
+        // mesh 类型网格：size 在 args 中
+        gridOptions.args = {
+          size: props.size,
+          color: props.color,
+          ...props.args,
+        };
+      } else {
+        // 其他类型：保持原有逻辑
+        gridOptions.args = {
+          size: props.size,
+          color: props.color,
+          ...props.args,
+        };
+      }
+
+      console.log('XFlowGrid: Drawing grid with options:', gridOptions);
+      graph.value.drawGrid(gridOptions);
       // 显示网格
       graph.value.showGrid();
     } else {
@@ -71,6 +108,8 @@ onMounted(async () => {
 watch(() => [
   props.size,
   props.type,
+  props.dotSize,
+  props.color,
   props.args,
   props.visible,
 ], () => {

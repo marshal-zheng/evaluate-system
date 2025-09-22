@@ -27,7 +27,8 @@ export function useContextMenu(graph, options = {}) {
     enableBlankMenu: true,
     enableNodeMenu: true,
     enableEdgeMenu: true,
-    customItems: {}, // 自定义菜单项，支持 position 配置
+    customItems: {}, // 自定义菜单项，支持 position 配置（向后兼容）
+    customMenuHandler: null, // 自定义菜单处理器（新方式）
   };
 
   const config = { ...defaultOptions, ...options };
@@ -65,6 +66,24 @@ export function useContextMenu(graph, options = {}) {
     }
 
     return result;
+  };
+
+  // 处理自定义菜单的核心函数
+  const processCustomMenu = (standardItems, type, target = null) => {
+    // 优先使用新的自定义菜单处理器
+    if (typeof config.customMenuHandler === 'function') {
+      try {
+        const result = config.customMenuHandler(standardItems, type, target);
+        // 确保返回的是数组
+        return Array.isArray(result) ? result : standardItems;
+      } catch (error) {
+        console.error('自定义菜单处理器执行错误:', error);
+        return standardItems;
+      }
+    }
+
+    // 向后兼容：使用旧的合并逻辑
+    return mergeCustomItems(standardItems, config.customItems[type]);
   };
 
   // 获取剪贴板状态（需要外部注入）
@@ -144,8 +163,8 @@ export function useContextMenu(graph, options = {}) {
       },
     ];
 
-    // 使用新的合并逻辑处理自定义菜单项
-    return mergeCustomItems(items, config.customItems.blank);
+    // 使用新的自定义菜单处理逻辑
+    return processCustomMenu(items, 'blank');
   };
 
   const getNodeMenuItems = (node) => {
@@ -180,8 +199,8 @@ export function useContextMenu(graph, options = {}) {
       },
     ];
 
-    // 使用新的合并逻辑处理自定义菜单项
-    return mergeCustomItems(items, config.customItems.node);
+    // 使用新的自定义菜单处理逻辑
+    return processCustomMenu(items, 'node', node);
   };
 
   const getEdgeMenuItems = (edge) => {
@@ -207,8 +226,8 @@ export function useContextMenu(graph, options = {}) {
       },
     ];
 
-    // 使用新的合并逻辑处理自定义菜单项
-    return mergeCustomItems(items, config.customItems.edge);
+    // 使用新的自定义菜单处理逻辑
+    return processCustomMenu(items, 'edge', edge);
   };
 
   // 辅助函数：切换节点锁定状态
@@ -381,6 +400,15 @@ export function useContextMenu(graph, options = {}) {
     }
   };
 
+  // 设置自定义菜单处理器
+  const setCustomMenuHandler = (handler) => {
+    if (typeof handler === 'function' || handler === null) {
+      config.customMenuHandler = handler;
+    } else {
+      console.warn('customMenuHandler 必须是一个函数或 null');
+    }
+  };
+
   // 设置图形事件监听
   const setupGraphEvents = (graphInstance = null) => {
     const g = graphInstance || graph?.value || graph;
@@ -464,6 +492,7 @@ export function useContextMenu(graph, options = {}) {
     setClipboardHandler,
     setHistoryHandler,
     setSelectionHandler,
+    setCustomMenuHandler, // 新增：设置自定义菜单处理器
     setupGraphEvents, // 允许手动设置事件
   };
 }

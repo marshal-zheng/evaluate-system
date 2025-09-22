@@ -548,8 +548,10 @@ const handleOpen = () => {
 
 const handleFullScreenToggle = async (event) => {
   // 阻止事件冒泡，防止触发其他点击事件
-  event.preventDefault()
-  event.stopPropagation()
+  if (event) {
+    event.preventDefault()
+    event.stopPropagation()
+  }
   
   // 防止快速连续点击
   if (isToggling.value) {

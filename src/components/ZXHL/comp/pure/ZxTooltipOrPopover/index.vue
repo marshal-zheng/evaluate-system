@@ -41,6 +41,10 @@ const props = defineProps({
   placement: {
     type: String,
     default: 'top'
+  },
+  offset: {
+    type: Number,
+    default: 12
   }
 })
 
@@ -74,6 +78,7 @@ const finalProps = computed(() => {
     placement: props.placement,
     content: props.content,
     title: props.title,
+    offset: props.offset,
     ...restAttrs
   }
 })

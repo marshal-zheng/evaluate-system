@@ -107,6 +107,7 @@ import { ref, reactive, watch, nextTick } from 'vue'
 import { Search } from '@element-plus/icons-vue'
 import ZxDialog from '@/components/ZXHL/comp/pure/ZxDialog'
 import ZxGridList from '@/components/ZXHL/comp/pure/ZxGridList'
+import { getCalculationModelList } from '@/components/ZXHL/api/modules/indicator'
 
 // 定义组件选项
 defineOptions({
@@ -141,75 +142,12 @@ const selectedModel = ref(null)
 const gridRef = ref(null)
 const tableRef = ref(null)
 
-// 模拟数据
-const mockModelData = [
-  {
-    id: 1,
-    name: '测试模型',
-    description: '测试模型'
-  },
-  {
-    id: 2,
-    name: '123123',
-    description: '123'
-  },
-  {
-    id: 3,
-    name: '测试250331',
-    description: '测试250331'
-  },
-  {
-    id: 4,
-    name: '陆航-装备研制费用-其他设备费用',
-    description: '陆航-装备研制费用-其他设备费用'
-  },
-  {
-    id: 5,
-    name: '陆航-装备研制费用-保障人员费用',
-    description: '陆航-装备研制费用-保障人员费用'
-  },
-  {
-    id: 6,
-    name: '陆航-装备研制费用-保障资料费用',
-    description: '陆航-装备研制费用-保障资料费用'
-  },
-  {
-    id: 7,
-    name: '陆航-装备研制费用-保障设施费用',
-    description: '陆航-装备研制费用-保障设施费用'
-  },
-  {
-    id: 8,
-    name: '陆航-装备研制费用-供应保障费用',
-    description: '陆航-装备研制费用-供应保障费用'
-  },
-  {
-    id: 9,
-    name: '陆航-装备研制费用-维修人员费用',
-    description: '陆航-装备研制费用-维修人员费用'
-  }
-]
-
 // 数据加载函数
 const loadModelData = async (params) => {
-  // 模拟API请求延迟
-  await new Promise(resolve => setTimeout(resolve, 300))
-  
-  let filteredData = [...mockModelData]
-  
-  // 根据搜索关键词过滤
-  if (searchKeyword.value) {
-    const keyword = searchKeyword.value.toLowerCase()
-    filteredData = filteredData.filter(item => 
-      item.name.toLowerCase().includes(keyword) || 
-      item.description.toLowerCase().includes(keyword)
-    )
-  }
-  
-  return {
-    list: filteredData,
-    total: filteredData.length
-  }
+  const response = await getCalculationModelList(params)
+  console.log('loadModelData response:', response)
+  console.log('params:', params)
+  return response
 }
 
 // 搜索处理
@@ -259,26 +197,31 @@ const handleClose = () => {
 }
 
 // 重置状态
-const resetState = () => {
+const resetState = async () => {
   searchKeyword.value = ''
   selectedModelId.value = props.defaultSelectedId || null
   selectedModel.value = null
   
-  // 如果有预选中的ID，找到对应的模型
+  // 如果有预选中的ID，从API获取对应的模型数据
   if (props.defaultSelectedId) {
-    const defaultModel = mockModelData.find(item => item.id === props.defaultSelectedId)
-    if (defaultModel) {
-      selectedModel.value = defaultModel
-      selectedModelId.value = defaultModel.id
+    try {
+      const response = await loadModelData({ pageSize: 1000 })
+      const defaultModel = response.list.find(item => item.id === props.defaultSelectedId)
+      if (defaultModel) {
+        selectedModel.value = defaultModel
+        selectedModelId.value = defaultModel.id
+      }
+    } catch (error) {
+      console.error('获取默认选中模型失败:', error)
     }
   }
 }
 
 // 监听弹框显示状态
-watch(() => props.modelValue, (newVal) => {
+watch(() => props.modelValue, async (newVal) => {
   visible.value = newVal
   if (newVal) {
-    resetState()
+    await resetState()
     // 延迟刷新数据，确保组件已渲染
     nextTick(() => {
       if (gridRef.value) {

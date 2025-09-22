@@ -1,259 +1,207 @@
 {
   "nodes": [
     {
-      "id": "b113a77e-4663-4f7d-b774-8915f6df8ad6",
+      "id": "1663477489012345678",
       "type": "root-node",
-      "x": "836",
-      "y": "128",
+      "x": 836,
+      "y": 120,
       "properties": {
         "content": {
-          "id": "d",
+          "id": "1663477489012345679",
           "label": "根节点"
         },
-        "label": {
-          "id": "d",
-          "label": "根节点"
-        }
+        "weight": 50,
+        "otherData": {},
+        "parentNodeId": null,
+        "customType": "",
+        "customProperties": "",
+        "unit": "",
+        "priority": "",
+        "defaultValue": "",
+        "notes": "",
+        "level": 1
       }
     },
     {
-      "id": "ecee19b9-3348-438c-b0f8-3212040f0188",
+      "id": "1663477489012345680",
       "type": "sub-node",
-      "x": "724",
-      "y": "240",
+      "x": 724,
+      "y": 240,
       "properties": {
         "content": {
-          "id": "536dd2c9-0869-4780-8d2e-3e3c2566ba6a",
-          "label": "测试模式",
-          "weight": "50",
-          "otherData": "state",
-          "nullFlag": "1",
-          "createId": "null",
-          "modifyId": "null",
+          "id": "1663477489012345681",
+          "label": "二级指标"
+        },
+        "weight": 50,
+        "otherData": {
+          "state": null,
+          "flag": 1,
+          "createId": null,
+          "modifyId": null,
           "createTime": "2025-09-10 21:07:20",
           "modifyTime": "2025-09-10 21:13:57",
-          "ip": "1965764024555028290",
-          "oprnodelName": "测试模式",
-          "oprModelDesc": "测试模式",
-          "oprModelPath": "1965764024555028290",
-          "kql": "sqlcontent",
-          "nullIndex": "1",
-          "title": "测试模式",
-          "desc": "测试模式",
-          "label": "测试模式"
+          "id": "1965764024555020290",
+          "oprModelName": "测试模型",
+          "oprModelDesc": "测试模型",
+          "oprModelPath": "1965764024555020290.ktr",
+          "sqlContent": null,
+          "index": 1,
+          "title": "测试模型",
+          "desc": "测试模型",
+          "label": "测试模型"
         },
-        "parentNodeId": "b113a77e-4663-4f7d-b774-8915f6df8ad6",
+        "parentNodeId": "1663477489012345678",
         "customType": "1",
         "customProperties": "2",
         "unit": "3",
         "priority": "4",
         "defaultValue": "5",
         "notes": "6",
-        "level": "2"
+        "level": 2
       }
     },
     {
-      "id": "e4c4ea0d-2451-4dec-bda2-816fbc4472c2",
+      "id": "1663477489012345682",
       "type": "leaf-node",
-      "x": "686",
-      "y": "440",
+      "x": 686,
+      "y": 440,
       "properties": {
         "content": {
-          "id": "c677c32-1c1f-41d4-b5c4-6ddbb7fd167b",
-          "label": "二级数据",
-          "weight": "50",
-          "otherData": {},
-          "parentNodeId": "ecee19b9-3348-438c-b0f8-3212040f0188",
-          "customType": "1",
-          "customProperties": "2",
-          "unit": "3",
-          "priority": "4",
-          "defaultValue": "5",
-          "notes": "6",
-          "level": "3"
-        }
+          "id": "1663477489012345683",
+          "label": "三级指标"
+        },
+        "weight": 50,
+        "otherData": {},
+        "parentNodeId": "1663477489012345680",
+        "customType": "1",
+        "customProperties": "2",
+        "unit": "3",
+        "priority": "4",
+        "defaultValue": "5",
+        "notes": "6",
+        "level": 3
       }
     },
     {
-      "id": "02db7ec1-8eb3-4e5a-bb0b-b70ac6ba621",
+      "id": "1663477489012345684",
       "type": "leaf-node",
-      "x": "761",
-      "y": "440",
+      "x": 761,
+      "y": 440,
       "properties": {
         "content": {
-          "id": "20861c03-29f6-48d3-bd37-56f2e3b30d99",
-          "label": "二级数据",
-          "weight": "50",
-          "otherData": {
-            "state": "null",
-            "flag": "1",
-            "createId": "null",
-            "modifyId": "null",
-            "createTime": "2025-09-10 21:07:20",
-            "modifyTime": "2025-09-10 21:13:57",
-            "ip": "1965764024555028290",
-            "oprnodelName": "测试模式",
-            "oprModelDesc": "测试模式",
-            "oprModelPath": "1965764024555028290",
-            "kql": "sqlcontent",
-            "nullIndex": "1",
-            "title": "测试模式",
-            "desc": "测试模式",
-            "label": "测试模式"
-          },
-          "parentNodeId": "ecee19b9-3348-438c-b0f8-3212040f0188",
-          "customType": "1",
-          "customProperties": "2",
-          "unit": "3",
-          "priority": "4",
-          "defaultValue": "5",
-          "notes": "6",
-          "level": "3"
-        }
+          "id": "1663477489012345685",
+          "label": "三级指标2"
+        },
+        "weight": 50,
+        "otherData": {
+          "state": null,
+          "flag": 1,
+          "createId": null,
+          "modifyId": null,
+          "createTime": "2025-09-10 21:07:20",
+          "modifyTime": "2025-09-10 21:13:57",
+          "id": "1965764024555020290",
+          "oprModelName": "测试模型",
+          "oprModelDesc": "测试模型",
+          "oprModelPath": "1965764024555020290.ktr",
+          "sqlContent": null,
+          "index": 1,
+          "title": "测试模型",
+          "desc": "测试模型",
+          "label": "测试模型"
+        },
+        "parentNodeId": "1663477489012345680",
+        "customType": "1",
+        "customProperties": "2",
+        "unit": "3",
+        "priority": "4",
+        "defaultValue": "5",
+        "notes": "6",
+        "level": 3
       }
     },
     {
-      "id": "5e365b61-0710-4f8d-8c50-5a7fca28e0ac",
+      "id": "1663477489012345686",
       "type": "sub-node",
-      "x": "949",
-      "y": "240",
+      "x": 949,
+      "y": 240,
       "properties": {
         "content": {
-          "id": "a869cfd2-68f1-489a-8db3-a4169c0a42a0",
-          "label": "二级数据2",
-          "weight": "50",
-          "otherData": {},
-          "parentNodeId": "b113a77e-4663-4f7d-b774-8915f6df8ad6",
-          "customType": "1",
-          "customProperties": "2",
-          "unit": "",
-          "priority": "",
-          "defaultValue": "",
-          "notes": "",
-          "level": "3"
-        }
+          "id": "1663477489012345687",
+          "label": "二级指标2"
+        },
+        "weight": 50,
+        "otherData": {},
+        "parentNodeId": "1663477489012345678",
+        "customType": "",
+        "customProperties": "",
+        "unit": "",
+        "priority": "",
+        "defaultValue": "",
+        "notes": "",
+        "level": 2
       }
     }
   ],
   "edges": [
     {
-      "id": "86c3fd75-e721-4c1e-91f6-e1d8fa2991ff",
+      "id": "1663477489012345688",
       "type": "mindmap-edge",
-      "sourceNodeId": "ecee19b9-3348-438c-b0f8-3212040f0188",
-      "targetNodeId": "e4c4ea0d-2451-4dec-bda2-816fbc4472c2",
-      "startPoint": {
-        "x": "723.5",
-        "y": "240"
-      },
-      "endPoint": {
-        "x": "686.5",
-        "y": "440"
-      },
+      "sourceNodeId": "1663477489012345680",
+      "targetNodeId": "1663477489012345682",
+      "startPoint": { "x": 723.5, "y": 240 },
+      "endPoint": { "x": 686, "y": 362 },
+      "properties": {},
       "pointsList": [
-        {
-          "x": "723.5",
-          "y": "240"
-        },
-        {
-          "x": "723.5",
-          "y": "320"
-        },
-        {
-          "x": "686",
-          "y": "320"
-        },
-        {
-          "x": "686",
-          "y": "362"
-        },
-        {
-          "x": "686.5",
-          "y": "440"
-        }
+        { "x": 723.5, "y": 240 },
+        { "x": 723.5, "y": 320 },
+        { "x": 686, "y": 320 },
+        { "x": 686, "y": 362 }
       ]
     },
     {
-      "id": "43053a06-a304-4819-aef0-47e2a6598f9a",
+      "id": "1663477489012345689",
       "type": "mindmap-edge",
-      "sourceNodeId": "ecee19b9-3348-438c-b0f8-3212040f0188",
-      "targetNodeId": "02db7ec1-8eb3-4e5a-bb0b-b70ac6ba621",
-      "startPoint": {
-        "x": "723.5",
-        "y": "240"
-      },
-      "endPoint": {
-        "x": "761.5",
-        "y": "440"
-      },
+      "sourceNodeId": "1663477489012345680",
+      "targetNodeId": "1663477489012345684",
+      "startPoint": { "x": 723.5, "y": 240 },
+      "endPoint": { "x": 761, "y": 362 },
+      "properties": {},
       "pointsList": [
-        {
-          "x": "723.5",
-          "y": "240"
-        },
-        {
-          "x": "723.5",
-          "y": "320"
-        },
-        {
-          "x": "761",
-          "y": "320"
-        },
-        {
-          "x": "761",
-          "y": "362"
-        },
-        {
-          "x": "761.5",
-          "y": "440"
-        }
+        { "x": 723.5, "y": 240 },
+        { "x": 723.5, "y": 320 },
+        { "x": 761, "y": 320 },
+        { "x": 761, "y": 362 }
       ]
     },
     {
-      "id": "15e26af6-919d-49a9-af18-e3bff7c4057",
+      "id": "1663477489012345690",
       "type": "mindmap-edge",
-      "sourceNodeId": "b113a77e-4663-4f7d-b774-8915f6df8ad6",
-      "targetNodeId": "ecee19b9-3348-438c-b0f8-3212040f0188",
-      "startPoint": {
-        "x": "836",
-        "y": "167.75"
-      },
-      "endPoint": {
-        "x": "723.5",
-        "y": "202"
-      },
+      "sourceNodeId": "1663477489012345678",
+      "targetNodeId": "1663477489012345680",
+      "startPoint": { "x": 836, "y": 120 },
+      "endPoint": { "x": 723.5, "y": 202 },
+      "properties": {},
       "pointsList": [
-        {
-          "x": "836",
-          "y": "167.75"
-        },
-        {
-          "x": "723.5",
-          "y": "202"
-        }
+        { "x": 836, "y": 120 },
+        { "x": 836, "y": 167.75 },
+        { "x": 723.5, "y": 167.75 },
+        { "x": 723.5, "y": 202 }
       ]
     },
     {
-      "id": "6b844024-969a-4609-a44d-f3f9b1a5b6f7",
+      "id": "1663477489012345691",
       "type": "mindmap-edge",
-      "sourceNodeId": "b113a77e-4663-4f7d-b774-8915f6df8ad6",
-      "targetNodeId": "5e365b61-0710-4f8d-8c50-5a7fca28e0ac",
-      "startPoint": {
-        "x": "836",
-        "y": "128"
-      },
-      "endPoint": {
-        "x": "948.5",
-        "y": "202"
-      },
+      "sourceNodeId": "1663477489012345678",
+      "targetNodeId": "1663477489012345686",
+      "startPoint": { "x": 836, "y": 120 },
+      "endPoint": { "x": 948.5, "y": 202 },
+      "properties": {},
       "pointsList": [
-        {
-          "x": "836",
-          "y": "128"
-        },
-        {
-          "x": "948.5",
-          "y": "202"
-        }
+        { "x": 836, "y": 120 },
+        { "x": 836, "y": 167.75 },
+        { "x": 948.5, "y": 167.75 },
+        { "x": 948.5, "y": 202 }
       ]
     }
   ]

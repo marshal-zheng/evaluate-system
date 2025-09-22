@@ -27,12 +27,33 @@ export function useContextMenu(graph, options = {}) {
     enableBlankMenu: true,
     enableNodeMenu: true,
     enableEdgeMenu: true,
+    // 自定义菜单处理器 - 允许用户完全控制菜单内容
+    customMenuHandler: null, // 函数：(standardItems, type, target) => customItems
+    // 向后兼容的旧配置方式
     customItems: {}, // 自定义菜单项，支持 position 配置
   };
 
   const config = { ...defaultOptions, ...options };
 
-  // 合并自定义菜单项的辅助函数
+  // 处理自定义菜单的核心函数
+  const processCustomMenu = (standardItems, type, target = null) => {
+    // 优先使用新的自定义菜单处理器
+    if (typeof config.customMenuHandler === 'function') {
+      try {
+        const result = config.customMenuHandler(standardItems, type, target);
+        // 确保返回的是数组
+        return Array.isArray(result) ? result : standardItems;
+      } catch (error) {
+        console.error('自定义菜单处理器执行错误:', error);
+        return standardItems;
+      }
+    }
+
+    // 向后兼容：使用旧的合并逻辑
+    return mergeCustomItems(standardItems, config.customItems[type]);
+  };
+
+  // 向后兼容的合并自定义菜单项函数
   const mergeCustomItems = (standardItems, customItems) => {
     if (!customItems || customItems.length === 0) {
       return standardItems;
@@ -144,8 +165,8 @@ export function useContextMenu(graph, options = {}) {
       },
     ];
 
-    // 使用新的合并逻辑处理自定义菜单项
-    return mergeCustomItems(items, config.customItems.blank);
+    // 使用新的自定义菜单处理逻辑
+    return processCustomMenu(items, 'blank');
   };
 
   const getNodeMenuItems = (node) => {
@@ -173,15 +194,15 @@ export function useContextMenu(graph, options = {}) {
       { type: 'divider' },
       {
         id: 'lock',
-        label: node?.prop('locked') ? '解锁' : '锁定',
-        icon: node?.prop('locked') ? 'Unlock' : 'Lock',
+        label: (node?.prop('locked') || node?.getData()?.locked) ? '解锁' : '锁定',
+        icon: (node?.prop('locked') || node?.getData()?.locked) ? 'Unlock' : 'Lock',
         action: () => toggleNodeLock(node),
         disabled: !node,
       },
     ];
 
-    // 使用新的合并逻辑处理自定义菜单项
-    return mergeCustomItems(items, config.customItems.node);
+    // 使用新的自定义菜单处理逻辑
+    return processCustomMenu(items, 'node', node);
   };
 
   const getEdgeMenuItems = (edge) => {
@@ -207,34 +228,100 @@ export function useContextMenu(graph, options = {}) {
       },
     ];
 
-    // 使用新的合并逻辑处理自定义菜单项
-    return mergeCustomItems(items, config.customItems.edge);
+    // 使用新的自定义菜单处理逻辑
+    return processCustomMenu(items, 'edge', edge);
   };
 
   // 辅助函数：切换节点锁定状态
   const toggleNodeLock = (node) => {
     if (!node) return;
     
-    const locked = node.prop('locked');
+    const locked = node.prop('locked') || node.getData()?.locked;
     const newLocked = !locked;
     
-    // 设置锁定状态
+    // 设置锁定状态到节点属性
     node.prop('locked', newLocked);
     
     // 设置节点的拖拽状态
-    node.prop('draggable', !newLocked);
+    node.prop('movable', !newLocked);
     
-    // 设置节点的锁定视觉状态
+    // 更新节点数据
+    const currentData = node.getData() || {};
     if (newLocked) {
-      // 设置锁定标记到节点数据和DOM属性
-      node.setData({ ...node.getData(), locked: true });
-      node.attr('body/data-locked', 'true');
+      node.setData({ ...currentData, locked: true });
     } else {
-      // 移除锁定标记
-      const data = node.getData();
-      delete data.locked;
-      node.setData(data);
-      node.attr('body/data-locked', null);
+      const { locked: _, ...restData } = currentData;
+      node.setData(restData);
+    }
+    
+    // 设置视觉标识 - 使用更通用的方式
+    try {
+      if (newLocked) {
+        // 添加锁定样式类
+        node.addTools([{
+          name: 'lock-indicator',
+          args: {
+            markup: [{
+              tagName: 'rect',
+              attrs: {
+                width: 16,
+                height: 16,
+                x: -8,
+                y: -8,
+                fill: '#ff6b6b',
+                stroke: '#fff',
+                'stroke-width': 1,
+                rx: 2,
+              }
+            }, {
+              tagName: 'text',
+              attrs: {
+                text: '🔒',
+                'font-size': 10,
+                'text-anchor': 'middle',
+                'dominant-baseline': 'central',
+                x: 0,
+                y: 0,
+                fill: '#fff'
+              }
+            }],
+            x: '100%',
+            y: 0,
+            offset: { x: -8, y: 8 }
+          }
+        }]);
+        
+        // 设置节点样式表示锁定状态
+        const originalStroke = node.attr('body/stroke') || '#333';
+        node.attr('body/strokeDasharray', '5,5');
+        node.attr('body/stroke', '#ff6b6b');
+        node.setData({ ...node.getData(), originalStroke });
+      } else {
+        // 移除锁定标识
+        node.removeTool('lock-indicator');
+        
+        // 恢复原始样式
+        const originalStroke = node.getData()?.originalStroke || '#333';
+        node.attr('body/strokeDasharray', '');
+        node.attr('body/stroke', originalStroke);
+        
+        // 清理原始样式记录
+        const data = node.getData();
+        if (data?.originalStroke) {
+          const { originalStroke: _, ...restData } = data;
+          node.setData(restData);
+        }
+      }
+    } catch (error) {
+      console.warn('设置锁定视觉标识时出错:', error);
+      // 降级方案：仅使用边框样式
+      if (newLocked) {
+        node.attr('body/stroke', '#ff6b6b');
+        node.attr('body/strokeDasharray', '5,5');
+      } else {
+        node.attr('body/stroke', '#333');
+        node.attr('body/strokeDasharray', '');
+      }
     }
     
     console.log(`节点 ${node.id} ${newLocked ? '已锁定' : '已解锁'}`);
@@ -383,6 +470,15 @@ export function useContextMenu(graph, options = {}) {
     }
   };
 
+  // 设置自定义菜单处理器
+  const setCustomMenuHandler = (handler) => {
+    if (typeof handler === 'function' || handler === null) {
+      config.customMenuHandler = handler;
+    } else {
+      console.warn('customMenuHandler 必须是一个函数或 null');
+    }
+  };
+
   // 设置图形事件监听
   const setupGraphEvents = (graphInstance = null) => {
     const g = graphInstance || graph?.value || graph;
@@ -466,6 +562,7 @@ export function useContextMenu(graph, options = {}) {
     setClipboardHandler,
     setHistoryHandler,
     setSelectionHandler,
+    setCustomMenuHandler, // 新增：设置自定义菜单处理器
     setupGraphEvents, // 允许手动设置事件
   };
 }

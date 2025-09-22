@@ -218,7 +218,13 @@ export function useStandardInteractions(graph, options = {}) {
   const selectAll = () => {
     const g = graph?.value || graph;
     if (g) {
-      g.selectAll();
+      // X6 无内置 selectAll 方法，需要手动选择所有元素
+      const cells = config.allowEdgeSelection
+        ? (g.getCells ? g.getCells() : [])
+        : (g.getNodes ? g.getNodes() : []);
+      if (cells && cells.length > 0) {
+        g.select(cells);
+      }
     }
   };
 

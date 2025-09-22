@@ -5,6 +5,7 @@
     :title="popoverTitle"
     :trigger="tooltipTrigger"
     :placement="tooltipPlacement"
+    :offset="tooltipOffset"
     :disabled="disabled || (!tooltip && !popoverTitle)"
   >
     <!-- SVG 图标 (通过 svg-icon: 前缀识别) -->
@@ -158,7 +159,10 @@ const props = defineProps({
     type: String,
     default: 'top'
   },
-  // 是否禁用
+  tooltipOffset: {
+    type: Number,
+    default: 12
+  },
   disabled: {
     type: Boolean,
     default: false

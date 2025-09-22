@@ -244,6 +244,16 @@ const initGraph = async () => {
       min: props.minScale,
       max: props.maxScale,
     },
+    // 启用内置选择功能
+    selecting: {
+      enabled: true,
+      multiple: true,
+      rubberband: true,
+      movable: true,
+      showNodeSelectionBox: true,
+      showEdgeSelectionBox: props.selectOptions?.showEdgeSelectionBox === true,
+      ...props.selectOptions,
+    },
     connecting: {
       ...props.connectionOptions,
       allowBlank: false,
