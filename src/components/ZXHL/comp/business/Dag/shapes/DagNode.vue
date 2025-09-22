@@ -11,7 +11,7 @@
         :tooltip="modelTooltip"
         tooltip-placement="left"
         :tooltip-offset="12"
-        :popover-width="400"
+        :popover-width="hasModel?400:undefined"
       >
         <!-- 紧凑型模型信息展示 -->
         <template v-if="hasModel && modelData" #popoverContent>
@@ -84,6 +84,23 @@ const nodeData = computed(() => {
   });
   return data;
 });
+
+// 监听节点数据变化，强制更新
+watch(
+  () => props.node?.getData?.(),
+  (newData, oldData) => {
+    console.log('DagNode - 节点数据发生变化:', {
+      nodeId: props.node?.id,
+      newData,
+      oldData,
+      labelChanged: newData?.label !== oldData?.label,
+      contentLabelChanged: newData?.properties?.content?.label !== oldData?.properties?.content?.label
+    });
+    // 强制重新计算
+    dataVersion.value++;
+  },
+  { deep: true, immediate: false }
+);
 
 // 支持两种数据结构：旧的直接结构和新的 properties 结构
 const properties = computed(() => {

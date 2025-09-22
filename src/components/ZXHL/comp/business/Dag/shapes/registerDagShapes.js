@@ -110,9 +110,14 @@ export const registerDagShapes = () => {
   Graph.registerConnector(
     DAG_CONNECTOR,
     (s, e) => {
-      const offset = 4;
+      const offset = 15; // 进一步增加偏移量，让线条更高
       const deltaY = Math.abs(e.y - s.y);
-      const control = Math.floor((deltaY / 3) * 2);
+      const deltaX = Math.abs(e.x - s.x);
+      
+      // 根据距离动态调整控制点，让线条更自然
+      const minControl = 30; // 增加最小控制距离，让弧度更大
+      const control = Math.max(minControl, Math.floor(Math.max(deltaY, deltaX) / 1.5)); // 减少除数，增加弧度
+      
       const v1 = { x: s.x, y: s.y + offset + control };
       const v2 = { x: e.x, y: e.y - offset - control };
 
@@ -133,7 +138,7 @@ export const registerDagShapes = () => {
       attrs: {
         line: {
           stroke: '#C2C8D5',
-          strokeWidth: 1,
+          strokeWidth: 4,
           targetMarker: null,
         },
       },

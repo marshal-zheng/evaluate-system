@@ -26,7 +26,7 @@ export const systemManagementRoutes = [
           title: '指标体系设计',
           showInMenu: false
         },
-        component: () => import('@/components/ZXHL/pages/indicatorSystem/designManagement/detail.vue')
+        component: () => import('@/components/ZXHL/pages/indicatorSystem/designManagement/test.vue')
       }
     ]
   }

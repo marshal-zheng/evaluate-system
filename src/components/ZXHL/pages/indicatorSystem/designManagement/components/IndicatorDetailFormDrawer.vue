@@ -53,8 +53,6 @@
             maxlength="50"
             show-word-limit
             :disabled="disabledMenu.includes('indicatorName') || isReadOnly"
-            :tooltip="'指标名称是用于标识和描述该指标的唯一名称，应简洁明了且具有代表性'"
-            tooltip-placement="right"
           />
         </el-form-item>
 
@@ -82,7 +80,6 @@
                 type="primary" 
                 size="default"
                 :tooltip="formData.calculationModelName"
-                :tooltip-placement="'top'"
                 class="calculation-model-tag"
               >
                 <span class="model-name-text">{{ formData.calculationModelName }}</span>
@@ -119,8 +116,6 @@
             v-model="formData.customType"
             placeholder="请输入类型"
             :disabled="disabledMenu.includes('customType') || isReadOnly"
-            :tooltip="'指标类型用于分类管理指标，如：定量指标、定性指标、过程指标、结果指标等'"
-            tooltip-placement="right"
           />
         </el-form-item>
 
@@ -130,8 +125,6 @@
             v-model="formData.customProperties"
             placeholder="请输入属性"
             :disabled="disabledMenu.includes('customProperties') || isReadOnly"
-            :tooltip="'指标属性描述指标的特征和性质，如：正向指标、反向指标、适度指标等'"
-            tooltip-placement="right"
           />
         </el-form-item>
 
@@ -141,8 +134,6 @@
             v-model="formData.unit"
             placeholder="请输入单位"
             :disabled="disabledMenu.includes('unit') || isReadOnly"
-            :tooltip="'指标的计量单位，如：个、%、元、天、次等，用于明确指标的度量标准'"
-            tooltip-placement="right"
           />
         </el-form-item>
 
@@ -234,6 +225,7 @@ const formData = reactive({
   supportDescription: 0,
   calculationModel: '', // 存储模型ID
   calculationModelName: '', // 存储模型名称用于显示
+  calculationModelData: null, // 存储完整的模型对象
   customType: '',
   customProperties: '',
   unit: '', // 添加单位字段
@@ -271,6 +263,7 @@ watch(
         supportDescription: 0,
         calculationModel: '',
         calculationModelName: '',
+        calculationModelData: null,
         customType: '',
         customProperties: '',
         unit: '',
@@ -285,6 +278,7 @@ watch(
       if (!formData.isLeafNode) {
         formData.calculationModel = ''
         formData.calculationModelName = ''
+        formData.calculationModelData = null
       }
       
       console.log('IndicatorDetailFormDrawer - 表单数据已更新:', formData)
@@ -302,6 +296,7 @@ const openModelSelectDialog = () => {
 const handleModelSelect = (selectedModel) => {
   formData.calculationModel = selectedModel.id
   formData.calculationModelName = selectedModel.name
+  formData.calculationModelData = selectedModel // 存储完整的模型对象
   showModelSelectDialog.value = false
 }
 
@@ -348,6 +343,7 @@ const resetForm = () => {
     supportDescription: 0,
     calculationModel: '',
     calculationModelName: '',
+    calculationModelData: null,
     customType: '',
     customProperties: '',
     unit: '',

@@ -1,51 +1,5 @@
 <template>
-  <div class="xflow-dag-container">
-    <!-- 顶部操作栏 -->
-    <div class="dag-actions">
-      <el-button type="primary" @click="handleGetSaveData">
-        <el-icon><Document /></el-icon>
-        获取保存数据
-      </el-button>
-      
-      <!-- 新功能测试按钮 -->
-      <el-divider direction="vertical" />
-      
-      <el-button 
-        :type="showSidebar ? 'primary' : 'default'" 
-        @click="toggleSidebar"
-      >
-        <el-icon><Menu /></el-icon>
-        {{ showSidebar ? '隐藏' : '显示' }}侧边栏
-      </el-button>
-      
-      <el-button 
-        :type="showToolbar ? 'primary' : 'default'" 
-        @click="toggleToolbar"
-      >
-        <el-icon><Operation /></el-icon>
-        {{ showToolbar ? '隐藏' : '显示' }}工具栏
-      </el-button>
-      
-      <el-button 
-        :type="readonly ? 'danger' : 'success'" 
-        @click="toggleReadonly"
-      >
-        <el-icon><Lock v-if="readonly" /><Unlock v-else /></el-icon>
-        {{ readonly ? '只读模式' : '编辑模式' }}
-      </el-button>
-      
-      <el-divider direction="vertical" />
-      
-      <el-button 
-        :type="useStaticOperators ? 'info' : 'primary'" 
-        @click="toggleOperatorsDataMode"
-        :loading="operatorsLoading"
-      >
-        <el-icon><DataBoard /></el-icon>
-        {{ useStaticOperators ? '使用静态数据' : '使用异步数据' }}
-      </el-button>
-    </div>
-    
+  <div class="indicator-dag-editor">
     <div class="dag-content">
       <DAGPage 
         ref="dagPageRef"
@@ -54,12 +8,12 @@
         :dnd-config="dndConfig"
         :layout="layoutMode"
         :custom-menu-handler="customMenuHandler"
-        :initial-graph-data="loadIndicatorSystemData"
+        :initial-graph-data="processedGraphData"
         :graph-loading="graphLoading"
         :auto-layout="true"
-        :show-sidebar="showSidebar"
-        :readonly="readonly"
-        :show-toolbar="showToolbar"
+        :show-sidebar="computedShowSidebar"
+        :readonly="computedReadonly"
+        :show-toolbar="isShowToolbar"
         @edit-node="handleEditNode"
         @save="handleSave"
       />
@@ -79,13 +33,43 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { DAGPage } from '@/components/ZXHL/comp/business/Dag/index.vue'
 import IndicatorDetailFormDrawer from './components/IndicatorDetailFormDrawer.vue'
 import { useMessageBox } from '@/composables/useElementPlus'
 import { useGraphStore } from '@/components/ZXHL/comp/business/ZxFlow/composables/useGraphStore'
 import { indicatorApi } from '@/components/ZXHL/api/modules/indicator'
-import { Document, Menu, Operation, Lock, Unlock, DataBoard } from '@element-plus/icons-vue'
+
+// Props 定义
+const props = defineProps({
+  // 基础指标数据（左侧树列表）
+  listData: {
+    type: Array,
+    default: () => []
+  },
+  // 图数据
+  graphData: {
+    type: [Object, Function],
+    default: () => ({ nodes: [], edges: [] })
+  },
+  // 是否显示左侧导航树
+  isShowSideNav: {
+    type: Boolean,
+    default: true
+  },
+  isShowToolbar: {
+    type: Boolean,
+    default: true
+  },
+  // 是否可编辑
+  isEditable: {
+    type: Boolean,
+    default: true
+  }
+})
+
+// Emits 定义
+const emit = defineEmits(['save', 'edit-node', 'delete-node'])
 
 // 初始化工具函数
 const { showConfirm } = useMessageBox()
@@ -94,50 +78,48 @@ const graphStore = useGraphStore()
 // DAGPage 组件引用
 const dagPageRef = ref(null)
 
-// Mock 数据 - 用户简单格式
-const staticOperators = [
-  // 数据源类
-  { name: 'MySQL数据源', value: '连接MySQL数据库读取数据' },
-  { name: 'CSV文件读取', value: '读取本地CSV文件数据' },
-  { name: 'API数据获取', value: 'REST API接口数据获取' },
-  
-  // 数据处理类
-  { name: '数据过滤', value: '按条件过滤和筛选数据' },
-  { name: '数据转换', value: '字段映射和数据转换' },
-  { name: '数据关联', value: '多表关联和数据合并' },
-  
-  // 机器学习类
-  { name: '线性回归', value: '线性回归算法模型训练' },
-  { name: '决策树', value: '决策树分类算法' },
-  { name: '神经网络', value: '深度学习神经网络模型' },
-  
-  // 数据输出类
-  { name: '文件导出', value: '导出结果到文件' },
-  { name: '数据库写入', value: '写入数据到数据库' },
-  { name: 'API发布', value: '发布为API服务接口' },
-];
-
-// 数据配置
-const operators = ref([]);
+// 响应式数据
 const operatorsLoading = ref(false);
-const layoutMode = ref('vertical'); // 'vertical' | 'horizontal'
+const layoutMode = ref('vertical');
+const graphLoading = ref(false);
+
+// 控制状态
+const showSidebar = ref(props.isShowSideNav);
+const readonly = ref(!props.isEditable);
+const showToolbar = ref(true);
+const useStaticOperators = ref(true);
 
 // 指标详情抽屉相关
 const showIndicatorDrawer = ref(false);
 const currentIndicatorData = ref({});
-// 当前正在编辑的节点ID
 const editingNodeId = ref('');
 
-// 图数据相关
-const graphLoading = ref(false);
+// 计算属性
+const computedShowSidebar = computed(() => showSidebar.value);
+const computedReadonly = computed(() => readonly.value);
 
-// 新增功能测试相关
-const showSidebar = ref(true);
-const readonly = ref(false);
-const showToolbar = ref(true);
+// 静态算子数据
+const staticOperators = computed(() => {
+  return props.listData.length > 0 ? props.listData : [];
+});
 
-// 数据模式切换相关
-const useStaticOperators = ref(false);
+// 处理图数据 - 使用 ref 而不是 computed，确保能触发响应式更新
+const processedGraphData = ref(null);
+
+// 监听 graphData 变化并更新 processedGraphData
+watch(() => props.graphData, (newData) => {
+  console.log('IndicatorDagEditor - 图数据变化:', newData);
+  if (typeof newData === 'function') {
+    // 如果是函数，直接传递给 DAGPage
+    processedGraphData.value = newData;
+  } else if (newData && typeof newData === 'object') {
+    // 如果是静态对象，包装成函数返回该对象
+    processedGraphData.value = () => Promise.resolve(newData);
+  } else {
+    // 默认返回空数据的函数
+    processedGraphData.value = () => Promise.resolve({ nodes: [], edges: [] });
+  }
+}, { immediate: true, deep: true });
 
 // DnD 配置
 const dndConfig = {
@@ -152,7 +134,18 @@ const dndConfig = {
   }
 };
 
-// 自定义菜单处理器 - 将自定义菜单放在上面，通用菜单放在下面
+// 监听 props 变化
+watch(() => props.isShowSideNav, (newVal) => {
+  showSidebar.value = newVal;
+});
+
+watch(() => props.isEditable, (newVal) => {
+  readonly.value = !newVal;
+});
+
+
+
+// 自定义菜单处理器
 const customMenuHandler = (standardItems, type, target) => {
   const customItems = [];
   
@@ -184,7 +177,7 @@ const customMenuHandler = (standardItems, type, target) => {
     customItems.push(...filteredStandardItems);
     
   } else if (type === 'blank') {
-    // 空白区域只使用标准菜单项，不添加自定义的"添加指标"
+    // 空白区域只使用标准菜单项
     customItems.push(...standardItems);
     
   } else {
@@ -250,6 +243,9 @@ const handleEditNode = (node) => {
   };
 
   showIndicatorDrawer.value = true;
+  
+  // 触发外部事件
+  emit('edit-node', node);
 };
 
 // 删除节点处理函数
@@ -279,18 +275,15 @@ const handleDeleteNode = async (node) => {
       console.log(`指标节点 "${nodeName}" 已删除`);
     }
     
+    // 触发外部事件
+    emit('delete-node', node);
+    
   } catch (error) {
     // 用户取消删除或发生错误
     if (error !== 'cancel') {
       console.error('删除指标节点时发生错误:', error);
     }
   }
-};
-
-// 添加节点处理函数
-const handleAddNode = (position) => {
-  console.log('添加指标节点:', position);
-  // 这里可以添加新增节点的逻辑
 };
 
 // 指标表单确认处理
@@ -345,24 +338,24 @@ const handleIndicatorConfirm = (formData) => {
     // 强制触发节点重新渲染
     setTimeout(() => {
       const updatedNode = graphStore.getNodeById?.(nodeId);
-      console.log('节点更新后的数据:', updatedNode);
-      console.log('graphStore 中的所有节点:', graphStore.nodes?.map(n => ({ id: n.id, label: n.data?.label })));
+      console.log('IndicatorDagEditor - 节点更新后的数据:', updatedNode);
+      console.log('IndicatorDagEditor - graphStore 中的所有节点:', graphStore.nodes?.map(n => ({ id: n.id, label: n.data?.label })));
       
       // 尝试直接通过X6 API更新节点数据，确保触发Vue组件重新渲染
       if (dagPageRef.value?.getGraph) {
         const graph = dagPageRef.value.getGraph();
         const x6Node = graph?.getCellById?.(nodeId);
         if (x6Node) {
-          console.log('找到 X6 节点，当前数据:', x6Node.getData());
-          console.log('即将更新为:', updateData.data);
+          console.log('IndicatorDagEditor - 找到 X6 节点，当前数据:', x6Node.getData());
+          console.log('IndicatorDagEditor - 即将更新为:', updateData.data);
           x6Node.setData(updateData.data);
-          console.log('X6 节点更新完成，新数据:', x6Node.getData());
+          console.log('IndicatorDagEditor - X6 节点更新完成，新数据:', x6Node.getData());
         } else {
-          console.error('在 X6 图中找不到节点:', nodeId);
-          console.log('X6 图中的所有节点:', graph?.getNodes()?.map(n => ({ id: n.id, data: n.getData() })));
+          console.error('IndicatorDagEditor - 在 X6 图中找不到节点:', nodeId);
+          console.log('IndicatorDagEditor - X6 图中的所有节点:', graph?.getNodes()?.map(n => ({ id: n.id, data: n.getData() })));
         }
       } else {
-        console.error('无法获取图实例');
+        console.error('IndicatorDagEditor - 无法获取图实例');
       }
       
       // 如果有DAG页面引用，尝试强制刷新
@@ -391,74 +384,15 @@ const handleIndicatorClose = () => {
   currentIndicatorData.value = {};
 };
 
-// 清理节点数据，移除 originalData
-const cleanNodeData = (nodeData) => {
-  if (!nodeData) return nodeData;
-  const cleaned = { ...nodeData };
-  if (cleaned.originalData) {
-    delete cleaned.originalData;
-  }
-  return cleaned;
-};
-
-// 主动获取保存数据的方法
-const handleGetSaveData = () => {
-  if (!dagPageRef.value) {
-    console.warn('DAGPage 组件引用不存在');
-    return;
-  }
-
-  try {
-    const graphData = dagPageRef.value.getSaveData();
-    if (graphData) {
-      console.log('获取到的完整图数据（与data.json格式一致）:', graphData);
-      
-      // 验证数据格式
-      const { nodes = [], edges = [] } = graphData;
-      console.log('节点数据格式验证:', nodes[0]);
-      console.log('边数据格式验证:', edges[0]);
-      
-      // 这里可以调用API保存数据
-      // await indicatorApi.saveIndicatorSystemStructure(systemId, graphData);
-      
-      return graphData;
-    }
-  } catch (error) {
-    console.error('获取图数据时出错:', error);
-  }
-};
 
 // 保存图数据处理（来自工具栏的保存事件）
 const handleSave = (graphData) => {
   console.log('接收到保存的图数据:', graphData);
   
-  // 这里可以调用API保存数据
-  // await indicatorApi.saveIndicatorSystemStructure(systemId, graphData);
-  
-  // 触发自定义事件或其他处理逻辑
-  // 例如：更新父组件状态、显示保存成功消息等
+  // 触发外部事件
+  emit('save', graphData);
 };
 
-// 新增功能测试函数
-const toggleSidebar = () => {
-  showSidebar.value = !showSidebar.value;
-  console.log('侧边栏状态切换:', showSidebar.value ? '显示' : '隐藏');
-};
-
-const toggleToolbar = () => {
-  showToolbar.value = !showToolbar.value;
-  console.log('工具栏状态切换:', showToolbar.value ? '显示' : '隐藏');
-};
-
-const toggleReadonly = () => {
-  readonly.value = !readonly.value;
-  console.log('模式切换:', readonly.value ? '只读模式' : '编辑模式');
-};
-
-const toggleOperatorsDataMode = () => {
-  useStaticOperators.value = !useStaticOperators.value;
-  console.log('算子数据模式切换:', useStaticOperators.value ? '静态数据' : '异步数据');
-};
 
 // 加载算子数据 - 支持Promise和静态数据两种方式
 const loadOperatorsData = async () => {
@@ -466,7 +400,6 @@ const loadOperatorsData = async () => {
     operatorsLoading.value = true;
     
     // 模拟异步加载算子数据
-    // 实际使用时可以调用API: const response = await indicatorApi.getOperators();
     await new Promise(resolve => setTimeout(resolve, 1000)); // 模拟网络延迟
     
     // 这里可以从API获取更丰富的算子数据
@@ -503,39 +436,72 @@ const loadOperatorsData = async () => {
   }
 };
 
-// 加载指标体系结构数据
-const loadIndicatorSystemData = async () => {
+// 暴露方法给外部使用
+const getSaveData = () => {
+  if (!dagPageRef.value) {
+    console.warn('DAGPage 组件引用不存在');
+    return;
+  }
+
   try {
-    // 模拟从路由参数获取systemId，实际使用时从路由参数获取
-    const systemId = '1663477489012345678'; // 使用data.json中的根节点ID作为系统ID
-    
-    // 调用API获取数据
-    const response = await indicatorApi.getIndicatorSystemStructure(systemId);
-    
-    // 返回数据，这里直接返回mock数据的格式
-    return response.data || response;
-    
+    const graphData = dagPageRef.value.getSaveData();
+    if (graphData) {
+      console.log('获取到的完整图数据（与data.json格式一致）:', graphData);
+      
+      // 处理数据，移除指定字段中的 '-' 字符
+      const processedGraphData = {
+        ...graphData,
+        nodes: graphData.nodes?.map(node => ({
+          ...node,
+          id: node.id?.replace(/-/g, '') || node.id,
+          properties: {
+            ...node.properties,
+            content: {
+              ...node.properties?.content,
+              id: node.properties?.content?.id?.replace(/-/g, '') || node.properties?.content?.id
+            },
+            parentNodeId: node.properties?.parentNodeId?.replace(/-/g, '') || node.properties?.parentNodeId
+          }
+        })) || [],
+        edges: graphData.edges?.map(edge => ({
+          ...edge,
+          id: edge.id?.replace(/-/g, '') || edge.id,
+          sourceNodeId: edge.sourceNodeId?.replace(/-/g, '') || edge.sourceNodeId,
+          targetNodeId: edge.targetNodeId?.replace(/-/g, '') || edge.targetNodeId
+        })) || []
+      };
+      
+      // 验证数据格式
+      const { nodes = [], edges = [] } = processedGraphData;
+      console.log('节点数据格式验证:', nodes[0]);
+      console.log('边数据格式验证:', edges[0]);
+      
+      return processedGraphData;
+    }
   } catch (error) {
-    console.error('加载指标体系数据失败:', error);
-    // 返回空数据
-    return { nodes: [], edges: [] };
+    console.error('获取图数据时出错:', error);
   }
 };
 
-// 初始化数据
+const getGraph = () => {
+  return dagPageRef.value?.getGraph?.();
+};
+
+// 暴露方法
+defineExpose({
+  getSaveData,
+  getGraph,
+  dagPageRef
+});
+
+// 初始化
 onMounted(async () => {
-  console.log('初始化自定义菜单处理器');
-  
-  // 注意：现在 operators 和 initial-graph-data 都支持 Promise 方式
-  // DAG 组件会自动处理这些异步数据的加载
+  console.log('IndicatorDagEditor 初始化完成');
 });
 </script>
 
-<style>
-.xflow-context-menu .menu-item {
-  color:  #000 !important;
-}
-.xflow-dag-container {
+<style scoped>
+.indicator-dag-editor {
   width: 100%;
   height: 100%;
   min-height: 600px;
@@ -545,21 +511,6 @@ onMounted(async () => {
   flex-direction: column;
 }
 
-.dag-actions {
-  padding: 12px 16px;
-  background-color: #f5f7fa;
-  border-bottom: 1px solid #e4e7ed;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.dag-actions .el-divider--vertical {
-  height: 24px;
-  margin: 0 8px;
-}
 
 .dag-content {
   flex: 1;
@@ -583,5 +534,9 @@ onMounted(async () => {
 
 :deep(.graph) {
   height: calc(100% - 42px);
+}
+
+.xflow-context-menu .menu-item {
+  color: #000 !important;
 }
 </style>

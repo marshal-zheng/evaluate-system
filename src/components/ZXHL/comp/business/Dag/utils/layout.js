@@ -1,6 +1,6 @@
 // 简单的 dagre 风格布局实现，避免 @antv/layout 的兼容性问题
 // direction: 'TB' | 'LR' (只支持竖向和横向)
-export async function dagreLayout(graph, direction = 'TB', ranksep = 80, nodesep = 50) {
+export async function dagreLayout(graph, direction = 'TB', ranksep = 120, nodesep = 60) {
   if (!graph) return;
   const g = graph?.value ?? graph;
   if (!g) return;
@@ -96,8 +96,18 @@ export async function dagreLayout(graph, direction = 'TB', ranksep = 80, nodesep
 
   const routerArgs =
   direction === 'LR'
-    ? { startDirections: ['right'], endDirections: ['left'] }
-    : { startDirections: ['bottom'], endDirections: ['top'] };
+    ? { 
+        startDirections: ['right'], 
+        endDirections: ['left'],
+        padding: 20, // 进一步增加内边距
+        step: 30     // 增加步长，让转折更明显
+      }
+    : { 
+        startDirections: ['bottom'], 
+        endDirections: ['top'],
+        padding: 20, // 进一步增加内边距
+        step: 30     // 增加步长，让转折更明显
+      };
   
   // 智能边重绑：优先保持现有连接，必要时重绑到合适端口
   edges.forEach((edge) => {

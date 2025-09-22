@@ -137,6 +137,26 @@ const handleEdgeConnected = async ({ edge }) => {
     const targetId = edge.getTargetCellId?.();
     if (sourceId) updateNodeTypeAndLevel(g, sourceId);
     if (targetId) updateNodeTypeAndLevel(g, targetId);
+    
+    // 修复bug: 为目标节点设置parentNodeId
+    if (targetId) {
+      const targetNode = g.getCellById(targetId);
+      if (targetNode) {
+        const parentId = getParentNodeId(g, targetId);
+        if (parentId) {
+          const currentData = targetNode.getData() || {};
+          const properties = currentData.properties || {};
+          targetNode.setData({
+            ...currentData,
+            properties: {
+              ...properties,
+              parentNodeId: parentId
+            }
+          });
+          console.log(`[DagConnect] 设置目标节点 ${targetId} 的 parentNodeId: ${parentId}`);
+        }
+      }
+    }
   } catch (e) {
     console.warn('Failed to update node types:', e);
   }
@@ -158,6 +178,24 @@ const handleEdgeRemoved = ({ edge }) => {
     // 更新相关节点的类型和层级
     if (sourceId) updateNodeTypeAndLevel(g, sourceId);
     if (targetId) updateNodeTypeAndLevel(g, targetId);
+    
+    // 修复bug: 更新目标节点的parentNodeId
+    if (targetId) {
+      const targetNode = g.getCellById(targetId);
+      if (targetNode) {
+        const newParentId = getParentNodeId(g, targetId);
+        const currentData = targetNode.getData() || {};
+        const properties = currentData.properties || {};
+        targetNode.setData({
+          ...currentData,
+          properties: {
+            ...properties,
+            parentNodeId: newParentId || null
+          }
+        });
+        console.log(`[DagConnect] 更新目标节点 ${targetId} 的 parentNodeId: ${newParentId || 'null'}`);
+      }
+    }
     
   } catch (e) {
     console.warn('Edge removed handling error:', e);

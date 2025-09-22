@@ -1,7 +1,7 @@
 <template></template>
 
 <script setup>
-import { onMounted, watch } from 'vue';
+import { onMounted, watch, nextTick } from 'vue';
 import { useGraphInstance } from '../../ZxFlow/composables/useGraphInstance';
 import { useGraphStore } from '../../ZxFlow/composables/useGraphStore';
 import { dagreLayout } from '../utils/layout.js';
@@ -37,7 +37,9 @@ registerDagShapes();
 
 // 将数据转换为DAG画布格式
 const convertToDAGFormat = (data) => {
+  console.log('DagInitData - 转换数据:', data);
   if (!data || !data.nodes || !data.edges) {
+    console.log('DagInitData - 数据为空或格式不正确');
     return { nodes: [], edges: [] };
   }
 
@@ -127,18 +129,36 @@ const loadAndSetData = async (dataSource) => {
   try {
     let data;
     
+    console.log('DagInitData - 开始加载数据:', dataSource);
+    console.log('DagInitData - 数据源类型:', typeof dataSource);
+    
     // 如果是函数，调用函数获取数据
     if (typeof dataSource === 'function') {
+      console.log('DagInitData - 调用函数获取数据');
       data = await dataSource();
     }
     // 如果是Promise，等待解析
     else if (dataSource && typeof dataSource.then === 'function') {
+      console.log('DagInitData - 等待Promise解析');
       data = await dataSource;
     } else {
+      console.log('DagInitData - 直接使用数据');
       data = dataSource;
     }
     
-    if (!data) return;
+    console.log('DagInitData - 解析后的数据:', data);
+    console.log('DagInitData - 节点数量:', data?.nodes?.length);
+    console.log('DagInitData - 边数量:', data?.edges?.length);
+    
+    if (!data) {
+      console.log('DagInitData - 数据为空，退出');
+      return;
+    }
+    
+    if (!data.nodes || !Array.isArray(data.nodes)) {
+      console.error('DagInitData - 数据格式错误，nodes不是数组:', data);
+      return;
+    }
     
     // 清空现有数据 - 使用正确的方法
     const allNodes = graphStore.nodes.map(node => node.id);
@@ -154,32 +174,59 @@ const loadAndSetData = async (dataSource) => {
     // 转换数据格式
     const { nodes, edges } = convertToDAGFormat(data);
     
+    console.log('DagInitData - 转换后的节点:', nodes);
+    console.log('DagInitData - 转换后的边:', edges);
+    console.log('DagInitData - 当前图实例:', graph?.value);
+    
     // 添加节点和边
     if (nodes.length > 0) {
+      console.log('DagInitData - 添加节点到store');
       graphStore.addNodes(nodes);
+      console.log('DagInitData - store中的节点数量:', graphStore.nodes.length);
     }
     
     if (edges.length > 0) {
+      console.log('DagInitData - 添加边到store');
       graphStore.addEdges(edges);
+      console.log('DagInitData - store中的边数量:', graphStore.edges.length);
     }
     
-    // 自动布局
-    if (props.autoLayout && nodes.length > 0) {
-      setTimeout(async () => {
+    // 等待图实例准备好，然后进行布局
+    const waitForGraphAndLayout = async () => {
+      let attempts = 0;
+      const maxAttempts = 20; // 最多等待2秒
+      
+      while (attempts < maxAttempts) {
         const g = graph?.value;
-        if (!g) return;
+        console.log(`DagInitData - 等待图实例，尝试 ${attempts + 1}/${maxAttempts}:`, !!g);
         
-        // 先让节点渲染完成，再进行布局
-        await new Promise(resolve => setTimeout(resolve, 200));
-        await dagreLayout(g, props.layoutDirection, 100, 80); // 设置合适的间距
-        g.centerContent();
-        // 通知父级刷新小地图
-        emit('data-updated');
-      }, 300);
-    } else {
-      // 非自动布局场景也通知父级（例如手动布局或仅增删节点）
+        if (g) {
+          console.log('DagInitData - 图实例已准备好，开始布局');
+          
+          if (props.autoLayout && nodes.length > 0) {
+            // 先让节点渲染完成，再进行布局
+            await new Promise(resolve => setTimeout(resolve, 200));
+            await dagreLayout(g, props.layoutDirection, 100, 80);
+            g.centerContent();
+            console.log('DagInitData - 自动布局完成');
+          }
+          
+          // 通知父级刷新小地图
+          emit('data-updated');
+          return;
+        }
+        
+        attempts++;
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+      
+      console.error('DagInitData - 等待图实例超时');
+      // 即使没有图实例，也通知父级
       emit('data-updated');
-    }
+    };
+    
+    // 启动等待和布局流程
+    waitForGraphAndLayout();
     
   } catch (error) {
     console.error('加载DAG数据失败:', error);
@@ -188,14 +235,25 @@ const loadAndSetData = async (dataSource) => {
 
 // 监听初始数据变化
 watch(() => props.initialData, (newData) => {
+  console.log('DagInitData - watch 触发，新数据:', newData);
+  console.log('DagInitData - 数据类型:', typeof newData);
   if (newData) {
-    loadAndSetData(newData);
+    // 延迟执行，确保图实例已经准备好
+    setTimeout(() => {
+      loadAndSetData(newData);
+    }, 100);
   }
-}, { immediate: true });
+}, { immediate: false, deep: true }); // 改为 false，避免在图实例准备前执行
 
 onMounted(async () => {
+  console.log('DagInitData - onMounted 触发');
+  
+  // 等待足够的时间确保 XFlowGraph 完全初始化
+  await new Promise(resolve => setTimeout(resolve, 500));
+  
   // 如果有初始数据，加载它
   if (props.initialData) {
+    console.log('DagInitData - onMounted 开始加载初始数据');
     await loadAndSetData(props.initialData);
   }
 });

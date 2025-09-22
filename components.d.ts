@@ -67,6 +67,7 @@ declare module 'vue' {
     Example: typeof import('./src/components/ZXHL/comp/business/DashboardGrid/PanelComponent/PanelHeader/example.vue')['default']
     FileList: typeof import('./src/components/ZXHL/comp/pure/ZxUpload/fileList.vue')['default']
     Header: typeof import('./src/components/layout/Header.vue')['default']
+    IndicatorDagEditor: typeof import('./src/components/ZXHL/pages/indicatorSystem/designManagement/IndicatorDagEditor.vue')['default']
     IndicatorDetailFormDrawer: typeof import('./src/components/ZXHL/pages/indicatorSystem/designManagement/components/IndicatorDetailFormDrawer.vue')['default']
     IndicatorSystemFormDialog: typeof import('./src/components/ZXHL/pages/indicatorSystem/designManagement/components/IndicatorSystemFormDialog.vue')['default']
     IndicatorSystemSelector: typeof import('./src/components/ZXHL/comp/business/Selector/IndicatorSystemSelector.vue')['default']

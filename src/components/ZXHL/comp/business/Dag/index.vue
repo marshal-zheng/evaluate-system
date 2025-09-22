@@ -36,7 +36,7 @@
               :pannable="!readonly"
               :connection-options="readonly ? null : connectionOptions"
               :connection-edge-options="readonly ? null : connectionEdgeOptions"
-              :select-options="readonly ? { enabled: false } : { showEdgeSelectionBox: true }"
+              :select-options="readonly ? { enabled: false } : { showEdgeSelectionBox: true, showNodeSelectionBox: false }"
               :enable-context-menu="!readonly"
               :custom-menu-handler="readonly ? null : customMenuHandler"
               :fit-view="false"
@@ -66,7 +66,7 @@
                 color="#e6e6e6"
               />
               <!-- 小地图 -->
-              <XFlowMinimap 
+              <!-- <XFlowMinimap 
                 :key="minimapKey"
                 :width="200" 
                 :height="150" 
@@ -74,7 +74,7 @@
                 :padding="24"
                 :style="{ right: '24px', top: '24px' }"
                 class="dag-minimap"
-              />
+              /> -->
               <div class="dag-graph__control">
                 <DagGraphControl />
               </div>
@@ -104,12 +104,12 @@ const connectionEdgeOptions = {
   attrs: {
     line: {
       stroke: '#C2C8D5',
-      strokeWidth: 1,
+      strokeWidth: 5,
       targetMarker: null,
     },
   },
-  router: 'normal', // 使用直线路由，配合贝塞尔连接器
-  connector: 'smooth', // 贝塞尔曲线连接器
+  router: 'manhattan', // 使用直角路由，保证线条长度
+  connector: 'rounded', // 圆角连接器，与layout.js保持一致
 };
 
 const DAGPage = defineComponent({
@@ -412,7 +412,12 @@ const DAGPage = defineComponent({
       }
     };
 
-    expose({ getSaveData });
+    // 提供获取图实例的方法，供外部调用
+    const getGraph = () => {
+      return graphInstance.value;
+    };
+
+    expose({ getSaveData, getGraph });
 
     // 处理XFlowGraph的ready事件，确保standardInteractions正确初始化
     const onGraphReady = (graph, keyboardMgr, standardInteractions) => {
