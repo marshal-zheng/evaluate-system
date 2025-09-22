@@ -87,6 +87,49 @@
     </div>
 
     <div class="demo-section">
+      <h3>优化的 Popover 交互</h3>
+      <p style="color: #666; margin-bottom: 20px;">鼠标可以移动到 popover 内容区域进行复制等操作</p>
+      <div class="icon-row">
+        <ZxIcon 
+          icon="CopyDocument" 
+          :size="24" 
+          popover-title="可复制内容"
+          tooltip="悬停查看可复制的内容"
+        >
+          <template #popoverContent>
+            <div style="padding: 10px; max-width: 300px;">
+              <p><strong>API Key:</strong></p>
+              <code style="background: #f5f5f5; padding: 4px 8px; border-radius: 4px; display: block; margin: 8px 0; user-select: all;">
+                sk-1234567890abcdef1234567890abcdef
+              </code>
+              <p style="color: #666; font-size: 12px;">鼠标移动到此区域可以选择和复制内容</p>
+            </div>
+          </template>
+        </ZxIcon>
+        <ZxIcon 
+          icon="Document" 
+          :size="24" 
+          popover-title="持久化 Popover"
+          tooltip="点击查看持久化内容"
+          tooltip-trigger="click"
+          :popover-persistent="true"
+        >
+          <template #popoverContent>
+            <div style="padding: 15px; max-width: 250px;">
+              <p><strong>持久化模式</strong></p>
+              <p>这个 popover 需要点击外部区域才会关闭，方便进行复制操作。</p>
+              <div style="margin-top: 10px; padding: 8px; background: #f0f9ff; border-radius: 4px;">
+                <code style="user-select: all; font-size: 12px;">
+                  这段文字可以被选中和复制
+                </code>
+              </div>
+            </div>
+          </template>
+        </ZxIcon>
+      </div>
+    </div>
+
+    <div class="demo-section">
       <h3>禁用状态</h3>
       <div class="icon-row">
         <ZxIcon icon="Edit" :size="24" disabled tooltip="当前不可编辑" />

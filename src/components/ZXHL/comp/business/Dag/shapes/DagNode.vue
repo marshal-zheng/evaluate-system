@@ -1,38 +1,55 @@
 <template>
-  <div class="dag-node-root">
-    <div class="zx-dag-node" :class="[nodeTypeClass, { 'has-model': hasModel, 'no-model': !hasModel }]">
-      <!-- 左侧图标指示器，非叶子节点不显示图标 -->
-      <div class="zx-dag-node__indicator">
-        <ZxIcon 
-          v-if="isLeafNode"
-          :icon="modelIcon" 
-          :size="16" 
-          :color="modelIconColor"
-          :popover-title="modelPopoverTitle"
-          :tooltip="modelTooltip"
-          tooltip-placement="left"
-          :tooltip-offset="20"
-        >
-          <!-- Popover内容插槽 -->
-          <template v-if="hasModel && modelData" #popoverContent>
-            <div class="model-info">
-              <div class="model-info__item">
-                <strong>模型名称：</strong>{{ modelData.name }}
-              </div>
-              <div class="model-info__item">
-                <strong>描述：</strong>{{ modelData.description }}
-              </div>
-              <div class="model-info__item">
-                <strong>模型ID：</strong>{{ modelData.id }}
-              </div>
+  <div class="zx-dag-node" :class="[nodeTypeClass, { 'has-model': hasModel, 'no-model': !hasModel }]">
+    <!-- 左侧状态指示器 -->
+    <div class="zx-dag-node__indicator">
+      <ZxIcon 
+        v-if="isLeafNode"
+        :icon="modelIcon" 
+        :size="14" 
+        :color="modelIconColor"
+        :popover-title="modelPopoverTitle"
+        :tooltip="modelTooltip"
+        tooltip-placement="left"
+        :tooltip-offset="12"
+        :popover-width="400"
+      >
+        <!-- 紧凑型模型信息展示 -->
+        <template v-if="hasModel && modelData" #popoverContent>
+          <div class="model-info">
+            <div class="info-row">
+              <span class="label">名称</span>
+              <span class="value">{{ modelDisplayName }}</span>
             </div>
-          </template>
-        </ZxIcon>
-      </div>
-      
-      <!-- <el-icon class="zx-dag-node__logo"><component :is="icons.logo" /></el-icon> -->
-      <div class="zx-dag-node__label">{{ label }}</div>
+            <div v-if="modelData.oprModelDesc || modelData.description" class="info-row">
+              <span class="label">描述</span>
+              <span class="value">{{ modelData.oprModelDesc || modelData.description }}</span>
+            </div>
+            <div class="info-row">
+              <span class="label">ID</span>
+              <span class="value code">{{ modelData.id }}</span>
+            </div>
+            <div v-if="modelData.oprModelPath" class="info-row">
+              <span class="label">路径</span>
+              <span class="value code">{{ modelData.oprModelPath }}</span>
+            </div>
+            <div v-if="modelData.index !== undefined" class="info-row">
+              <span class="label">顺序</span>
+              <span class="value">{{ modelData.index }}</span>
+            </div>
+            <div class="info-row">
+              <span class="label">状态</span>
+              <span class="value" :class="modelStatusClass">{{ modelStatusText }}</span>
+            </div>
+            <div v-if="modelData.createTime" class="info-row">
+              <span class="label">创建</span>
+              <span class="value">{{ formatTime(modelData.createTime) }}</span>
+            </div>
+          </div>
+        </template>
+      </ZxIcon>
     </div>
+    
+    <div class="zx-dag-node__label">{{ label }}</div>
   </div>
 </template>
 
@@ -141,6 +158,50 @@ const modelTooltip = computed(() => {
   return hasModel.value ? '点击查看计算模型详情' : '该节点尚未绑定计算模型';
 });
 
+// 新增的模型信息展示相关计算属性
+const modelDisplayName = computed(() => {
+  return modelData.value.oprModelName || modelData.value.title || modelData.value.label || modelData.value.name || '未命名模型';
+});
+
+const modelStatusText = computed(() => {
+  const state = modelData.value.state;
+  if (state === null || state === undefined) return '未知状态';
+  if (state === 0) return '未启用';
+  if (state === 1) return '已启用';
+  return `状态${state}`;
+});
+
+const modelStatusClass = computed(() => {
+  const state = modelData.value.state;
+  if (state === 1) return 'status-active';
+  if (state === 0) return 'status-inactive';
+  return 'status-unknown';
+});
+
+// 时间格式化方法
+const formatTime = (timeStr) => {
+  if (!timeStr) return '';
+  try {
+    // 如果是标准时间格式，直接返回
+    if (timeStr.includes('-') && timeStr.includes(':')) {
+      return timeStr;
+    }
+    // 如果是时间戳，转换为可读格式
+    const date = new Date(timeStr);
+    if (isNaN(date.getTime())) return timeStr;
+    return date.toLocaleString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+  } catch (error) {
+    return timeStr;
+  }
+};
+
 // 监听节点数据变化
 watch(
   () => props.node,
@@ -164,116 +225,105 @@ if (props.node) {
 </script>
 
 <style lang="scss">
-
 .dag-page foreignObject > body {
   margin: 0;
   min-height: 100%;
   display: block;
   place-items: initial;
 }
-.z x-root {
-  width: 100%;
-  height: 100%;
-  box-sizing: border-box;
-}
 
 .zx-dag-node {
   display: flex;
-  justify-content: center;
   align-items: center;
   width: 100%;
-  height: 36px; /* 明确设置高度 */
-  min-height: 36px;
-  max-height: 36px;
-  align-items: center;
-  border: 1px solid #c2c8d5;
+  height: 32px;
+  border: 1px solid #d9d9d9;
   border-radius: 4px;
-  background-color: #fff;
-  box-shadow: 0 2px 5px 1px rgb(0 0 0 / 6%);
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   cursor: default;
   box-sizing: border-box;
-  position: relative;
-
-  // 所有节点保持正常的白色背景
-  &.no-model,
-  &.has-model {
-    background-color: #fff;
-    
-    .zx-dag-node__label {
-      color: #666;
-    }
-  }
 
   &__indicator {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
+    width: 20px;
     height: 100%;
     flex-shrink: 0;
     border-right: 1px solid #e8e8e8;
   }
 
-  // 叶子节点的 indicator 样式
   &.leaf-node &__indicator {
-    background-color: rgba(95, 149, 255, 0.1);
-    
-    // 有模型时
-    &.has-model {
-      background-color: rgba(64, 158, 255, 0.1);
-    }
-    
-    // 无模型时
-    &.no-model {
-      background-color: rgba(191, 191, 191, 0.1);
-    }
+    background: rgba(64, 158, 255, 0.1);
   }
 
-  // 非叶子节点的 indicator 样式 - 使用蓝色背景
   &.non-leaf-node &__indicator {
-    background-color: #409eff;
-  }
-
-  &__logo {
-    width: 20px;
-    height: 20px;
-    flex-shrink: 0;
-    margin-left: 8px;
+    background: #409eff;
   }
 
   &__label {
-    width: calc(100% - 24px - 1px); /* 减去指示器宽度24px和边框1px */
+    flex: 1;
     text-align: center;
-    padding-right: 8px;
-    color: #666;
-    font-size: 14px;
-    line-height: 14px;
-    font-weight: bold;
-    vertical-align: middle;
-    box-sizing: border-box;
+    padding: 0 8px;
+    color: #606266;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
-
-
-
 }
 
-// Popover 内容样式
+// 紧凑型模型信息展示
 .model-info {
-  max-width: 280px;
-  padding: 4px 0;
+  padding: 12px;
+  min-width: 280px;
+  max-width: 380px;
   
-  &__item {
+  .info-row {
+    display: flex;
     margin-bottom: 8px;
-    font-size: 13px;
-    line-height: 1.4;
     
     &:last-child {
       margin-bottom: 0;
     }
     
-    strong {
-      color: #333;
-      font-weight: 500;
+    .label {
+      width: 60px;
+      color: #909399;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+    
+    .value {
+      flex: 1;
+      color: #606266;
+      font-size: 12px;
+      word-break: break-all;
+      
+      &.code {
+        font-family: monospace;
+        background: #f5f7fa;
+        padding: 2px 4px;
+        border-radius: 2px;
+        font-size: 11px;
+      }
+      
+      &.status-active {
+        color: #67c23a;
+        font-weight: 500;
+      }
+      
+      &.status-inactive {
+        color: #e6a23c;
+        font-weight: 500;
+      }
+      
+      &.status-unknown {
+        color: #f56c6c;
+        font-weight: 500;
+      }
     }
   }
 }

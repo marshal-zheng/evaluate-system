@@ -416,6 +416,7 @@ export default {
 | popoverTitle | Popover 标题（有标题时显示为 popover） | String | - | 否 |
 | tooltipTrigger | Tooltip/Popover 触发方式 | String | hover | 否 |
 | tooltipPlacement | Tooltip/Popover 位置 | String | top | 否 |
+| popoverPersistent | Popover 是否持久化显示（便于复制内容） | Boolean | false | 否 |
 | disabled | 是否禁用 | Boolean | false | 否 |
 
 ### 图标类型说明
@@ -461,6 +462,36 @@ export default {
       <div>
         <p>这里是详细的设置说明</p>
         <el-button size="small">确认</el-button>
+      </div>
+    </template>
+  </ZxIcon>
+  
+  <!-- 可复制内容的 Popover -->
+  <ZxIcon 
+    icon="CopyDocument" 
+    popover-title="可复制内容"
+    tooltip="悬停查看可复制的内容"
+  >
+    <template #popoverContent>
+      <div style="padding: 10px;">
+        <p><strong>API Key:</strong></p>
+        <code style="user-select: all;">sk-1234567890abcdef</code>
+        <p style="color: #666; font-size: 12px;">鼠标可以移动到此区域进行复制</p>
+      </div>
+    </template>
+  </ZxIcon>
+  
+  <!-- 持久化 Popover -->
+  <ZxIcon 
+    icon="Document" 
+    popover-title="持久化内容"
+    tooltip-trigger="click"
+    :popover-persistent="true"
+  >
+    <template #popoverContent>
+      <div>
+        <p>这个 popover 需要点击外部区域才会关闭</p>
+        <code style="user-select: all;">便于进行复制操作</code>
       </div>
     </template>
   </ZxIcon>

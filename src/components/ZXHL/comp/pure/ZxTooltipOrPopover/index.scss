@@ -115,3 +115,23 @@
   word-wrap: break-word;
   word-break: break-all;
 }
+
+// 增强交互体验的样式
+.zx-tooltip,
+.zx-popover {
+  // 确保tooltip/popover在鼠标移动过程中不会消失
+  .el-tooltip__popper,
+  .el-popover {
+    // 添加一个小的缓冲区域，减少意外关闭
+    &::before {
+      content: '';
+      position: absolute;
+      top: -5px;
+      left: -5px;
+      right: -5px;
+      bottom: -5px;
+      z-index: -1;
+      pointer-events: auto;
+    }
+  }
+}

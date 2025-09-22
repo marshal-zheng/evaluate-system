@@ -45,6 +45,29 @@ const props = defineProps({
   offset: {
     type: Number,
     default: 12
+  },
+  hideAfter: {
+    type: Number,
+    default: 300
+  },
+  showAfter: {
+    type: Number,
+    default: 150
+  },
+  // 仅在 Popover 模式下生效：设置弹层宽度（对齐 ElPopover.width）
+  width: {
+    type: [Number, String],
+    default: undefined
+  },
+  // 是否允许鼠标进入popover内容区域（用于复制内容等操作）
+  enterable: {
+    type: Boolean,
+    default: true
+  },
+  // 是否持久化显示（点击外部区域才关闭）
+  persistent: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -79,6 +102,12 @@ const finalProps = computed(() => {
     content: props.content,
     title: props.title,
     offset: props.offset,
+    hideAfter: props.hideAfter,
+    showAfter: props.showAfter,
+    // 只有 Popover 时才把 width 透传给 ElPopover
+    width: isPopover.value ? props.width : undefined,
+    enterable: props.enterable,
+    persistent: props.persistent,
     ...restAttrs
   }
 })
