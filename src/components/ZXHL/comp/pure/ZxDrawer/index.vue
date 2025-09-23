@@ -134,7 +134,7 @@
 </template>
 
 <script setup>
-import { ref, watch, nextTick, computed } from 'vue'
+import { ref, watch, nextTick, computed, onBeforeUnmount } from 'vue'
 import ZxIcon from '@/components/ZXHL/comp/pure/ZxIcon'
 import ZxButton from '@/components/ZXHL/comp/pure/ZxButton'
 
@@ -318,6 +318,7 @@ const resizing = ref(false)
 const drawerWidth = ref(props.width)
 const isToggling = ref(false) // 防止快速切换时的状态混乱
 const confirmLoading = ref(false)
+let keydownListenerAttached = false
 
 // 表单快照
 const initialFormSnapshot = ref(null)
@@ -444,14 +445,62 @@ watch(
   (val, oldVal) => {
     emit('update:modelValue', val)
     if (val) {
+      addKeydownListener()
       snapshotFormModel()
     }
     if (!val && oldVal) {
       nextTick(() => resetForm())
       confirmLoading.value = false
+      removeKeydownListener()
     }
   }
 )
+
+const handleKeydown = (event) => {
+  if (!visible.value) return
+  if (event.key !== 'Enter') return
+  if (event.shiftKey || event.altKey || event.metaKey || event.ctrlKey || event.repeat) return
+  if (event.defaultPrevented) return
+
+  const target = event.target
+  const tagName = target?.tagName ? String(target.tagName).toLowerCase() : ''
+
+  if (target?.isContentEditable) return
+  if (tagName === 'textarea') return
+  if (tagName === 'button') return
+  if (tagName === 'a') return
+  if (tagName === 'input') {
+    const type = target.type ? String(target.type).toLowerCase() : ''
+    if (['button', 'submit', 'reset', 'checkbox', 'radio', 'file'].includes(type)) {
+      return
+    }
+  }
+  if (typeof target?.closest === 'function') {
+    const blockNode = target.closest('[data-stop-enter-confirm]')
+    if (blockNode) return
+  }
+
+  if (props.okDisabled || props.okLoading || confirmLoading.value) {
+    return
+  }
+
+  event.preventDefault()
+  handleOk()
+}
+
+const addKeydownListener = () => {
+  if (keydownListenerAttached) return
+  if (typeof window === 'undefined') return
+  document.addEventListener('keydown', handleKeydown)
+  keydownListenerAttached = true
+}
+
+const removeKeydownListener = () => {
+  if (!keydownListenerAttached) return
+  if (typeof window === 'undefined') return
+  document.removeEventListener('keydown', handleKeydown)
+  keydownListenerAttached = false
+}
 
 // 事件处理函数
 const handleContinue = () => {
@@ -605,6 +654,10 @@ const handleBeforeClose = (done) => {
     done()
   }
 }
+
+onBeforeUnmount(() => {
+  removeKeydownListener()
+})
 
 watch(
   () => props.formModel,

@@ -32,7 +32,7 @@
               :class="{ 'is-loading': graphLoading }"
             ></div>
             
-            <XFlowGraph
+              <XFlowGraph
               :pannable="!readonly"
               :connection-options="readonly ? null : connectionOptions"
               :connection-edge-options="readonly ? null : connectionEdgeOptions"
@@ -42,6 +42,8 @@
               :fit-view="false"
               :zoom-options="zoomOptions"
               @ready="onGraphReady"
+              @node-click="onNodeClick"
+              @node-dblclick="onNodeDblclick"
             >
               <XFlowState :edge-animation-duration="30" />
               <XFlowClipboard />
@@ -225,7 +227,7 @@ const DAGPage = defineComponent({
     DagInitData,
     DagToolbar,
   },
-  emits: ['edit-node', 'delete-node', 'copy-node', 'add-node', 'save', 'ready'],
+  emits: ['edit-node', 'delete-node', 'copy-node', 'add-node', 'save', 'ready', 'node-click', 'node-dblclick'],
   setup(props, { emit, expose }) {
     const currentLayout = ref(props.layout === 'vertical' ? 'vertical' : 'horizontal');
     const minimapKey = ref(0);
@@ -344,6 +346,17 @@ const DAGPage = defineComponent({
       emit('save', graphData);
     };
 
+    // 节点单击事件透传
+    const onNodeClick = ({ node, event, type }) => {
+      emit('node-click', { node, event, type });
+    };
+
+    // 节点双击事件透传
+    const onNodeDblclick = ({ node, event, type }) => {
+      console.log(1111)
+      emit('node-dblclick', { node, event, type });
+    };
+
     // 暴露方法供外部调用
     const getSaveData = () => {
       // 这里直接调用 DagToolbar 的保存逻辑
@@ -459,6 +472,8 @@ const DAGPage = defineComponent({
       onGraphDataUpdated,
       onGraphReady,
       onSave,
+      onNodeClick,
+      onNodeDblclick,
       // 新增的处理器相关
       customMenuHandler,
       // 对齐线相关

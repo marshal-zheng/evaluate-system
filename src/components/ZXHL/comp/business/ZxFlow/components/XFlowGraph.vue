@@ -218,7 +218,10 @@ const props = defineProps({
 
 const containerRef = ref(null);
 const graph = useGraphInstance();
-const emit = defineEmits(['ready']);
+const emit = defineEmits(['ready', 'node-click', 'node-dblclick']);
+
+// 缓存事件处理器，便于在重新初始化或销毁时解绑
+let nodeClickHandler = null;
 
 // 键盘管理器
 const {
@@ -432,6 +435,22 @@ const initGraph = async () => {
     standardInteractions.setupStandardEvents(g);
   }
   
+  // 节点单击事件转发（统一由 XFlowGraph 对外抛出）
+  if (nodeClickHandler) {
+    try {
+      g.off('node:click', nodeClickHandler);
+    } catch (e) {}
+  }
+  nodeClickHandler = ({ node, e }) => {
+    if (!node) return;
+    emit('node-click', { node, event: e, type: 'node' });
+    const detail = e?.detail;
+    if (detail === 2) {
+      emit('node-dblclick', { node, event: e, type: 'node' });
+    }
+  };
+  g.on('node:click', nodeClickHandler);
+
   // 向外通知已就绪，同时传递键盘管理器和标准交互
   emit('ready', g, keyboardMgr, standardInteractions);
 
@@ -440,10 +459,17 @@ const initGraph = async () => {
 
 // 销毁 Graph
 const destroyGraph = () => {
-  if (graph && graph.value) {
-    graph.value.dispose();
-    graph.value = null;
-  }
+  if (!graph || !graph.value) return;
+
+  try {
+    if (nodeClickHandler) {
+      graph.value.off('node:click', nodeClickHandler);
+    }
+  } catch (e) {}
+
+  graph.value.dispose();
+  graph.value = null;
+  nodeClickHandler = null;
 };
 
 // 统一应用交互策略（只读/锁定/默认）

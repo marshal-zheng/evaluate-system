@@ -16,6 +16,7 @@
         :show-toolbar="isShowToolbar"
         @edit-node="handleEditNode"
         @save="handleSave"
+        @node-dblclick="handleNodeDblclick"
       />
     </div>
     
@@ -33,7 +34,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { DAGPage } from '@/components/ZXHL/comp/business/Dag/index.vue'
 import IndicatorDetailFormDrawer from './components/IndicatorDetailFormDrawer.vue'
 import { useMessageBox } from '@/composables/useElementPlus'
@@ -377,6 +378,10 @@ const handleIndicatorCancel = () => {
   showIndicatorDrawer.value = false;
 };
 
+const handleNodeDblclick = () => {
+  showIndicatorDrawer.value = true;
+};
+
 // 指标表单关闭处理
 const handleIndicatorClose = () => {
   console.log('指标表单关闭');
@@ -436,6 +441,17 @@ const loadOperatorsData = async () => {
   }
 };
 
+// 图实例引用
+const graphInstance = ref(null);
+
+// 处理来自 DAGPage 的节点单击事件（由 XFlowGraph 转发）
+const handleNodeClick = ({ node, event }) => {
+  console.log('node', node);
+  if (node) {
+    handleEditNode(node);
+  }
+};
+
 // 暴露方法给外部使用
 const getSaveData = () => {
   if (!dagPageRef.value) {
@@ -458,7 +474,7 @@ const getSaveData = () => {
             ...node.properties,
             content: {
               ...node.properties?.content,
-              id: node.properties?.content?.id?.replace(/-/g, '') || node.properties?.content?.id
+              id: node.properties?.content?.id
             },
             parentNodeId: node.properties?.parentNodeId?.replace(/-/g, '') || node.properties?.parentNodeId
           }
