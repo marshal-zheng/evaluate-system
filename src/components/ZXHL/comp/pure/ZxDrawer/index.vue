@@ -15,14 +15,21 @@
       noContentPadding ? 'zx-drawer-no-content-padding' : '',
       noTitle ? 'zx-drawer-no-title' : '',
     ]"
-    :style="drawerStyle"
+    :style="drawerInlineStyle"
     :before-close="handleBeforeClose"
     @open="handleOpen"
     @close="handleClose"
   >
     <!-- 自定义标题栏 -->
     <template #header="{ close, titleId, titleClass }">
-      <div class="zx-drawer-header-container">
+      <div
+        ref="headerRef"
+        :class="[
+          'zx-drawer-header-container',
+          { 'zx-drawer-header-draggable': draggable && !fullScreenAPI.isFullScreen }
+        ]"
+        @mousedown="handleHeaderMousedown"
+      >
         <slot name="title">
           <div class="zx-drawer-title-container">
             <div class="zx-drawer-title-content">
@@ -134,7 +141,7 @@
 </template>
 
 <script setup>
-import { ref, watch, nextTick, computed, onBeforeUnmount } from 'vue'
+import { ref, watch, nextTick, computed, onBeforeUnmount, reactive } from 'vue'
 import ZxIcon from '@/components/ZXHL/comp/pure/ZxIcon'
 import ZxButton from '@/components/ZXHL/comp/pure/ZxButton'
 
@@ -297,8 +304,14 @@ const props = defineProps({
   handleBeforeCancel: {
     type: Function,
     default: null
+  },
+  draggable: {
+    type: Boolean,
+    default: true
   }
 })
+
+const draggable = computed(() => props.draggable !== false)
 
 // 定义事件
 const emit = defineEmits([
@@ -314,11 +327,24 @@ const emit = defineEmits([
 // 响应式数据
 const visible = ref(props.modelValue)
 const drawerRef = ref(null)
+const headerRef = ref(null)
 const resizing = ref(false)
 const drawerWidth = ref(props.width)
 const isToggling = ref(false) // 防止快速切换时的状态混乱
 const confirmLoading = ref(false)
 let keydownListenerAttached = false
+const dragOffset = ref({ x: 0, y: 0 })
+let dragRafId = null
+let previousBodyUserSelect = ''
+let previousBodyCursor = ''
+const dragState = reactive({
+  active: false,
+  startX: 0,
+  startY: 0,
+  initialRect: null,
+  offsetX: 0,
+  offsetY: 0
+})
 
 // 表单快照
 const initialFormSnapshot = ref(null)
@@ -431,11 +457,41 @@ const computedDrawerSize = computed(() => {
   return fullScreenAPI.isFullScreen ? '100%' : toCssSize(drawerWidth.value)
 })
 
+const drawerInlineStyle = computed(() => {
+  const baseStyle = props.drawerStyle ? { ...props.drawerStyle } : {}
+  if (!draggable.value) {
+    return baseStyle
+  }
+
+  const { x, y } = dragOffset.value
+  if (x === 0 && y === 0) {
+    return baseStyle
+  }
+
+  const translate = `translate3d(${x}px, ${y}px, 0)`
+  baseStyle.transform = baseStyle.transform
+    ? `${baseStyle.transform} ${translate}`
+    : translate
+  baseStyle.willChange = baseStyle.willChange
+    ? `${baseStyle.willChange}, transform`
+    : 'transform'
+  return baseStyle
+})
+
 // 监听 modelValue 变化
 watch(
   () => props.modelValue,
   (val) => {
     visible.value = val
+  }
+)
+
+watch(
+  () => draggable.value,
+  (enabled) => {
+    if (enabled) return
+    stopHeaderDragging()
+    resetDragOffset()
   }
 )
 
@@ -449,8 +505,10 @@ watch(
       snapshotFormModel()
     }
     if (!val && oldVal) {
+      stopHeaderDragging()
       nextTick(() => resetForm())
       confirmLoading.value = false
+      resetDragOffset()
       removeKeydownListener()
     }
   }
@@ -500,6 +558,102 @@ const removeKeydownListener = () => {
   if (typeof window === 'undefined') return
   document.removeEventListener('keydown', handleKeydown)
   keydownListenerAttached = false
+}
+
+const resetDragOffset = () => {
+  if (dragOffset.value.x === 0 && dragOffset.value.y === 0) return
+  dragOffset.value = { x: 0, y: 0 }
+  dragState.offsetX = 0
+  dragState.offsetY = 0
+}
+
+const stopHeaderDragging = () => {
+  if (dragRafId !== null && typeof cancelAnimationFrame === 'function') {
+    cancelAnimationFrame(dragRafId)
+    dragRafId = null
+  }
+  if (!dragState.active) return
+  dragState.active = false
+  dragState.initialRect = null
+  document.removeEventListener('mousemove', handleHeaderMousemove)
+  document.removeEventListener('mouseup', stopHeaderDragging)
+  document.body.style.userSelect = previousBodyUserSelect
+  document.body.style.cursor = previousBodyCursor
+  previousBodyUserSelect = ''
+  previousBodyCursor = ''
+}
+
+const applyDragOffset = (x, y) => {
+  dragOffset.value = { x, y }
+  dragRafId = null
+}
+
+const handleHeaderMousemove = (event) => {
+  if (!dragState.active || !dragState.initialRect) return
+  event.preventDefault()
+
+  const dx = event.clientX - dragState.startX
+  const dy = event.clientY - dragState.startY
+  const { left, top, width, height } = dragState.initialRect
+
+  const maxLeft = Math.max(0, window.innerWidth - width)
+  const maxTop = Math.max(0, window.innerHeight - height)
+
+  const desiredLeft = left + dx
+  const desiredTop = top + dy
+
+  const clampedLeft = Math.min(Math.max(desiredLeft, 0), maxLeft)
+  const clampedTop = Math.min(Math.max(desiredTop, 0), maxTop)
+
+  const nextX = dragState.offsetX + (clampedLeft - left)
+  const nextY = dragState.offsetY + (clampedTop - top)
+
+  const schedule = () => applyDragOffset(nextX, nextY)
+  if (typeof requestAnimationFrame === 'function') {
+    if (dragRafId !== null && typeof cancelAnimationFrame === 'function') {
+      cancelAnimationFrame(dragRafId)
+    }
+    dragRafId = requestAnimationFrame(schedule)
+  } else {
+    schedule()
+    dragRafId = null
+  }
+}
+
+const handleHeaderMousedown = (event) => {
+  if (!draggable.value || fullScreenAPI.isFullScreen) return
+  if (event.button !== 0) return
+
+  const target = event.target
+  if (target?.isContentEditable) return
+  const tag = target?.tagName ? target.tagName.toLowerCase() : ''
+  if (['button', 'input', 'textarea', 'a', 'select', 'label'].includes(tag)) return
+  if (typeof target?.closest === 'function') {
+    if (target.closest('[data-drag-exclude]')) return
+    if (target.closest('.zx-drawer-right-operation')) return
+  }
+
+  stopHeaderDragging()
+
+  const rootEl = resolveDrawerRootEl()
+  const panelEl = rootEl?.querySelector?.('.el-drawer')
+  if (!panelEl) return
+
+  event.preventDefault()
+
+  dragState.active = true
+  dragState.startX = event.clientX
+  dragState.startY = event.clientY
+  dragState.initialRect = panelEl.getBoundingClientRect()
+  dragState.offsetX = dragOffset.value.x
+  dragState.offsetY = dragOffset.value.y
+
+  document.addEventListener('mousemove', handleHeaderMousemove, { passive: false })
+  document.addEventListener('mouseup', stopHeaderDragging)
+  previousBodyUserSelect = document.body.style.userSelect || ''
+  previousBodyCursor = document.body.style.cursor || ''
+  document.body.style.userSelect = 'none'
+  document.body.style.cursor = 'move'
 }
 
 // 事件处理函数
@@ -606,12 +760,18 @@ const handleFullScreenToggle = async (event) => {
   if (isToggling.value) {
     return
   }
+
+  stopHeaderDragging()
   
   isToggling.value = true
   
   try {
     // 切换全屏状态
     fullScreenAPI.toggleFullScreen()
+
+    if (fullScreenAPI.isFullScreen) {
+      resetDragOffset()
+    }
     
     // 使用 nextTick 确保DOM更新完成
     await nextTick()
@@ -657,6 +817,7 @@ const handleBeforeClose = (done) => {
 
 onBeforeUnmount(() => {
   removeKeydownListener()
+  stopHeaderDragging()
 })
 
 watch(

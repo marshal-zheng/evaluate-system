@@ -17,6 +17,12 @@
     background: var(--cmp-confirm-input-bg);
     border-bottom: 1px solid var(--cmp-confirm-input-border-light);
 
+    transition: background-color 0.2s ease, opacity 0.2s ease;
+  
+    &:hover {
+      background-color: var(--el-fill-color-light, rgba(0, 0, 0, 0.02));
+    }
+
     .el-dialog__title {
       font-size: 16px;
       font-weight: 600;

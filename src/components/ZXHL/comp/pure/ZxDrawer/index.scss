@@ -103,6 +103,25 @@
   padding-left: calc(var(--cmp-drawer-header-padding) + 15px);
 }
 
+.zx-drawer-header-draggable {
+  cursor: move;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+
+  .zx-drawer-right-operation,
+  .zx-drawer-right-operation *,
+  button,
+  a {
+    cursor: pointer;
+  }
+
+  [data-drag-exclude] {
+    cursor: auto;
+  }
+}
+
 // 无标题样式
 .zx-drawer-no-title {
   .el-drawer__header {

@@ -4,6 +4,23 @@
 // 导入变量定义
 @import './var.scss';
 
+// 全局对话框样式 - 支持拖拽 transform
+.zx-dialog.el-dialog {
+  // 支持通过 CSS 变量控制拖拽位移
+  transform: var(--zx-dialog-transform, none);
+  will-change: transform;
+  transition: box-shadow 0.2s ease;
+  
+  // 拖拽时的增强阴影效果
+  &[style*="--zx-dialog-transform: translate3d"] {
+    box-shadow: 
+      0 20px 40px rgba(0, 0, 0, 0.15),
+      0 8px 24px rgba(0, 0, 0, 0.1),
+      var(--cmp-dialog-box-shadow);
+    z-index: 2001; // 确保在拖拽时层级最高
+  }
+}
+
 // 所有样式包装在 modal-class 下
 .zx-dialog-modal {
   // 对话框容器样式
@@ -23,6 +40,19 @@
          border-bottom: 1px solid var(--cmp-dialog-border-color);
         padding: var(--cmp-dialog-header-padding);
         margin: 0;
+        cursor: move;
+        user-select: none;
+        transition: background-color 0.2s ease, opacity 0.2s ease;
+
+        &:hover {
+          background-color: var(--el-fill-color-light, rgba(0, 0, 0, 0.02));
+        }
+
+        // 拖拽激活状态
+        &.dragging {
+          background-color: var(--el-fill-color, rgba(0, 0, 0, 0.06)) !important;
+          opacity: 0.8;
+        }
 
         .el-dialog__title {
           color: var(--cmp-dialog-text-color);
@@ -185,3 +215,4 @@
 .text-\[rgb\(var\(--el-color-primary\)\)\] {
   color: rgb(var(--el-color-primary));
 }
+

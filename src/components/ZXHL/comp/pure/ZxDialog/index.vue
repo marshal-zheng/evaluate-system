@@ -26,7 +26,11 @@
   >
     <!-- 自定义标题栏 -->
     <template #header="{ close, titleId, titleClass }">
-      <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+      <div
+        ref="headerRef"
+        style="display: flex; align-items: center; justify-content: space-between; width: 100%;"
+        @mousedown="handleHeaderMousedown"
+      >
         <slot name="title">
           <div style="display: flex; flex: 1 1 0%; align-items: center; justify-content: space-between; overflow: hidden;">
             <div style="display: flex; flex: 1 1 0%; align-items: center; overflow: hidden;">
@@ -132,7 +136,7 @@
 </template>
 
 <script setup>
-import { ref, watch, nextTick, computed } from 'vue'
+import { ref, watch, nextTick, computed, reactive, onBeforeUnmount } from 'vue'
 import ZxIcon from '@/components/ZXHL/comp/pure/ZxIcon'
 
 // 定义属性
@@ -288,6 +292,10 @@ const props = defineProps({
   scrollErrorOffset: { // 滚动时额外的偏移量，避免被标题等遮挡
     type: Number,
     default: 24
+  },
+  draggable: {
+    type: Boolean,
+    default: true
   }
 })
 
@@ -307,9 +315,24 @@ const visible = ref(props.modelValue)
 const switchEnable = ref(props.switchProps?.enable || false)
 const confirmLoading = ref(false)
 const dialogRef = ref(null)
+const headerRef = ref(null)
+const dragOffset = ref({ x: 0, y: 0 })
+const dragState = reactive({
+  active: false,
+  startX: 0,
+  startY: 0,
+  initialRect: null,
+  offsetX: 0,
+  offsetY: 0
+})
+let dragRafId = null
+let previousBodyUserSelect = ''
+let previousBodyCursor = ''
 
 // 唯一类名用于多弹框区分（主要用于调试和选择器隔离）
 const uniqueClass = `zx-dialog-instance-${Math.random().toString(36).slice(2, 9)}`
+
+const isDraggable = computed(() => props.draggable !== false)
 
 // 表单初始快照
 const initialFormSnapshot = ref(null)
@@ -413,7 +436,7 @@ const dialogWidth = ref(props.width)
 
 // 计算动态样式，支持 props 覆盖 CSS 变量
 const dynamicStyle = computed(() => {
-  const style = { ...props.dialogStyle }
+  const style = props.dialogStyle ? { ...props.dialogStyle } : {}
   
   if (props.headerPadding) {
     style['--zx-dialog-header-padding'] = props.headerPadding
@@ -427,14 +450,191 @@ const dynamicStyle = computed(() => {
     style['--zx-dialog-footer-padding'] = props.footerPadding
   }
   
+  if (isDraggable.value) {
+    const { x, y } = dragOffset.value
+    if (x !== 0 || y !== 0) {
+      const transform = `translate3d(${x}px, ${y}px, 0)`
+      style['--zx-dialog-transform'] = transform
+      console.log('[ZxDialog] 🎨 Setting CSS variable:', { transform, x, y })
+    } else {
+      style['--zx-dialog-transform'] = 'none'
+      console.log('[ZxDialog] 🎨 Resetting CSS variable to none')
+    }
+  }
+
   return style
 })
+
+const resetDragOffset = () => {
+  if (dragOffset.value.x === 0 && dragOffset.value.y === 0) return
+  dragOffset.value = { x: 0, y: 0 }
+  dragState.offsetX = 0
+  dragState.offsetY = 0
+}
+
+const stopHeaderDragging = () => {
+  if (typeof document !== 'undefined') {
+    document.removeEventListener('mousemove', handleHeaderMousemove)
+    document.removeEventListener('mouseup', stopHeaderDragging)
+    if (dragState.active) {
+      document.body.style.userSelect = previousBodyUserSelect
+      document.body.style.cursor = previousBodyCursor
+      // 移除 header 的拖拽状态类名
+      const rootEl = resolveDialogRootEl()
+      const headerEl = rootEl?.querySelector?.('.el-dialog__header')
+      if (headerEl) {
+        headerEl.classList.remove('dragging')
+      }
+    }
+  }
+  if (dragRafId !== null && typeof cancelAnimationFrame === 'function') {
+    cancelAnimationFrame(dragRafId)
+    dragRafId = null
+  }
+  dragState.active = false
+  dragState.initialRect = null
+  previousBodyUserSelect = ''
+  previousBodyCursor = ''
+}
+
+const applyDragOffset = (x, y) => {
+  console.log('[ZxDialog] 📍 Applying drag offset:', { x, y })
+  dragOffset.value = { x, y }
+  dragRafId = null
+}
+
+const handleHeaderMousemove = (event) => {
+  if (!dragState.active || !dragState.initialRect || typeof window === 'undefined') return
+  event.preventDefault()
+
+  const dx = event.clientX - dragState.startX
+  const dy = event.clientY - dragState.startY
+  const { left, top, width, height } = dragState.initialRect
+
+  const viewportWidth = window.innerWidth || document.documentElement?.clientWidth || width
+  const viewportHeight = window.innerHeight || document.documentElement?.clientHeight || height
+
+  const maxLeft = Math.max(0, viewportWidth - width)
+  const maxTop = Math.max(0, viewportHeight - height)
+
+  const desiredLeft = left + dx
+  const desiredTop = top + dy
+
+  const clampedLeft = Math.min(Math.max(desiredLeft, 0), maxLeft)
+  const clampedTop = Math.min(Math.max(desiredTop, 0), maxTop)
+
+  const nextX = dragState.offsetX + (clampedLeft - left)
+  const nextY = dragState.offsetY + (clampedTop - top)
+
+  console.log('[ZxDialog] 🚀 Mouse move:', { 
+    dx, dy, 
+    desiredLeft, desiredTop, 
+    clampedLeft, clampedTop, 
+    nextX, nextY 
+  })
+
+  const schedule = () => applyDragOffset(nextX, nextY)
+  if (typeof requestAnimationFrame === 'function') {
+    if (dragRafId !== null && typeof cancelAnimationFrame === 'function') {
+      cancelAnimationFrame(dragRafId)
+    }
+    dragRafId = requestAnimationFrame(schedule)
+  } else {
+    schedule()
+  }
+}
+
+const handleHeaderMousedown = (event) => {
+  console.log('[ZxDialog] 🖱️ Header mousedown triggered', { 
+    isDraggable: isDraggable.value,
+    button: event.button,
+    target: event.target,
+    tagName: event.target?.tagName
+  })
+  
+  if (!isDraggable.value || typeof document === 'undefined' || typeof window === 'undefined') {
+    console.log('[ZxDialog] ❌ Dragging disabled or environment not available')
+    return
+  }
+  if (event.button !== 0) {
+    console.log('[ZxDialog] ❌ Not left mouse button')
+    return
+  }
+
+  const target = event.target
+  if (target?.isContentEditable) {
+    console.log('[ZxDialog] ❌ Target is contentEditable')
+    return
+  }
+  const tag = target?.tagName ? target.tagName.toLowerCase() : ''
+  if (['button', 'input', 'textarea', 'a', 'select', 'label'].includes(tag)) {
+    console.log('[ZxDialog] ❌ Target is interactive element:', tag)
+    return
+  }
+  if (typeof target?.closest === 'function') {
+    if (target.closest('[data-drag-exclude]')) {
+      console.log('[ZxDialog] ❌ Target has drag-exclude')
+      return
+    }
+  }
+
+  const rootEl = resolveDialogRootEl()
+  // rootEl 本身就是 .el-dialog 元素，不需要再查找
+  const dialogEl = rootEl?.classList?.contains('el-dialog') ? rootEl : rootEl?.querySelector?.('.el-dialog')
+  console.log('[ZxDialog] 🔍 Dialog elements found:', { rootEl, dialogEl, hasElDialogClass: rootEl?.classList?.contains('el-dialog') })
+  if (!dialogEl) {
+    console.log('[ZxDialog] ❌ Dialog element not found')
+    return
+  }
+
+  event.preventDefault()
+
+  stopHeaderDragging()
+
+  dragState.active = true
+  dragState.startX = event.clientX
+  dragState.startY = event.clientY
+  dragState.initialRect = dialogEl.getBoundingClientRect()
+  dragState.offsetX = dragOffset.value.x
+  dragState.offsetY = dragOffset.value.y
+
+  // 给 header 添加拖拽状态类名
+  const headerEl = dialogEl.querySelector('.el-dialog__header')
+  if (headerEl) {
+    headerEl.classList.add('dragging')
+  }
+
+  console.log('[ZxDialog] ✅ Drag started:', {
+    startX: dragState.startX,
+    startY: dragState.startY,
+    initialRect: dragState.initialRect,
+    offsetX: dragState.offsetX,
+    offsetY: dragState.offsetY,
+    headerEl
+  })
+
+  document.addEventListener('mousemove', handleHeaderMousemove, { passive: false })
+  document.addEventListener('mouseup', stopHeaderDragging)
+  previousBodyUserSelect = document.body.style.userSelect || ''
+  previousBodyCursor = document.body.style.cursor || ''
+  document.body.style.userSelect = 'none'
+  document.body.style.cursor = 'move'
+}
 
 // 监听 modelValue 变化
 watch(
   () => props.modelValue,
   (val) => {
     visible.value = val
+  }
+)
+
+watch(
+  () => isDraggable.value,
+  (enabled) => {
+    if (enabled) return
+    stopHeaderDragging()
+    resetDragOffset()
   }
 )
 
@@ -558,9 +758,12 @@ watch(
       // 关闭动作完成后延迟执行，等待过渡
       nextTick(() => resetForm())
       confirmLoading.value = false
+      resetDragOffset()
+      stopHeaderDragging()
     }
     if (val) {
       snapshotFormModel()
+      resetDragOffset()
     }
     previousVisible = val
   }
@@ -590,6 +793,10 @@ watch(
     }
   }
 )
+
+onBeforeUnmount(() => {
+  stopHeaderDragging()
+})
 </script>
 
 <style lang="scss">
