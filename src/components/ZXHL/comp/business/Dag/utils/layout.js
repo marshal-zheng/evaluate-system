@@ -1,3 +1,5 @@
+import { getNodeSizeByDirection } from './nodeGeometry.js';
+
 // 简单的 dagre 风格布局实现，避免 @antv/layout 的兼容性问题
 // direction: 'TB' | 'LR' (只支持竖向和横向)
 export async function dagreLayout(graph, direction = 'TB', ranksep = 120, nodesep = 60) {
@@ -9,6 +11,10 @@ export async function dagreLayout(graph, direction = 'TB', ranksep = 120, nodese
   const edges = g.getEdges();
   
   if (nodes.length === 0) return;
+
+  const isVerticalLayout = direction !== 'LR';
+  const targetOrientation = isVerticalLayout ? 'vertical' : 'horizontal';
+  const sizeConfig = getNodeSizeByDirection(direction);
 
   // 构建图的拓扑结构
   const nodeMap = new Map();
@@ -76,15 +82,32 @@ export async function dagreLayout(graph, direction = 'TB', ranksep = 120, nodese
     levels.push(remaining.map(node => node.id));
   }
   
-  // 计算布局位置
-  const positions = calculatePositions(levels, nodeMap, direction, ranksep, nodesep);
-  
-  // 应用节点位置
+  // 应用节点尺寸与布局方向，并计算布局位置
   g.batchUpdate?.(() => {
+    nodes.forEach((node) => {
+      const prevData = node.getData?.() || {};
+      if (prevData.layoutDirection !== targetOrientation) {
+        node.setData({
+          ...prevData,
+          layoutDirection: targetOrientation,
+        });
+      }
+
+      const currentSize = node.getSize();
+      if (
+        currentSize.width !== sizeConfig.width ||
+        currentSize.height !== sizeConfig.height
+      ) {
+        node.resize(sizeConfig.width, sizeConfig.height);
+      }
+    });
+
+    const positions = calculatePositions(levels, nodeMap, direction, ranksep, nodesep);
+
     positions.forEach((pos, nodeId) => {
       const node = nodeMap.get(nodeId);
       if (!node) return;
-      
+
       // 设置节点位置（X6 的 position 是左上角坐标）
       node.position(pos.x, pos.y);
       // 确保四向端口存在
@@ -377,5 +400,3 @@ function getPortPositionConfig(group) {
   };
   return configs[group] || null;
 }
-
-

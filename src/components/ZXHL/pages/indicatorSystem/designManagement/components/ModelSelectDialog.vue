@@ -31,9 +31,10 @@
         ref="gridRef"
         :load-data="loadModelData"
         :show-pagination="false"
-        :load-on-mounted="true"
         :debounce-delay="300"
         :auto-fit-table-height="false"
+        :params-transform="paramsTransform"
+        @dataLoaded="onDataLoaded"
         style="height: 400px;"
       >
         <template #table="{ grid, loading }">
@@ -147,7 +148,15 @@ const loadModelData = async (params) => {
   const response = await getCalculationModelList(params)
   console.log('loadModelData response:', response)
   console.log('params:', params)
+  params.query.page = 1111
   return response
+}
+
+// 将外部搜索关键字合并到请求参数中
+const paramsTransform = (params) => {
+  const merged = { ...params }
+  merged.query = { ...(params?.query || {}), keyword: searchKeyword.value || undefined }
+  return merged
 }
 
 // 搜索处理
@@ -201,20 +210,6 @@ const resetState = async () => {
   searchKeyword.value = ''
   selectedModelId.value = props.defaultSelectedId || null
   selectedModel.value = null
-  
-  // 如果有预选中的ID，从API获取对应的模型数据
-  if (props.defaultSelectedId) {
-    try {
-      const response = await loadModelData({ pageSize: 1000 })
-      const defaultModel = response.list.find(item => item.id === props.defaultSelectedId)
-      if (defaultModel) {
-        selectedModel.value = defaultModel
-        selectedModelId.value = defaultModel.id
-      }
-    } catch (error) {
-      console.error('获取默认选中模型失败:', error)
-    }
-  }
 }
 
 // 监听弹框显示状态
@@ -237,6 +232,25 @@ watch(visible, (newVal) => {
     emit('update:modelValue', false)
   }
 })
+
+// 数据加载完成后，根据默认选中ID设置选中项与高亮
+const onDataLoaded = async (response) => {
+  if (!props.defaultSelectedId) return
+  try {
+    const list = response?.list || response?.data || response?.items || []
+    const match = Array.isArray(list) ? list.find(item => item.id === props.defaultSelectedId) : null
+    if (match) {
+      selectedModel.value = match
+      selectedModelId.value = match.id
+      await nextTick()
+      if (tableRef.value) {
+        tableRef.value.setCurrentRow(match)
+      }
+    }
+  } catch (e) {
+    // ignore
+  }
+}
 </script>
 
 <style lang="scss" scoped>

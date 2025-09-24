@@ -16,11 +16,23 @@
         </div>
         <div class="dag-center">
           <div v-if="showToolbar" class="dag-toolbar">
-            <DagToolbar 
-              @layout-change="onToolbarLayoutChange" 
-              @save="onSave" 
-              :readonly="readonly"
-            />
+            <div class="dag-toolbar__left">
+              <el-radio-group
+                size="small"
+                :model-value="currentLayout"
+                @change="onLayoutRadioChange"
+                :disabled="readonly"
+              >
+                <el-radio-button label="horizontal">横向</el-radio-button>
+                <el-radio-button label="vertical">纵向</el-radio-button>
+              </el-radio-group>
+              <el-divider direction="vertical" />
+              <el-button-group>
+                <el-button size="small" @click="exportPNG" :disabled="readonly">导出 PNG</el-button>
+                <el-button size="small" @click="exportSVG" :disabled="readonly">导出 SVG</el-button>
+                <el-button size="small" @click="exportPDF" :disabled="readonly">导出 PDF</el-button>
+              </el-button-group>
+            </div>
           </div>
           <div class="dag-graph" :class="{ 'no-toolbar': !showToolbar }">
             <!-- 加载状态遮罩 -->
@@ -53,6 +65,7 @@
                 :tolerance="snaplineTolerance"
                 :sharp="snaplineSharp"
               />
+              <XFlowExport />
               <DagInitData 
                 :initial-data="initialGraphData"
                 :auto-layout="autoLayout"
@@ -91,13 +104,15 @@
 <script>
 import { defineComponent, toRefs, ref, onMounted, watch, computed } from 'vue';
 import { willCreateCycle } from './utils/graphConstraints.js';
-import { XFlow, XFlowGraph, XFlowClipboard, XFlowState, XFlowHistory, XFlowGrid, XFlowBackground, XFlowMinimap, XFlowContextMenu, XFlowSnapline } from '../ZxFlow/components';
+import { XFlow, XFlowGraph, XFlowClipboard, XFlowState, XFlowHistory, XFlowGrid, XFlowBackground, XFlowMinimap, XFlowContextMenu, XFlowSnapline, XFlowExport } from '../ZxFlow/components';
+import { useExport } from '../ZxFlow/composables';
 import DagConnect from './components/DagConnect.vue';
 import DagDnd from './components/DagDnd.vue';
 import DagGraphControl from './components/DagGraphControl.vue';
 import DagInitData from './components/DagInitData.vue';
 import DagToolbar from './components/DagToolbar.vue';
 import { DAG_CONNECTOR, DAG_EDGE } from './shapes/registerDagShapes';
+import { dagreLayout } from './utils/layout.js';
 
 const connectionEdgeOptions = {
   shape: DAG_EDGE,
@@ -232,6 +247,7 @@ const DAGPage = defineComponent({
     const currentLayout = ref(props.layout === 'vertical' ? 'vertical' : 'horizontal');
     const minimapKey = ref(0);
     const graphInstance = ref(null);
+    const exportActions = useExport(graphInstance);
 
     // 对齐线配置
     const snaplineEnabled = ref(props.snaplineConfig.enabled);
@@ -334,6 +350,61 @@ const DAGPage = defineComponent({
       currentLayout.value = dir === 'LR' ? 'horizontal' : 'vertical';
       // 布局切换后强制重建小地图，避免插件偶发不同步/空白
       minimapKey.value += 1;
+    };
+
+    // 通过单选按钮切换布局（横向/纵向），并实时应用 dagre 布局
+    const onLayoutRadioChange = async (val) => {
+      try {
+        currentLayout.value = val === 'vertical' ? 'vertical' : 'horizontal';
+        minimapKey.value += 1;
+        const g = graphInstance.value;
+        if (g) {
+          const dir = currentLayout.value === 'horizontal' ? 'LR' : 'TB';
+          await dagreLayout(g, dir);
+          g.centerContent();
+        }
+      } catch (e) {
+        console.warn('切换布局失败:', e);
+      }
+    };
+
+    const exportSVG = async () => {
+      try {
+        await exportActions.exportSVG('graph.svg', {
+          preserveDimensions: true,
+          copyStyles: true,
+          padding: 20,
+          backgroundColor: '#ffffff',
+        });
+      } catch (error) {
+        console.warn('导出 SVG 失败:', error);
+      }
+    };
+
+    const exportPNG = () => {
+      try {
+        exportActions.exportPNG('graph.png', {
+          backgroundColor: '#ffffff',
+          padding: 20,
+          quality: 1,
+          scale: 2,
+        });
+      } catch (error) {
+        console.warn('导出 PNG 失败:', error);
+      }
+    };
+
+    const exportPDF = async () => {
+      try {
+        await exportActions.exportPDF('graph.pdf', {
+          backgroundColor: '#ffffff',
+          padding: 20,
+          quality: 1,
+          scale: 2,
+        });
+      } catch (error) {
+        console.warn('导出 PDF 失败:', error);
+      }
     };
 
     // 数据加载/布局完成后，强制重建小地图
@@ -469,6 +540,10 @@ const DAGPage = defineComponent({
       currentLayout,
       minimapKey,
       onToolbarLayoutChange,
+      onLayoutRadioChange,
+      exportPNG,
+      exportSVG,
+      exportPDF,
       onGraphDataUpdated,
       onGraphReady,
       onSave,
@@ -497,6 +572,7 @@ export { DAGPage };
 </script>
 
 <style lang="scss">
+/* SVG foreignObject 修复 */
 .zx-dag-page foreignObject > body {
   margin: 0;
   display: block;
@@ -506,6 +582,8 @@ export { DAGPage };
   max-width: 100%;
   min-height: 100%;
 }
+
+/* 主容器样式 */
 .zx-dag-page {
   width: 100%;
   height: 100%;
@@ -520,6 +598,7 @@ export { DAGPage };
     box-sizing: border-box;
   }
 
+  /* 左侧边栏 */
   .dag-left {
     display: flex;
     flex-direction: column;
@@ -532,6 +611,7 @@ export { DAGPage };
     }
   }
 
+  /* 中心区域 */
   .dag-center {
     position: relative;
     flex: 1;
@@ -547,6 +627,12 @@ export { DAGPage };
       padding: 0 16px;
       background-color: #f6f8fa;
       border-bottom: 1px solid #eaebed;
+
+      &__left, &__right {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
     }
 
     .dag-graph {
@@ -584,18 +670,15 @@ export { DAGPage };
       }
     }
   }
-}
-</style>
 
-<style lang="scss">
-.zx-dag-page .xflow-graph {
-  width: 100%;
-  height: 100%;
+  /* XFlow 图形容器 */
+  .xflow-graph {
+    width: 100%;
+    height: 100%;
+  }
 }
 
-/* 修复 x6-vue-shape 容器尺寸问题：
-   注意：.x6-node-body 是 SVG foreignObject，设置百分比会相对整个 SVG 视口，
-   会导致节点被撑满画布。这里只保留内部容器 100%，不修改 .x6-node-body 尺寸。 */
+/* X6 节点和形状修复 */
 .zx-dag-page .x6-node[data-shape='dag-node'] {
   .vue-shape-view {
     width: 100% !important;
@@ -604,22 +687,24 @@ export { DAGPage };
   }
 }
 
+/* 节点选中状态样式 */
 .x6-node-selected .zx-dag-node {
   border-color: #1890ff;
   border-radius: 2px;
   box-shadow: 0 0 0 4px #d4e8fe;
+
+  &.success {
+    border-color: #52c41a;
+    box-shadow: 0 0 0 4px #ccecc0;
+  }
+
+  &.failed {
+    border-color: #ff4d4f;
+    box-shadow: 0 0 0 4px #fedcdc;
+  }
 }
 
-.x6-node-selected .zx-dag-node.success {
-  border-color: #52c41a;
-  box-shadow: 0 0 0 4px #ccecc0;
-}
-
-.x6-node-selected .zx-dag-node.failed {
-  border-color: #ff4d4f;
-  box-shadow: 0 0 0 4px #fedcdc;
-}
-
+/* 边的交互样式 */
 .x6-edge:hover path:nth-child(2) {
   stroke: #1890ff;
   stroke-width: 1px;
@@ -634,23 +719,23 @@ export { DAGPage };
 .zx-dag-page .x6-node[data-locked="true"] .zx-dag-node {
   opacity: 0.5;
   cursor: not-allowed;
-}
 
-.zx-dag-page .x6-node[data-locked="true"] .zx-dag-node::after {
-  content: '🔒';
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  font-size: 12px;
-  background: #ff4d4f;
-  color: white;
-  border-radius: 50%;
-  width: 16px;
-  height: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10;
+  &::after {
+    content: '🔒';
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    font-size: 12px;
+    background: #ff4d4f;
+    color: white;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+  }
 }
 
 /* 小地图样式 */
@@ -660,14 +745,14 @@ export { DAGPage };
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
   background: rgba(255, 255, 255, 0.95) !important;
   backdrop-filter: blur(4px) !important;
+
+  &:hover {
+    border-color: #1890ff !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  }
 }
 
-.dag-minimap:hover {
-  border-color: #1890ff !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-}
-
-/* 小地图视窗边框增强：确保初始就能看清 */
+/* 小地图视窗边框增强 */
 :deep(.xflow-minimap) {
   .x6-widget-minimap-viewport {
     stroke: #1890ff !important;
@@ -678,33 +763,33 @@ export { DAGPage };
 }
 
 /* 端口连接点控制 */
-.zx-dag-page .x6-port-body {
-  opacity: 0;
-  transition: opacity 0.2s ease-in-out;
-}
+.zx-dag-page {
+  .x6-port-body {
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
 
-/* hover 节点时显示所有端口 */
-.zx-dag-page .x6-node:hover .x6-port-body {
-  opacity: 1;
-}
+    &.available {
+      opacity: 1;
+      fill: #1890ff !important;
+      stroke: #1890ff !important;
+    }
 
-/* 连接模式时显示所有端口 */
-.zx-dag-page.connecting .x6-port-body {
-  opacity: 1;
-}
+    &.adsorbed {
+      opacity: 1;
+      fill: #52c41a !important;
+      stroke: #52c41a !important;
+    }
+  }
 
-/* 可连接的端口高亮 */
-.zx-dag-page .x6-port-body.available {
-  opacity: 1;
-  fill: #1890ff !important;
-  stroke: #1890ff !important;
-}
+  /* hover 节点时显示所有端口 */
+  .x6-node:hover .x6-port-body {
+    opacity: 1;
+  }
 
-/* 已连接的端口高亮 */
-.zx-dag-page .x6-port-body.adsorbed {
-  opacity: 1;
-  fill: #52c41a !important;
-  stroke: #52c41a !important;
+  /* 连接模式时显示所有端口 */
+  &.connecting .x6-port-body {
+    opacity: 1;
+  }
 }
 
 /* 对齐线样式 - 增强可见性 */
@@ -714,33 +799,18 @@ export { DAGPage };
   z-index: 9999;
 }
 
-:deep(.x6-widget-snapline-horizontal) {
-  stroke: #ff4d4f !important;
-  stroke-width: 2 !important;
-  stroke-dasharray: 8,4 !important;
-  opacity: 0.9 !important;
-}
-
-:deep(.x6-widget-snapline-vertical) {
-  stroke: #ff4d4f !important;
-  stroke-width: 2 !important;
-  stroke-dasharray: 8,4 !important;
-  opacity: 0.9 !important;
-}
-
-/* 对齐线动画效果 */
 :deep(.x6-widget-snapline-horizontal),
 :deep(.x6-widget-snapline-vertical) {
+  stroke: #ff4d4f !important;
+  stroke-width: 2 !important;
+  stroke-dasharray: 8,4 !important;
+  opacity: 0.9 !important;
   animation: snapline-pulse 1s ease-in-out infinite alternate;
 }
 
 @keyframes snapline-pulse {
-  from {
-    opacity: 0.7;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0.7; }
+  to { opacity: 1; }
 }
 
 /* 只读模式样式 */

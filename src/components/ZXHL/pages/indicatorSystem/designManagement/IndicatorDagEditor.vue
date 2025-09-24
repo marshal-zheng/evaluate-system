@@ -24,6 +24,8 @@
     <IndicatorDetailFormDrawer
       v-model="showIndicatorDrawer"
       :indicator-data="currentIndicatorData"
+      :parent-indicator-name="currentIndicatorMeta.parentIndicator"
+      :is-leaf-node="currentIndicatorMeta.isLeafNode"
       :disabled-menu="[]"
       :is-read-only="false"
       @confirm="handleIndicatorConfirm"
@@ -34,12 +36,13 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch, nextTick } from 'vue';
+import { ref, reactive, computed, onMounted, watch, nextTick } from 'vue';
 import { DAGPage } from '@/components/ZXHL/comp/business/Dag/index.vue'
 import IndicatorDetailFormDrawer from './components/IndicatorDetailFormDrawer.vue'
 import { useMessageBox } from '@/composables/useElementPlus'
 import { useGraphStore } from '@/components/ZXHL/comp/business/ZxFlow/composables/useGraphStore'
 import { indicatorApi } from '@/components/ZXHL/api/modules/indicator'
+import { cloneNodeForForm, createEmptyNodeData, prepareNodeSubmitData } from './utils/indicatorMapper'
 
 // Props 定义
 const props = defineProps({
@@ -92,7 +95,11 @@ const useStaticOperators = ref(true);
 
 // 指标详情抽屉相关
 const showIndicatorDrawer = ref(false);
-const currentIndicatorData = ref({});
+const currentIndicatorData = ref(createEmptyNodeData());
+const currentIndicatorMeta = reactive({
+  parentIndicator: '',
+  isLeafNode: true,
+});
 const editingNodeId = ref('');
 
 // 计算属性
@@ -198,20 +205,9 @@ const handleEditNode = (node) => {
 
   // 从节点数据中提取指标信息
   const nodeData = node?.getData?.() || {};
-  const propsData = nodeData.properties || {};
-  const content = propsData.content || {};
-  const otherData = propsData.otherData || {};
-
-  // 是否叶子结点（仅叶子可以配置计算模型）
-  const isLeafNode = (nodeData.type === 'leaf-node');
-
-  // 计算模型名称兜底字段
-  const modelName = otherData.oprModelName || otherData.name || otherData.title || otherData.label || '';
-  const modelId = otherData.id || '';
-  const modelData = otherData || null;
-
   // 解析上级指标名称（而非ID）
   let parentIndicatorName = '';
+  const propsData = nodeData.properties || {};
   const parentId = propsData.parentNodeId || '';
   try {
     if (parentId && typeof graphStore?.getNodeById === 'function') {
@@ -225,23 +221,10 @@ const handleEditNode = (node) => {
     // 忽略获取父名称的异常
   }
 
-  // 构造指标数据，映射到表单字段
-  currentIndicatorData.value = {
-    id: editingNodeId.value,
-    isLeafNode,
-    parentIndicator: parentIndicatorName,
-    indicatorName: content.label || nodeData.label || '',
-    supportDescription: typeof propsData.weight === 'number' ? propsData.weight : 0,
-    calculationModel: isLeafNode ? modelId : '',
-    calculationModelName: isLeafNode ? modelName : '',
-    calculationModelData: isLeafNode && modelId ? modelData : null,
-    customType: propsData.customType || '',
-    customProperties: propsData.customProperties || '',
-    unit: propsData.unit || '',
-    priority: propsData.priority || '',
-    defaultValue: propsData.defaultValue || '',
-    notes: propsData.notes || ''
-  };
+  const nodeClone = cloneNodeForForm({ ...nodeData, id: node?.id || nodeData.id });
+  currentIndicatorData.value = nodeClone;
+  currentIndicatorMeta.parentIndicator = parentIndicatorName;
+  currentIndicatorMeta.isLeafNode = nodeData.type === 'leaf-node';
 
   showIndicatorDrawer.value = true;
   
@@ -288,47 +271,17 @@ const handleDeleteNode = async (node) => {
 };
 
 // 指标表单确认处理
-const handleIndicatorConfirm = (formData) => {
-  console.log('指标表单确认:', formData);
+const handleIndicatorConfirm = (formNodeData) => {
+  console.log('指标表单确认:', formNodeData);
 
   try {
     const nodeId = editingNodeId.value;
     if (!nodeId) return;
 
-    // 仅叶子结点保留计算模型；非叶子结点强制清空
-    const isLeafNode = !!currentIndicatorData.value.isLeafNode;
-    const nextOtherData = isLeafNode && formData.calculationModel && formData.calculationModelData ? 
-      formData.calculationModelData : {};
-
-    // 获取当前节点数据以保留现有结构
-    const currentNode = graphStore.getNodeById?.(nodeId);
-    const currentData = currentNode?.getData?.() || {};
-    const currentProperties = currentData.properties || {};
-    const currentContent = currentProperties.content || {};
-
-    // 构建更新数据 - 保留现有结构，只更新需要变更的字段
+    const submitNode = prepareNodeSubmitData({ ...formNodeData, id: nodeId }, { isLeafNode: currentIndicatorMeta.isLeafNode });
     const updateData = {
-      data: {
-        ...currentData,
-        label: formData.indicatorName,
-        properties: {
-          ...currentProperties,
-          content: {
-            ...currentContent,
-            label: formData.indicatorName,
-          },
-          weight: typeof formData.supportDescription === 'number' ? formData.supportDescription : Number(formData.supportDescription || 0),
-          otherData: nextOtherData,
-          customType: formData.customType || '',
-          customProperties: formData.customProperties || '',
-          unit: formData.unit || '',
-          priority: formData.priority || '',
-          defaultValue: formData.defaultValue || '',
-          notes: formData.notes || '',
-        },
-      },
-      // 同时更新顶级 label 以确保兼容性
-      label: formData.indicatorName,
+      data: submitNode,
+      label: submitNode.label,
     };
 
     console.log('更新节点数据:', nodeId, updateData);
@@ -348,8 +301,9 @@ const handleIndicatorConfirm = (formData) => {
         const x6Node = graph?.getCellById?.(nodeId);
         if (x6Node) {
           console.log('IndicatorDagEditor - 找到 X6 节点，当前数据:', x6Node.getData());
-          console.log('IndicatorDagEditor - 即将更新为:', updateData.data);
-          x6Node.setData(updateData.data);
+          const nextNodeData = updateData.data || updateData;
+          console.log('IndicatorDagEditor - 即将更新为:', nextNodeData);
+          x6Node.setData(nextNodeData);
           console.log('IndicatorDagEditor - X6 节点更新完成，新数据:', x6Node.getData());
         } else {
           console.error('IndicatorDagEditor - 在 X6 图中找不到节点:', nodeId);
@@ -378,15 +332,20 @@ const handleIndicatorCancel = () => {
   showIndicatorDrawer.value = false;
 };
 
-const handleNodeDblclick = () => {
-  showIndicatorDrawer.value = true;
+const handleNodeDblclick = (payload) => {
+  const targetNode = payload?.node || payload;
+  if (targetNode) {
+    handleEditNode(targetNode);
+  }
 };
 
 // 指标表单关闭处理
 const handleIndicatorClose = () => {
   console.log('指标表单关闭');
   showIndicatorDrawer.value = false;
-  currentIndicatorData.value = {};
+  currentIndicatorData.value = createEmptyNodeData();
+  currentIndicatorMeta.parentIndicator = '';
+  currentIndicatorMeta.isLeafNode = true;
 };
 
 

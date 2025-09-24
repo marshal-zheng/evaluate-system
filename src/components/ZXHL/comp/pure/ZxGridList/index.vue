@@ -181,7 +181,7 @@ const props = defineProps({
   // 组件创建时是否自动加载
   loadOnMounted: {
     type: Boolean,
-    default: true
+    default: false
   },
   // 查询参数处理函数
   queryTransform: {

@@ -25,11 +25,11 @@
         label-position="top"
         size="default"
       >
+        {{ formMeta }}
         <!-- 上级指标 - 只有当存在上级指标时才显示 -->
         <el-form-item 
-          v-if="formData.parentIndicator" 
-          label="上级指标" 
-          prop="parentIndicator"
+          v-if="formMeta.parentIndicator" 
+          label="上级指标"
         >
           <div class="parent-indicator-display">
             <ZxTag 
@@ -40,15 +40,15 @@
               :max-width="'100%'"
               class="parent-indicator-tag"
             >
-              {{ formData.parentIndicator }}
+              {{ formMeta.parentIndicator }}
             </ZxTag>
           </div>
         </el-form-item>
 
         <!-- 指标名称 -->
-        <el-form-item label="指标名称" prop="indicatorName">
+        <el-form-item label="指标名称" prop="properties.content.label">
           <ZxInput
-            v-model="formData.indicatorName"
+            v-model="formData.properties.content.label"
             placeholder="请输入指标名称"
             maxlength="50"
             show-word-limit
@@ -56,10 +56,10 @@
           />
         </el-form-item>
 
-        <el-form-item label="支撑说明" prop="supportDescription">
+        <el-form-item label="支撑说明" prop="properties.weight">
           <div class="support-description-field">
             <el-input-number
-              v-model="formData.supportDescription"
+              v-model="formData.properties.weight"
               placeholder="0"
               :min="0"
               :max="100"
@@ -72,17 +72,17 @@
         </el-form-item>
 
         <!-- 计算模型：仅叶子节点显示 -->
-        <el-form-item v-if="isLeafNode" label="计算模型" prop="calculationModel">
+        <el-form-item v-if="isLeafNode" label="计算模型">
           <div class="calculation-model-field">
             <!-- 当有选择的计算模型时，使用ZxTag展示 -->
-            <div v-if="formData.calculationModelName" class="calculation-model-display">
+            <div v-if="calculationModelName" class="calculation-model-display">
               <ZxTag 
                 type="primary" 
                 size="default"
-                :tooltip="formData.calculationModelName"
+                :tooltip="calculationModelName"
                 class="calculation-model-tag"
               >
-                <span class="model-name-text">{{ formData.calculationModelName }}</span>
+                <span class="model-name-text">{{ calculationModelName }}</span>
               </ZxTag>
               <el-button
                 type="primary"
@@ -111,54 +111,54 @@
         </el-form-item>
 
         <!-- 类型 -->
-        <el-form-item label="类型" prop="customType">
+        <el-form-item label="类型" prop="properties.customType">
           <ZxInput
-            v-model="formData.customType"
+            v-model="formData.properties.customType"
             placeholder="请输入类型"
             :disabled="disabledMenu.includes('customType') || isReadOnly"
           />
         </el-form-item>
 
         <!-- 属性 -->
-        <el-form-item label="属性" prop="customProperties">
+        <el-form-item label="属性" prop="properties.customProperties">
           <ZxInput
-            v-model="formData.customProperties"
+            v-model="formData.properties.customProperties"
             placeholder="请输入属性"
             :disabled="disabledMenu.includes('customProperties') || isReadOnly"
           />
         </el-form-item>
 
         <!-- 单位 -->
-        <el-form-item label="单位" prop="unit">
+        <el-form-item label="单位" prop="properties.unit">
           <ZxInput
-            v-model="formData.unit"
+            v-model="formData.properties.unit"
             placeholder="请输入单位"
             :disabled="disabledMenu.includes('unit') || isReadOnly"
           />
         </el-form-item>
 
         <!-- 优先级 -->
-        <el-form-item label="优先级" prop="priority">
+        <el-form-item label="优先级" prop="properties.priority">
           <ZxInput
-            v-model="formData.priority"
+            v-model="formData.properties.priority"
             placeholder="请输入优先级"
             :disabled="disabledMenu.includes('priority') || isReadOnly"
           />
         </el-form-item>
 
         <!-- 默认值 -->
-        <el-form-item label="默认值" prop="defaultValue">
+        <el-form-item label="默认值" prop="properties.defaultValue">
           <ZxInput
-            v-model="formData.defaultValue"
+            v-model="formData.properties.defaultValue"
             placeholder="请输入默认值"
             :disabled="disabledMenu.includes('defaultValue') || isReadOnly"
           />
         </el-form-item>
 
         <!-- 备注 -->
-        <el-form-item label="备注" prop="notes">
+        <el-form-item label="备注" prop="properties.notes">
           <ZxInput
-            v-model="formData.notes"
+            v-model="formData.properties.notes"
             type="textarea"
             :rows="3"
             placeholder="请输入备注"
@@ -171,7 +171,7 @@
     <!-- 计算模型选择对话框 -->
     <ModelSelectDialog
       v-model="showModelSelectDialog"
-      :default-selected-id="formData.calculationModel"
+      :default-selected-id="calculationModelId"
       @confirm="handleModelSelect"
       @cancel="handleModelSelectCancel"
     />
@@ -179,12 +179,12 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch } from 'vue'
+import { ref, reactive, computed, watch, isRef } from 'vue'
 import ZxDrawer from '@/components/ZXHL/comp/pure/ZxDrawer'
 import ZxTag from '@/components/ZXHL/comp/pure/ZxTag'
-import ZxIcon from '@/components/ZXHL/comp/pure/ZxIcon'
 import ZxInput from '@/components/ZXHL/comp/pure/ZxInput'
 import ModelSelectDialog from './ModelSelectDialog.vue'
+import { cloneNodeForForm, createEmptyNodeData, prepareNodeSubmitData } from '../utils/indicatorMapper'
 
 // Props 定义
 const props = defineProps({
@@ -195,6 +195,14 @@ const props = defineProps({
   indicatorData: {
     type: Object,
     default: () => ({})
+  },
+  parentIndicatorName: {
+    type: String,
+    default: ''
+  },
+  isLeafNode: {
+    type: Boolean,
+    default: true
   },
   disabledMenu: {
     type: Array,
@@ -218,32 +226,41 @@ const visible = computed({
 })
 
 // 表单数据
-const formData = reactive({
-  isLeafNode: true,
-  parentIndicator: '',
-  indicatorName: '',
-  supportDescription: 0,
-  calculationModel: '', // 存储模型ID
-  calculationModelName: '', // 存储模型名称用于显示
-  calculationModelData: null, // 存储完整的模型对象
-  customType: '',
-  customProperties: '',
-  unit: '', // 添加单位字段
-  priority: '',
-  defaultValue: '',
-  notes: ''
+const formData = reactive(cloneNodeForForm())
+const formMeta = reactive({
+  parentIndicator: props.parentIndicatorName || '',
+  isLeafNode: props.isLeafNode
 })
 
+const extractNodePayload = (payload) => (isRef(payload) ? payload.value : payload)
+
+const cloneModel = (payload) => {
+  if (!payload || typeof payload !== 'object') {
+    return payload
+  }
+  try {
+    return JSON.parse(JSON.stringify(payload))
+  } catch (error) {
+    console.warn('IndicatorDetailFormDrawer - cloneModel fallback triggered:', error)
+    return payload
+  }
+}
+
 // 计算属性
-const isLeafNode = computed(() => formData.isLeafNode)
+const isLeafNode = computed(() => formMeta.isLeafNode)
+const calculationModelName = computed(() => {
+  const data = formData.properties.otherData || {}
+  return data.oprModelName || data.name || data.title || data.label || ''
+})
+const calculationModelId = computed(() => formData.properties.otherData?.id || null)
 
 // 表单验证规则
 const formRules = {
-  indicatorName: [
+  'properties.content.label': [
     { required: true, message: '请输入指标名称', trigger: 'blur' },
     { max: 50, message: '指标名称不能超过50个字符', trigger: 'blur' }
   ],
-  supportDescription: [
+  'properties.weight': [
     { type: 'number', min: 0, max: 100, message: '支撑说明必须在0-100之间', trigger: 'blur' }
   ]
 }
@@ -252,39 +269,38 @@ const formRules = {
 watch(
   () => props.indicatorData,
   (newData) => {
-    console.log('IndicatorDetailFormDrawer - 接收到新数据:', newData)
-    if (newData && Object.keys(newData).length > 0) {
-      // 直接克隆整个数据对象，避免手动映射
-      Object.assign(formData, {
-        // 设置默认值，确保必要字段存在
-        isLeafNode: true,
-        parentIndicator: '',
-        indicatorName: '',
-        supportDescription: 0,
-        calculationModel: '',
-        calculationModelName: '',
-        calculationModelData: null,
-        customType: '',
-        customProperties: '',
-        unit: '',
-        priority: '',
-        defaultValue: '',
-        notes: '',
-        // 用新数据覆盖默认值
-        ...newData
-      })
-      
-      // 非叶子节点强制清空模型字段
-      if (!formData.isLeafNode) {
-        formData.calculationModel = ''
-        formData.calculationModelName = ''
-        formData.calculationModelData = null
-      }
-      
+    const resolved = extractNodePayload(newData)
+    console.log('IndicatorDetailFormDrawer - 接收到新数据:', resolved)
+    if (resolved && Object.keys(resolved).length > 0) {
+      const nextState = cloneNodeForForm(resolved)
+      Object.assign(formData, nextState)
+
       console.log('IndicatorDetailFormDrawer - 表单数据已更新:', formData)
+    } else {
+      Object.assign(formData, createEmptyNodeData())
     }
   },
-  { immediate: true, deep: true }
+  { immediate: true }
+)
+
+watch(
+  () => props.parentIndicatorName,
+  (val) => {
+    formMeta.parentIndicator = extractNodePayload(val) || ''
+  },
+  { immediate: true }
+)
+
+watch(
+  () => props.isLeafNode,
+  (val) => {
+    const resolved = extractNodePayload(val)
+    formMeta.isLeafNode = !!resolved
+    if (!formMeta.isLeafNode) {
+      formData.properties.otherData = {}
+    }
+  },
+  { immediate: true }
 )
 
 // 打开模型选择对话框
@@ -294,9 +310,7 @@ const openModelSelectDialog = () => {
 
 // 处理模型选择确认
 const handleModelSelect = (selectedModel) => {
-  formData.calculationModel = selectedModel.id
-  formData.calculationModelName = selectedModel.name
-  formData.calculationModelData = selectedModel // 存储完整的模型对象
+  formData.properties.otherData = cloneModel(selectedModel) || {}
   showModelSelectDialog.value = false
 }
 
@@ -312,7 +326,7 @@ const handleConfirm = async () => {
     await formRef.value.validate()
     
     // 提交数据
-    const submitData = { ...formData }
+    const submitData = prepareNodeSubmitData(formData, { isLeafNode: formMeta.isLeafNode })
     emit('confirm', submitData)
     
     return true
@@ -336,22 +350,9 @@ const resetForm = () => {
     formRef.value.resetFields()
   }
   // 重置为默认值
-  const defaultData = {
-    isLeafNode: true,
-    parentIndicator: '',
-    indicatorName: '',
-    supportDescription: 0,
-    calculationModel: '',
-    calculationModelName: '',
-    calculationModelData: null,
-    customType: '',
-    customProperties: '',
-    unit: '',
-    priority: '',
-    defaultValue: '',
-    notes: ''
-  }
-  Object.assign(formData, defaultData)
+  Object.assign(formData, createEmptyNodeData())
+  formMeta.parentIndicator = ''
+  formMeta.isLeafNode = true
 }
 
 // 暴露方法

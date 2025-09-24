@@ -1,17 +1,28 @@
 <template>
-  <div class="zx-dag-node" :class="[nodeTypeClass, { 'has-model': hasModel, 'no-model': !hasModel }]">
-    <!-- 左侧状态指示器 -->
-    <div class="zx-dag-node__indicator">
-      <ZxIcon 
-        v-if="isLeafNode"
-        :icon="modelIcon" 
-        :size="14" 
+  <div
+    class="zx-dag-node"
+    :class="[orientationClass, nodeTypeClass, { 'has-model': hasModel, 'no-model': !hasModel }]"
+  >
+    <div v-if="hasWeight" class="zx-dag-node__weight">{{ weightDisplay }}</div>
+
+    <div class="zx-dag-node__label">
+      <span v-if="isVerticalLayout" class="zx-dag-node__label-text vertical">
+        <span v-for="(char, index) in verticalLabelChars" :key="index">{{ char }}</span>
+      </span>
+      <span v-else class="zx-dag-node__label-text">{{ label }}</span>
+    </div>
+
+    <!-- 状态指示器 / 模型信息 -->
+    <div v-if="showIndicator" class="zx-dag-node__indicator">
+      <ZxIcon
+        :icon="modelIcon"
+        :size="14"
         :color="modelIconColor"
         :popover-title="modelPopoverTitle"
         :tooltip="modelTooltip"
-        tooltip-placement="left"
+        :tooltip-placement="tooltipPlacement"
         :tooltip-offset="12"
-        :popover-width="hasModel?400:undefined"
+        :popover-width="hasModel ? 400 : undefined"
       >
         <!-- 紧凑型模型信息展示 -->
         <template v-if="hasModel && modelData" #popoverContent>
@@ -48,8 +59,6 @@
         </template>
       </ZxIcon>
     </div>
-    
-    <div class="zx-dag-node__label">{{ label }}</div>
   </div>
 </template>
 
@@ -142,6 +151,43 @@ const nodeType = computed(() => {
 
 const isLeafNode = computed(() => nodeType.value === 'leaf-node');
 const nodeTypeClass = computed(() => isLeafNode.value ? 'leaf-node' : 'non-leaf-node');
+const layoutDirection = computed(() => {
+  const direction = nodeData.value.layoutDirection || 'horizontal';
+  const normalized = direction === 'vertical' ? 'vertical' : 'horizontal';
+  console.log('DagNode layoutDirection computed:', {
+    nodeId: props.node?.id,
+    direction,
+    normalized,
+  });
+  return normalized;
+});
+const orientationClass = computed(() => layoutDirection.value);
+const isVerticalLayout = computed(() => layoutDirection.value === 'vertical');
+const verticalLabelChars = computed(() => {
+  if (!isVerticalLayout.value) return [];
+  const text = label.value || '';
+  return Array.from(String(text));
+});
+const tooltipPlacement = computed(() => (layoutDirection.value === 'vertical' ? 'top' : 'bottom'));
+const showIndicator = computed(() => isLeafNode.value);
+const weightValue = computed(() => {
+  const directWeight = nodeData.value.weight;
+  const propertyWeight = properties.value.weight;
+  const contentWeight = content.value.weight;
+  return directWeight ?? propertyWeight ?? contentWeight ?? null;
+});
+const hasWeight = computed(() => {
+  const value = weightValue.value;
+  return value !== null && value !== undefined && value !== '';
+});
+const weightDisplay = computed(() => {
+  if (!hasWeight.value) return '';
+  const value = weightValue.value;
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value.toString() : '';
+  }
+  return String(value);
+});
 const modelData = computed(() => {
   console.log('properties', properties)
   // 优先使用新结构，回退到旧结构
@@ -251,45 +297,151 @@ if (props.node) {
 
 .zx-dag-node {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   width: 100%;
-  height: 32px;
-  border: 1px solid #d9d9d9;
-  border-radius: 4px;
-  background: #fff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  height: 100%;
+  // min-height: 40px;
+  border: 1px solid #d9dfe7;
+  border-radius: 6px;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(15, 34, 58, 0.08);
   cursor: default;
   box-sizing: border-box;
+  overflow: hidden;
+
+  &__weight {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    padding: 0 8px;
+    background: #f5f7fa;
+    color: #1f2d3d;
+    font-size: 13px;
+    font-weight: 600;
+    border-right: 1px solid #e3e8ee;
+    white-space: nowrap;
+  }
 
   &__indicator {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 20px;
-    height: 100%;
-    flex-shrink: 0;
-    border-right: 1px solid #e8e8e8;
+    width: 28px;
+    padding: 0 4px;
+    border-left: 1px solid #e3e8ee;
+    background: transparent;
+    color: #909399;
   }
 
   &.leaf-node &__indicator {
-    background: rgba(64, 158, 255, 0.1);
+    color: #409eff;
   }
 
   &.non-leaf-node &__indicator {
-    background: #409eff;
+    color: #909399;
   }
 
   &__label {
     flex: 1;
-    text-align: center;
-    padding: 0 8px;
-    color: #606266;
-    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 12px;
+    color: #303133;
+    font-size: 14px;
     font-weight: 500;
-    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  &__label-text {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    text-align: center;
+    line-height: 1.4;
+    word-break: break-all;
     overflow: hidden;
     text-overflow: ellipsis;
   }
+
+  &__label-text.vertical {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    width: auto;
+    max-width: 100%;
+    overflow: visible;
+    text-overflow: unset;
+  }
+
+  &__label-text.vertical > span {
+    display: block;
+    white-space: nowrap;
+  }
+
+  &.vertical {
+    flex-direction: column;
+    width: 100%;
+    min-height: 160px;
+    border-color: #d6e4ff;
+    background: linear-gradient(180deg, #f7f9ff 0%, #ffffff 85%);
+  }
+
+  &.vertical &__weight {
+    min-width: auto;
+    width: 100%;
+    height: 36px;
+    border-right: none;
+    border-bottom: 1px solid #dae1f0;
+    font-size: 14px;
+    order: 1;
+  }
+
+  &.vertical &__label {
+    width: 100%;
+    padding: 16px 12px;
+    min-height: 120px;
+    color: #1f2d3d;
+    font-size: 16px;
+    font-weight: 600;
+    order: 2;
+    flex: 1;
+  }
+
+  &.vertical &__label-text.vertical {
+    width: 100%;
+  }
+
+  &.vertical &__indicator {
+    width: 100%;
+    height: 36px;
+    border-left: none;
+    border-top: 1px solid #dae1f0;
+    border-radius: 0 0 6px 6px;
+    order: 3;
+  }
+
+  &.vertical.leaf-node.has-model &__indicator {
+    background: rgba(255, 153, 0, 0.14);
+    color: #fa8c16;
+  }
+
+  &.vertical.leaf-node.no-model &__indicator {
+    background: rgba(255, 77, 79, 0.12);
+    color: #f56c6c;
+  }
+
+  &.horizontal &__label-text {
+    writing-mode: initial;
+    text-orientation: initial;
+    letter-spacing: 0;
+    white-space: nowrap;
+  }
+
 }
 
 // 紧凑型模型信息展示

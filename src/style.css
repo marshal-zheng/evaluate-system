@@ -134,3 +134,8 @@ button:hover {
     color: white;
   }
 }
+
+
+.xflow-context-menu {
+  color: #000 !important;
+}

@@ -5,6 +5,7 @@ import { onMounted, watch, nextTick } from 'vue';
 import { useGraphInstance } from '../../ZxFlow/composables/useGraphInstance';
 import { useGraphStore } from '../../ZxFlow/composables/useGraphStore';
 import { dagreLayout } from '../utils/layout.js';
+import { getNodeSizeByLayout } from '../utils/nodeGeometry.js';
 import { registerDagShapes, DAG_NODE, DAG_EDGE } from '../shapes/registerDagShapes';
 
 // Props 定义
@@ -43,13 +44,16 @@ const convertToDAGFormat = (data) => {
     return { nodes: [], edges: [] };
   }
 
+  const layoutOrientation = props.layoutDirection === 'TB' ? 'vertical' : 'horizontal';
+  const sizeConfig = getNodeSizeByLayout(layoutOrientation);
+
   const nodes = data.nodes.map(node => ({
     id: node.id,
     shape: DAG_NODE,
     x: node.x || 0,
     y: node.y || 0,
-    width: 200,
-    height: 40,
+    width: sizeConfig.width,
+    height: sizeConfig.height,
     data: {
       // 支持新的数据结构
       type: node.type,
@@ -57,6 +61,7 @@ const convertToDAGFormat = (data) => {
       // 兼容旧结构
       label: node.properties?.content?.label || node.label || '未命名节点',
       status: 'default',
+      layoutDirection: layoutOrientation,
       // 保存原始数据
       originalData: node
     },
@@ -244,6 +249,27 @@ watch(() => props.initialData, (newData) => {
     }, 100);
   }
 }, { immediate: false, deep: true }); // 改为 false，避免在图实例准备前执行
+
+watch(
+  () => props.layoutDirection,
+  async (newDirection, oldDirection) => {
+    if (!newDirection || newDirection === oldDirection) return;
+    console.log('DagInitData - 布局方向变化:', { newDirection, oldDirection });
+    await nextTick();
+    const g = graph?.value;
+    if (!g) {
+      console.log('DagInitData - 图实例未准备好，暂不应用新的布局方向');
+      return;
+    }
+    try {
+      await dagreLayout(g, newDirection, 100, 80);
+      g.centerContent?.();
+      console.log('DagInitData - 布局方向更新完成');
+    } catch (error) {
+      console.warn('DagInitData - 布局方向更新失败:', error);
+    }
+  }
+);
 
 onMounted(async () => {
   console.log('DagInitData - onMounted 触发');

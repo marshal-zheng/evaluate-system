@@ -189,14 +189,6 @@ export function useContextMenu(graph, options = {}) {
         disabled: !graph,
         danger: true,
       },
-      { type: 'divider' },
-      {
-        id: 'lock',
-        label: node?.prop('locked') ? '解锁' : '锁定',
-        icon: node?.prop('locked') ? 'Unlock' : 'Lock',
-        action: () => toggleNodeLock(node),
-        disabled: !node,
-      },
     ];
 
     // 使用新的自定义菜单处理逻辑
@@ -231,31 +223,45 @@ export function useContextMenu(graph, options = {}) {
   };
 
   // 辅助函数：切换节点锁定状态
+  const LOCK_META_KEY = 'lockState/originalStroke';
+
   const toggleNodeLock = (node) => {
     if (!node) return;
-    
-    const locked = node.prop('locked');
+
+    const locked = node.prop('locked') === true;
     const newLocked = !locked;
-    
-    // 设置锁定状态
+
     node.prop('locked', newLocked);
-    
-    // 设置节点的拖拽状态
+    node.prop('movable', !newLocked);
     node.prop('draggable', !newLocked);
-    
-    // 设置节点的锁定视觉状态
+
+    try {
+      if (typeof node.updateData === 'function') {
+        node.updateData({ locked: newLocked });
+      } else if (typeof node.setData === 'function') {
+        const current = node.getData ? node.getData() || {} : {};
+        node.setData({ ...current, locked: newLocked });
+      }
+    } catch (error) {
+      console.warn('同步节点锁定数据状态失败:', error);
+    }
+
+    const storedStroke = node.prop(LOCK_META_KEY);
+    const currentStroke = node.attr('body/stroke') || '#333';
+    const savedStroke = storedStroke || currentStroke || '#333';
+
+    node.prop(LOCK_META_KEY, newLocked ? savedStroke : null, { silent: true });
+
     if (newLocked) {
-      // 设置锁定标记到节点数据和DOM属性
-      node.setData({ ...node.getData(), locked: true });
+      node.attr('body/strokeDasharray', '5,5');
+      node.attr('body/stroke', '#ff6b6b');
       node.attr('body/data-locked', 'true');
     } else {
-      // 移除锁定标记
-      const data = node.getData();
-      delete data.locked;
-      node.setData(data);
+      node.attr('body/strokeDasharray', '');
+      node.attr('body/stroke', savedStroke);
       node.attr('body/data-locked', null);
     }
-    
+
     console.log(`节点 ${node.id} ${newLocked ? '已锁定' : '已解锁'}`);
   };
 

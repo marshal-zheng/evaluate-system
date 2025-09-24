@@ -191,14 +191,6 @@ export function useContextMenu(graph, options = {}) {
         disabled: !graph,
         danger: true,
       },
-      { type: 'divider' },
-      {
-        id: 'lock',
-        label: (node?.prop('locked') || node?.getData()?.locked) ? '解锁' : '锁定',
-        icon: (node?.prop('locked') || node?.getData()?.locked) ? 'Unlock' : 'Lock',
-        action: () => toggleNodeLock(node),
-        disabled: !node,
-      },
     ];
 
     // 使用新的自定义菜单处理逻辑
@@ -232,98 +224,46 @@ export function useContextMenu(graph, options = {}) {
     return processCustomMenu(items, 'edge', edge);
   };
 
+  const LOCK_META_KEY = 'lockState/originalStroke';
+
   // 辅助函数：切换节点锁定状态
   const toggleNodeLock = (node) => {
     if (!node) return;
-    
-    const locked = node.prop('locked') || node.getData()?.locked;
+
+    const locked = node.prop('locked') === true;
     const newLocked = !locked;
-    
-    // 设置锁定状态到节点属性
+
     node.prop('locked', newLocked);
-    
-    // 设置节点的拖拽状态
     node.prop('movable', !newLocked);
-    
-    // 更新节点数据
-    const currentData = node.getData() || {};
-    if (newLocked) {
-      node.setData({ ...currentData, locked: true });
-    } else {
-      const { locked: _, ...restData } = currentData;
-      node.setData(restData);
-    }
-    
-    // 设置视觉标识 - 使用更通用的方式
+    node.prop('draggable', !newLocked);
+
     try {
-      if (newLocked) {
-        // 添加锁定样式类
-        node.addTools([{
-          name: 'lock-indicator',
-          args: {
-            markup: [{
-              tagName: 'rect',
-              attrs: {
-                width: 16,
-                height: 16,
-                x: -8,
-                y: -8,
-                fill: '#ff6b6b',
-                stroke: '#fff',
-                'stroke-width': 1,
-                rx: 2,
-              }
-            }, {
-              tagName: 'text',
-              attrs: {
-                text: '🔒',
-                'font-size': 10,
-                'text-anchor': 'middle',
-                'dominant-baseline': 'central',
-                x: 0,
-                y: 0,
-                fill: '#fff'
-              }
-            }],
-            x: '100%',
-            y: 0,
-            offset: { x: -8, y: 8 }
-          }
-        }]);
-        
-        // 设置节点样式表示锁定状态
-        const originalStroke = node.attr('body/stroke') || '#333';
-        node.attr('body/strokeDasharray', '5,5');
-        node.attr('body/stroke', '#ff6b6b');
-        node.setData({ ...node.getData(), originalStroke });
-      } else {
-        // 移除锁定标识
-        node.removeTool('lock-indicator');
-        
-        // 恢复原始样式
-        const originalStroke = node.getData()?.originalStroke || '#333';
-        node.attr('body/strokeDasharray', '');
-        node.attr('body/stroke', originalStroke);
-        
-        // 清理原始样式记录
-        const data = node.getData();
-        if (data?.originalStroke) {
-          const { originalStroke: _, ...restData } = data;
-          node.setData(restData);
-        }
+      if (typeof node.updateData === 'function') {
+        node.updateData({ locked: newLocked });
+      } else if (typeof node.setData === 'function') {
+        const current = node.getData ? node.getData() || {} : {};
+        node.setData({ ...current, locked: newLocked });
       }
     } catch (error) {
-      console.warn('设置锁定视觉标识时出错:', error);
-      // 降级方案：仅使用边框样式
-      if (newLocked) {
-        node.attr('body/stroke', '#ff6b6b');
-        node.attr('body/strokeDasharray', '5,5');
-      } else {
-        node.attr('body/stroke', '#333');
-        node.attr('body/strokeDasharray', '');
-      }
+      console.warn('同步节点锁定数据状态失败:', error);
     }
-    
+
+    const storedStroke = node.prop(LOCK_META_KEY);
+    const currentStroke = node.attr('body/stroke') || '#333';
+    const savedStroke = storedStroke || currentStroke || '#333';
+
+    node.prop(LOCK_META_KEY, newLocked ? savedStroke : null, { silent: true });
+
+    if (newLocked) {
+      node.attr('body/strokeDasharray', '5,5');
+      node.attr('body/stroke', '#ff6b6b');
+      node.attr('body/data-locked', 'true');
+    } else {
+      node.attr('body/strokeDasharray', '');
+      node.attr('body/stroke', savedStroke);
+      node.attr('body/data-locked', null);
+    }
+
     console.log(`节点 ${node.id} ${newLocked ? '已锁定' : '已解锁'}`);
   };
 
