@@ -1,280 +1,291 @@
+import { DagreLayout } from '@antv/layout';
+import Hierarchy from '@antv/hierarchy';
 import { getNodeSizeByDirection } from './nodeGeometry.js';
 
-// 简单的 dagre 风格布局实现，避免 @antv/layout 的兼容性问题
-// direction: 'TB' | 'LR' (只支持竖向和横向)
-export async function dagreLayout(graph, direction = 'TB', ranksep = 120, nodesep = 60) {
-  if (!graph) return;
+const DIRECTION_META = {
+  LR: {
+    rankdir: 'LR',
+    orientation: 'horizontal',
+    allowedGroups: ['left', 'right'],
+    sourcePort: 'r',
+    targetPort: 'l',
+  },
+  TB: {
+    rankdir: 'TB',
+    orientation: 'vertical',
+    allowedGroups: ['top', 'bottom'],
+    sourcePort: 'b',
+    targetPort: 't',
+  },
+};
+
+// 企业级边样式配置 - 参考阿里、腾讯等大厂DAG可视化最佳实践
+const EDGE_ROUTER = {
+  LR: { name: 'orth', args: { padding: 24, offset: 16, excludeShapes: ['edge'] } },
+  TB: { name: 'orth', args: { padding: 24, offset: 16, excludeShapes: ['edge'] } },
+};
+
+const EDGE_CONNECTOR = { 
+  name: 'rounded', 
+  args: { radius: 12 } // 增加圆角半径，让连接更流畅
+};
+const MINDMAP_PADDING = 30;
+const VIRTUAL_ROOT_ID = '__virtual_root__';
+
+/**
+ * 企业级DAG布局引擎
+ * 统一使用 @antv/layout 的 DagreLayout，提供稳定可靠的布局效果
+ * 支持手动布局位置保持，确保回显一致性
+ */
+export async function dagreLayout(graph, direction = 'TB', ranksep = 120, nodesep = 60, options = {}) {
   const g = graph?.value ?? graph;
   if (!g) return;
-  
+
+  const {
+    applyLayout = true,
+    preserveManualPositions = false,
+    preserveManualVertices = false,
+  } = options;
+
+  const meta = DIRECTION_META[direction] ?? DIRECTION_META.TB;
   const nodes = g.getNodes();
-  const edges = g.getEdges();
-  
   if (nodes.length === 0) return;
 
-  const isVerticalLayout = direction !== 'LR';
-  const targetOrientation = isVerticalLayout ? 'vertical' : 'horizontal';
   const sizeConfig = getNodeSizeByDirection(direction);
 
-  // 构建图的拓扑结构
-  const nodeMap = new Map();
-  const inDegree = new Map();
-  const outEdges = new Map();
-  
-  // 初始化节点信息
-  nodes.forEach(node => {
-    const id = node.id;
-    nodeMap.set(id, node);
-    inDegree.set(id, 0);
-    outEdges.set(id, []);
-  });
-  
-  // 构建邻接表和入度统计
-  edges.forEach(edge => {
-    const sourceId = edge.getSourceCellId();
-    const targetId = edge.getTargetCellId();
-    if (sourceId && targetId && nodeMap.has(sourceId) && nodeMap.has(targetId)) {
-      outEdges.get(sourceId).push(targetId);
-      inDegree.set(targetId, inDegree.get(targetId) + 1);
-    }
-  });
-  
-  // 拓扑排序分层
-  const levels = [];
-  const queue = [];
-  const processed = new Set();
-  
-  // 找到所有入度为0的节点作为第一层
-  inDegree.forEach((degree, nodeId) => {
-    if (degree === 0) {
-      queue.push(nodeId);
-    }
-  });
-  
-  while (queue.length > 0) {
-    const currentLevel = [];
-    const levelSize = queue.length;
-    
-    for (let i = 0; i < levelSize; i++) {
-      const nodeId = queue.shift();
-      currentLevel.push(nodeId);
-      processed.add(nodeId);
-      
-      // 更新后继节点的入度
-      outEdges.get(nodeId).forEach(targetId => {
-        if (!processed.has(targetId)) {
-          inDegree.set(targetId, inDegree.get(targetId) - 1);
-          if (inDegree.get(targetId) === 0) {
-            queue.push(targetId);
-          }
-        }
-      });
-    }
-    
-    if (currentLevel.length > 0) {
-      levels.push(currentLevel);
-    }
-  }
-  
-  // 处理剩余的节点（可能存在环）
-  const remaining = nodes.filter(node => !processed.has(node.id));
-  if (remaining.length > 0) {
-    levels.push(remaining.map(node => node.id));
-  }
-  
-  // 应用节点尺寸与布局方向，并计算布局位置
+  // 检查是否有手动设置的节点位置
+  const hasManualPositions = preserveManualPositions || checkHasManualPositions(nodes);
+
   g.batchUpdate?.(() => {
-    nodes.forEach((node) => {
-      const prevData = node.getData?.() || {};
-      if (prevData.layoutDirection !== targetOrientation) {
-        node.setData({
-          ...prevData,
-          layoutDirection: targetOrientation,
-        });
-      }
+    nodes.forEach((node) => syncNodeAppearance(node, meta, sizeConfig));
+  });
 
-      const currentSize = node.getSize();
-      if (
-        currentSize.width !== sizeConfig.width ||
-        currentSize.height !== sizeConfig.height
-      ) {
-        node.resize(sizeConfig.width, sizeConfig.height);
-      }
-    });
+  if (!applyLayout || hasManualPositions) {
+    // 仅更新边样式，保持节点位置不变
+    updateEdges(g, meta, { preserveManualVertices: true });
+    console.log('⚡ 保持手动布局位置，仅更新边样式');
+    return;
+  }
 
-    const positions = calculatePositions(levels, nodeMap, direction, ranksep, nodesep);
+  const edges = g.getEdges();
+  const layoutResult = await computeLayoutModel({
+    nodes,
+    edges,
+    meta,
+    ranksep,
+    nodesep,
+    sizeConfig,
+  });
 
-    positions.forEach((pos, nodeId) => {
-      const node = nodeMap.get(nodeId);
-      if (!node) return;
+  const positionMap = layoutResult.positions ?? new Map();
+  const controlPoints = layoutResult.controlPoints ?? new Map();
 
-      // 设置节点位置（X6 的 position 是左上角坐标）
-      node.position(pos.x, pos.y);
-      // 确保四向端口存在
-      ensureSidePorts(node);
-      // 智能端口管理：去重 + 按方向显隐
-      smartPortManagement(node, direction);
+  g.batchUpdate?.(() => {
+    if (positionMap.size > 0) {
+      applyNodePositions(g, positionMap, sizeConfig);
+    }
+    updateEdges(g, meta, {
+      controlPoints,
+      preserveManualVertices,
     });
   });
 
-  const routerArgs =
-  direction === 'LR'
-    ? { 
-        startDirections: ['right'], 
-        endDirections: ['left'],
-        padding: 20, // 进一步增加内边距
-        step: 30     // 增加步长，让转折更明显
-      }
-    : { 
-        startDirections: ['bottom'], 
-        endDirections: ['top'],
-        padding: 20, // 进一步增加内边距
-        step: 30     // 增加步长，让转折更明显
-      };
+  console.log('✨ Dagre自动布局完成');
+}
+
+/**
+ * 检查节点是否有手动设置的位置
+ * 通过检查节点的 data.manualPosition 标记或位置的合理性来判断
+ */
+function checkHasManualPositions(nodes) {
+  if (!nodes || nodes.length === 0) return false;
   
-  // 智能边重绑：优先保持现有连接，必要时重绑到合适端口
-  edges.forEach((edge) => {
+  // 检查是否有明确的手动位置标记
+  const hasManualMarks = nodes.some(node => {
+    const data = node.getData?.() || {};
+    return data.manualPosition === true;
+  });
+  
+  if (hasManualMarks) return true;
+  
+  // 检查位置是否看起来像手动设置的（非规律性布局）
+  const positions = nodes.map(node => node.getPosition()).filter(pos => pos.x !== 0 || pos.y !== 0);
+  if (positions.length < 2) return false;
+  
+  // 如果节点位置呈现明显的网格或规律性排列，可能是自动布局
+  // 如果位置比较随意，可能是手动布局
+  const avgDistance = positions.reduce((sum, pos, i) => {
+    if (i === 0) return sum;
+    const prevPos = positions[i - 1];
+    return sum + Math.sqrt(Math.pow(pos.x - prevPos.x, 2) + Math.pow(pos.y - prevPos.y, 2));
+  }, 0) / Math.max(positions.length - 1, 1);
+  
+  // 如果平均距离在合理范围内且节点已经有位置，认为是手动布局
+  return avgDistance > 50 && positions.length === nodes.length;
+}
+
+async function computeLayoutModel({ nodes, edges, meta, ranksep, nodesep }) {
+  // 统一使用企业级 Dagre 布局算法，确保稳定性和一致性
+  return runDagreLayoutModel({ nodes, edges, meta, ranksep, nodesep });
+}
+
+function runDagreLayoutModel({ nodes, edges, meta, ranksep, nodesep }) {
+  const layout = new DagreLayout({
+    rankdir: meta.rankdir,
+    ranksep,
+    nodesep,
+    controlPoints: true,
+    align: 'UL',
+  });
+
+  const modelNodes = nodes.map((node) => {
+    const size = node.getSize();
+    return {
+      id: node.id,
+      width: size.width,
+      height: size.height,
+    };
+  });
+
+  const modelEdges = edges.map((edge) => ({
+    id: edge.id,
+    source: edge.getSourceCellId(),
+    target: edge.getTargetCellId(),
+  }));
+
+  const result = layout.layout({ nodes: modelNodes, edges: modelEdges }) || { nodes: [], edges: [] };
+  const positionMap = new Map();
+  result.nodes?.forEach?.((item) => {
+    if (!item?.id) return;
+    positionMap.set(item.id, {
+      x: item.x,
+      y: item.y,
+    });
+  });
+
+  const controlPointMap = new Map();
+  result.edges?.forEach?.((edgeModel) => {
+    if (!edgeModel?.id) return;
+    controlPointMap.set(edgeModel.id, edgeModel.controlPoints || []);
+  });
+
+  return { positions: positionMap, controlPoints: controlPointMap };
+}
+
+// 移除复杂的mindmap布局逻辑，统一使用稳定的Dagre算法
+
+function applyNodePositions(graph, positionMap, fallbackSize) {
+  positionMap.forEach((coords, nodeId) => {
+    const node = graph.getCellById(nodeId);
+    if (!node) return;
+    const size = node.getSize?.() || fallbackSize;
+    const x = coords.x - size.width / 2;
+    const y = coords.y - size.height / 2;
+    node.position(x, y);
+  });
+}
+
+function syncNodeAppearance(node, meta, sizeConfig) {
+  const prevData = node.getData?.() || {};
+  if (prevData.layoutDirection !== meta.orientation) {
+    node.setData({
+      ...prevData,
+      layoutDirection: meta.orientation,
+    });
+  }
+
+  const size = node.getSize?.();
+  if (!size || size.width !== sizeConfig.width || size.height !== sizeConfig.height) {
+    node.resize(sizeConfig.width, sizeConfig.height);
+  }
+
+  ensureSidePorts(node);
+  smartPortManagement(node, meta.allowedGroups);
+}
+
+function updateEdges(graph, meta, options = {}) {
+  const {
+    controlPoints,
+    preserveManualVertices = false,
+  } = options;
+
+  const controlPointMap = normalizeControlPoints(controlPoints);
+  const routerConfig = EDGE_ROUTER[meta.rankdir] ?? EDGE_ROUTER.TB;
+
+  graph.getEdges().forEach((edge) => {
     try {
       const sourceId = edge.getSourceCellId();
       const targetId = edge.getTargetCellId();
       if (!sourceId || !targetId) return;
-      
-      const sourceNode = g.getCellById(sourceId);
-      const targetNode = g.getCellById(targetId);
+
+      const sourceNode = graph.getCellById(sourceId);
+      const targetNode = graph.getCellById(targetId);
       if (!sourceNode || !targetNode) return;
 
-      // 清除手动顶点
-      edge.setVertices([]);
+      if (!preserveManualVertices) {
+        const points = controlPointMap.get(edge.id) || [];
+        edge.setVertices(points.map(({ x, y }) => ({ x, y })));
+      }
 
-      const currentSource = edge.getSource();
-      const currentTarget = edge.getTarget();
-      
-      // 检查当前端口是否适合当前布局方向
-      const allowedGroups = direction === 'LR' ? ['left', 'right'] : ['top', 'bottom'];
-      
-      let needUpdateSource = false;
-      let needUpdateTarget = false;
-      
-      // 检查源端口
-      if (currentSource && currentSource.port) {
-        const sourceGroup = sourceNode.getPortProp?.(currentSource.port, 'group');
-        const sourceVisible = sourceNode.getPortProp?.(currentSource.port, 'attrs/circle/style/display') !== 'none';
-        if (!allowedGroups.includes(sourceGroup) || !sourceVisible) {
-          needUpdateSource = true;
-        }
-      } else {
-        needUpdateSource = true;
+      rebindPortIfNeeded(edge, sourceNode, meta.sourcePort, meta.allowedGroups, 'source');
+      rebindPortIfNeeded(edge, targetNode, meta.targetPort, meta.allowedGroups, 'target');
+
+      if (routerConfig) {
+        edge.setRouter(routerConfig.name, routerConfig.args);
       }
-      
-      // 检查目标端口
-      if (currentTarget && currentTarget.port) {
-        const targetGroup = targetNode.getPortProp?.(currentTarget.port, 'group');
-        const targetVisible = targetNode.getPortProp?.(currentTarget.port, 'attrs/circle/style/display') !== 'none';
-        if (!allowedGroups.includes(targetGroup) || !targetVisible) {
-          needUpdateTarget = true;
-        }
-      } else {
-        needUpdateTarget = true;
+      if (EDGE_CONNECTOR) {
+        edge.setConnector(EDGE_CONNECTOR.name, EDGE_CONNECTOR.args);
       }
-      
-      // 重绑源端口
-      if (needUpdateSource) {
-        const sourcePort = direction === 'LR' ? 'r' : 'b';
-        const sourcePorts = sourceNode.getPorts?.() || [];
-        const sourcePortExists = sourcePorts.some(p => p.id === sourcePort);
-        if (sourcePortExists) {
-          edge.setSource({ cell: sourceId, port: sourcePort });
-        }
-      }
-      
-      // 重绑目标端口
-      if (needUpdateTarget) {
-        const targetPort = direction === 'LR' ? 'l' : 't';
-        const targetPorts = targetNode.getPorts?.() || [];
-        const targetPortExists = targetPorts.some(p => p.id === targetPort);
-        if (targetPortExists) {
-          edge.setTarget({ cell: targetId, port: targetPort });
-        }
-      }
-      
-      // 设置路由和连接器
-      edge.setRouter('manhattan', routerArgs);
-      edge.setConnector('rounded');
-      
-    } catch (e) {
-      console.warn('Failed to update edge:', e);
+    } catch (error) {
+      console.warn('Failed to update edge:', error);
     }
   });
 }
 
-// 计算各层节点的位置
-function calculatePositions(levels, nodeMap, direction, ranksep, nodesep) {
-  const positions = new Map();
-  
-  if (levels.length === 0) return positions;
-  
-  // 根据方向确定主轴和交叉轴
-  const isVertical = direction === 'TB';
-  const isReverse = false; // 不支持反向布局
-  
-  let currentMainPos = 0;
-  
-  levels.forEach((level, levelIndex) => {
-    // 计算当前层的总宽度/高度
-    let totalCrossSize = 0;
-    const nodeSizes = level.map(nodeId => {
-      const node = nodeMap.get(nodeId);
-      const size = node.getSize();
-      return isVertical ? size.width : size.height;
+function normalizeControlPoints(controlPoints) {
+  if (!controlPoints) {
+    return new Map();
+  }
+  if (controlPoints instanceof Map) {
+    return controlPoints;
+  }
+  const map = new Map();
+  if (Array.isArray(controlPoints)) {
+    controlPoints.forEach((edgeModel) => {
+      if (!edgeModel || !edgeModel.id) return;
+      map.set(edgeModel.id, edgeModel.controlPoints || []);
     });
-    
-    totalCrossSize = nodeSizes.reduce((sum, size) => sum + size, 0) + (level.length - 1) * nodesep;
-    
-    // 计算起始位置（居中对齐）
-    let currentCrossPos = -totalCrossSize / 2;
-    
-    // 计算当前层的主轴位置
-    const levelMainPos = isReverse ? -currentMainPos : currentMainPos;
-    
-    level.forEach((nodeId, nodeIndex) => {
-      const node = nodeMap.get(nodeId);
-      const size = node.getSize();
-      const nodeSize = nodeSizes[nodeIndex];
-      
-      // 计算节点中心位置，然后转换为左上角位置
-      let x, y;
-      
-      if (isVertical) {
-        x = currentCrossPos + nodeSize / 2 - size.width / 2;
-        y = levelMainPos - size.height / 2;
-        currentCrossPos += nodeSize + nodesep;
-      } else {
-        x = levelMainPos - size.width / 2;
-        y = currentCrossPos + nodeSize / 2 - size.height / 2;
-        currentCrossPos += nodeSize + nodesep;
-      }
-      
-      positions.set(nodeId, { x, y });
-    });
-    
-    // 计算下一层的位置
-    if (levelIndex < levels.length - 1) {
-      // 找到当前层节点的最大尺寸
-      const maxMainSize = level.reduce((max, nodeId) => {
-        const node = nodeMap.get(nodeId);
-        const size = node.getSize();
-        const mainSize = isVertical ? size.height : size.width;
-        return Math.max(max, mainSize);
-      }, 0);
-      
-      currentMainPos += maxMainSize + ranksep;
-    }
-  });
-  
-  return positions;
+  }
+  return map;
 }
 
-// 保障每个节点具备上下左右四向端口（id 固定：t/b/l/r）
+function rebindPortIfNeeded(edge, node, preferPortId, allowedGroups, type) {
+  const next = type === 'source' ? edge.getSource() : edge.getTarget();
+  let needUpdate = false;
+
+  if (next && next.port) {
+    const group = node.getPortProp?.(next.port, 'group');
+    const visible = node.getPortProp?.(next.port, 'attrs/circle/style/display') !== 'none';
+    if (!allowedGroups.includes(group) || !visible) {
+      needUpdate = true;
+    }
+  } else {
+    needUpdate = true;
+  }
+
+  if (!needUpdate) return;
+
+  const ports = node.getPorts?.() || [];
+  const exists = ports.some((p) => p.id === preferPortId);
+  if (!exists) return;
+
+  if (type === 'source') {
+    edge.setSource({ cell: node.id, port: preferPortId });
+  } else {
+    edge.setTarget({ cell: node.id, port: preferPortId });
+  }
+}
+
 function ensureSidePorts(node) {
   const list = (node.getPorts?.() || []).map((p) => p.id);
   const need = [
@@ -292,17 +303,12 @@ function ensureSidePorts(node) {
   });
 }
 
-// 智能端口管理：统一处理端口去重和按方向显隐
-function smartPortManagement(node, direction) {
+function smartPortManagement(node, allowedGroups) {
   const ports = node.getPorts?.() || [];
   const standardPorts = new Set(['t', 'b', 'l', 'r']);
-  const showGroups = direction === 'LR' ? ['left', 'right'] : ['top', 'bottom'];
-  
-  // 获取所有连接到此节点的边
   const connectedEdges = node.getEdges?.() || [];
   const usedPorts = new Set();
-  
-  // 收集正在使用的端口ID
+
   connectedEdges.forEach((edge) => {
     const source = edge.getSource();
     const target = edge.getTarget();
@@ -313,62 +319,44 @@ function smartPortManagement(node, direction) {
       usedPorts.add(target.port);
     }
   });
-  
-  // 对于每个group的多个端口，选择一个显示的端口
-  const groupVisiblePort = new Map(); // group -> 显示的端口ID
-  const groupPorts = new Map(); // group -> 该组所有端口列表
-  
-  // 按group分组端口
+
+  const groupVisiblePort = new Map();
+  const groupPorts = new Map();
+
   ports.forEach((p) => {
     const group = p.group || node.getPortProp?.(p.id, 'group');
     if (!group) return;
-    
     if (!groupPorts.has(group)) {
       groupPorts.set(group, []);
     }
     groupPorts.get(group).push(p);
   });
-  
-  // 为每个group选择要显示的端口
+
   groupPorts.forEach((portList, group) => {
-    // 优先选择标准端口ID
-    const standardPort = portList.find(p => standardPorts.has(p.id));
+    const standardPort = portList.find((p) => standardPorts.has(p.id));
     if (standardPort) {
       groupVisiblePort.set(group, standardPort.id);
       return;
     }
-    
-    // 其次选择正在被使用的端口
-    const usedPort = portList.find(p => usedPorts.has(p.id));
+    const usedPort = portList.find((p) => usedPorts.has(p.id));
     if (usedPort) {
       groupVisiblePort.set(group, usedPort.id);
       return;
     }
-    
-    // 最后选择第一个端口
     if (portList.length > 0) {
       groupVisiblePort.set(group, portList[0].id);
     }
   });
-  
-  // 统一处理所有端口的显隐和可连接性
+
   ports.forEach((p) => {
     const group = p.group || node.getPortProp?.(p.id, 'group');
-    
-    // 是否为该组的代表端口
     const isGroupRepresentative = groupVisiblePort.get(group) === p.id;
-    
-    // 是否应该根据布局方向显示
-    const shouldShowByDirection = showGroups.includes(group);
-    
-    // 最终是否显示：必须是组代表 且 符合布局方向
+    const shouldShowByDirection = allowedGroups.includes(group);
     const shouldShow = isGroupRepresentative && shouldShowByDirection;
-    
-    // 设置显示和可连接性
+
     node.setPortProp?.(p.id, 'attrs/circle/style/display', shouldShow ? '' : 'none');
     node.setPortProp?.(p.id, 'attrs/circle/magnet', !!shouldShow);
-    
-    // 强制重置端口位置，确保居中对齐
+
     if (shouldShow && isGroupRepresentative) {
       const positionConfig = getPortPositionConfig(group);
       if (positionConfig) {
@@ -378,25 +366,24 @@ function smartPortManagement(node, direction) {
   });
 }
 
-// 获取端口位置配置
 function getPortPositionConfig(group) {
   const configs = {
     top: {
       name: 'top',
-      args: { x: '50%', y: 0 }
+      args: { x: '50%', y: 0 },
     },
     bottom: {
-      name: 'bottom', 
-      args: { x: '50%', y: 0 }
+      name: 'bottom',
+      args: { x: '50%', y: 0 },
     },
     left: {
       name: 'left',
-      args: { x: 0, y: '50%' }
+      args: { x: 0, y: '50%' },
     },
     right: {
       name: 'right',
-      args: { x: 0, y: '50%' }
-    }
+      args: { x: 0, y: '50%' },
+    },
   };
   return configs[group] || null;
 }

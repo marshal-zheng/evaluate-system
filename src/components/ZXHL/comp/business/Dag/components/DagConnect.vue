@@ -232,6 +232,24 @@ const handleNodeAdded = ({ node }) => {
   }, 100);
 };
 
+// 节点移动结束处理函数 - 标记为手动位置
+const handleNodeMoved = ({ node }) => {
+  if (!node) return;
+  
+  try {
+    const currentData = node.getData() || {};
+    // 标记节点为手动位置，确保下次加载时保持位置
+    node.setData({
+      ...currentData,
+      manualPosition: true
+    });
+    
+    console.log(`⚡ 节点 ${node.id} 移动完成，已标记为手动位置`);
+  } catch (e) {
+    console.warn('Node moved handling error:', e);
+  }
+};
+
 // 注册事件监听器
 const registerEventListeners = () => {
   const g = graph?.value;
@@ -244,6 +262,7 @@ const registerEventListeners = () => {
   g.on('edge:connected', handleEdgeConnected);
   g.on('edge:removed', handleEdgeRemoved);
   g.on('node:added', handleNodeAdded);
+  g.on('node:moved', handleNodeMoved);
 };
 
 // 清理事件监听器
@@ -255,6 +274,7 @@ const cleanupEventListeners = () => {
   g.off('edge:connected', handleEdgeConnected);
   g.off('edge:removed', handleEdgeRemoved);
   g.off('node:added', handleNodeAdded);
+  g.off('node:moved', handleNodeMoved);
 };
 
 // 监听 graph 实例变化

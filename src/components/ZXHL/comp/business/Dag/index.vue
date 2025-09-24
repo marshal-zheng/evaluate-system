@@ -114,19 +114,38 @@ import DagToolbar from './components/DagToolbar.vue';
 import { DAG_CONNECTOR, DAG_EDGE } from './shapes/registerDagShapes';
 import { dagreLayout } from './utils/layout.js';
 
+// 企业级连接配置 - 与registerDagShapes保持一致
 const connectionEdgeOptions = {
   shape: DAG_EDGE,
-  animated: true,
+  animated: false, // 禁用动画，提升性能
   zIndex: -1,
   attrs: {
     line: {
-      stroke: '#C2C8D5',
-      strokeWidth: 5,
-      targetMarker: null,
+      stroke: '#8C92A4',
+      strokeWidth: 2,
+      targetMarker: {
+        name: 'path',
+        d: 'M 0 -4 L 8 0 L 0 4 Z',
+        fill: '#8C92A4',
+        stroke: '#8C92A4',
+        strokeWidth: 1,
+      },
+      strokeLinecap: 'round',
+      strokeLinejoin: 'round',
     },
   },
-  router: 'manhattan', // 使用直角路由，保证线条长度
-  connector: 'rounded', // 圆角连接器，与layout.js保持一致
+  router: {
+    name: 'orth',
+    args: {
+      padding: 24,
+      offset: 16,
+      excludeShapes: ['edge'],
+    },
+  },
+  connector: {
+    name: 'rounded',
+    args: { radius: 12 },
+  },
 };
 
 const DAGPage = defineComponent({

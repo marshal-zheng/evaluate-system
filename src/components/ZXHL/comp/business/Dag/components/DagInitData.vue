@@ -50,8 +50,8 @@ const convertToDAGFormat = (data) => {
   const nodes = data.nodes.map(node => ({
     id: node.id,
     shape: DAG_NODE,
-    x: node.x || 0,
-    y: node.y || 0,
+    x: Number.isFinite(node.x) ? node.x : 0,
+    y: Number.isFinite(node.y) ? node.y : 0,
     width: sizeConfig.width,
     height: sizeConfig.height,
     data: {
@@ -63,7 +63,9 @@ const convertToDAGFormat = (data) => {
       status: 'default',
       layoutDirection: layoutOrientation,
       // 保存原始数据
-      originalData: node
+      originalData: node,
+      // 标记是否为手动位置
+      manualPosition: Number.isFinite(node.x) && Number.isFinite(node.y) && (node.x !== 0 || node.y !== 0)
     },
     ports: generateNodePorts(node.type),
     draggable: true,
@@ -76,11 +78,37 @@ const convertToDAGFormat = (data) => {
     source: { cell: edge.sourceNodeId, port: 'b' }, // 指定源端口为底部
     target: { cell: edge.targetNodeId, port: 't' }, // 指定目标端口为顶部
     animated: false,
-    router: 'normal',
+    router: 'orth',
     connector: 'smooth',
+    vertices: Array.isArray(edge.pointsList) ? edge.pointsList : [],
   }));
 
   return { nodes, edges };
+};
+
+// 检查原始数据是否包含手动位置信息
+const checkDataHasManualPositions = (data) => {
+  if (!data || !Array.isArray(data.nodes) || data.nodes.length === 0) {
+    return false;
+  }
+  
+  // 检查是否所有节点都有有效的位置坐标
+  const nodesWithPositions = data.nodes.filter(node => 
+    Number.isFinite(node.x) && Number.isFinite(node.y) && (node.x !== 0 || node.y !== 0)
+  );
+  
+  // 如果大部分节点都有位置信息，认为是手动布局
+  const positionRatio = nodesWithPositions.length / data.nodes.length;
+  const hasManualPositions = positionRatio >= 0.8; // 80%以上的节点有位置信息
+  
+  console.log('DagInitData - 手动位置检测:', {
+    totalNodes: data.nodes.length,
+    nodesWithPositions: nodesWithPositions.length,
+    positionRatio,
+    hasManualPositions
+  });
+  
+  return hasManualPositions;
 };
 
 // 根据节点类型生成端口
@@ -176,7 +204,12 @@ const loadAndSetData = async (dataSource) => {
       graphStore.removeEdges(allEdges);
     }
     
-    // 转换数据格式
+    // 转换数据格式 - 增强手动位置检测逻辑
+    const hasManualPositions = checkDataHasManualPositions(data);
+    const hasManualEdgeVertices = Array.isArray(data.edges) && data.edges.some(edge => 
+      Array.isArray(edge.pointsList) && edge.pointsList.length > 0
+    );
+
     const { nodes, edges } = convertToDAGFormat(data);
     
     console.log('DagInitData - 转换后的节点:', nodes);
@@ -208,14 +241,21 @@ const loadAndSetData = async (dataSource) => {
         if (g) {
           console.log('DagInitData - 图实例已准备好，开始布局');
           
-          if (props.autoLayout && nodes.length > 0) {
+          if (nodes.length > 0) {
             // 先让节点渲染完成，再进行布局
             await new Promise(resolve => setTimeout(resolve, 200));
-            await dagreLayout(g, props.layoutDirection, 100, 80);
-            g.centerContent();
-            console.log('DagInitData - 自动布局完成');
+            const shouldAutoLayout = props.autoLayout && !hasManualPositions;
+            await dagreLayout(g, props.layoutDirection, 100, 80, {
+              applyLayout: shouldAutoLayout,
+              preserveManualPositions: hasManualPositions,
+              preserveManualVertices: hasManualPositions && hasManualEdgeVertices,
+            });
+            if (shouldAutoLayout) {
+              g.centerContent();
+              console.log('DagInitData - 自动布局完成');
+            }
           }
-          
+
           // 通知父级刷新小地图
           emit('data-updated');
           return;
